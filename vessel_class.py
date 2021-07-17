@@ -7,8 +7,11 @@ class vessel():
         self.color = color
         self.pos = pos
         self.vel = vel
-        self.draw_pos = [0,0,0]
+        self.draw_pos = [self.pos[0]*(3*(10**(-4))),
+                         self.pos[1]*(3*(10**(-4))),
+                         self.pos[2]*(3*(10**(-4)))]
         self.traj_history = []
+        self.draw_traj_history = []
 
     def get_name(self):
         return self.name
@@ -97,6 +100,15 @@ class vessel():
 
     def get_traj_history(self):
         return self.traj_history
+
+    def update_draw_traj_history(self):
+        self.draw_traj_history.append(self.draw_pos)
+
+    def clear_draw_traj_history(self):
+        self.draw_traj_history = []
+
+    def get_draw_traj_history(self):
+        return self.draw_traj_history
 
     def get_color(self):
         return self.color

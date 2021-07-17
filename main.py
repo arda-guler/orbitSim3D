@@ -96,7 +96,10 @@ def main():
     glTranslate(cam_trans[0], cam_trans[1], cam_trans[2])
 
     delta_t = 1
+    cycle_time = 0.01
     output_buffer = []
+
+    cam_strafe_speed = 100
 
     while True:
 
@@ -104,7 +107,6 @@ def main():
 
         # set to 0 so the "camera" doesn't fly off
         cam_trans = [0,0,0]
-        cam_strafe_speed = 100
 
         frame_command = False
 
@@ -185,11 +187,28 @@ def main():
                 for i in range(len(output_buffer)):
                     if output_buffer[i][0] == command[1]:
                         output_buffer.remove(output_buffer[i])
+                        break
+
+            # CLEAR command
+            elif command[0] == "clear":
+                output_buffer = []
+
+            # CAM_STRAFE_SPEED command
+            elif command[0] == "cam_strafe_speed":
+                cam_strafe_speed = float(command[1])
+
+            # DELTA_T command
+            elif command[0] == "delta_t":
+                delta_t = float(command[1])
+
+            # CYCLE_TIME command
+            elif command[0] == "cycle_time":
+                cycle_time = float(command[1])
 
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
-                    print("\nAvailable commands: help, show, hide\n")
+                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -203,6 +222,22 @@ def main():
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
                         print("Syntax: hide <display_label>\n")
                         input("Press Enter to continue...")
+                    elif command[1] == "clear":
+                        print("\n'clear' command removes all output element from the command prompt/terminal.\n")
+                        print("Syntax: clear\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "cam_strafe_speed":
+                        print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
+                        print("Syntax: cam_strafe_speed <speed>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delta_t":
+                        print("\n'delta_t' command sets time steps of each physics frame.\n")
+                        print("Syntax: delta_t <seconds>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "cycle_time":
+                        print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
+                        print("Syntax: cycle_time <seconds>\n")
+                        input("Press Enter to continue...")
                     elif command[1] == "help":
                         print("\n'help' command prints out the help text.\n")
                         print("Syntax: help\n")
@@ -214,6 +249,8 @@ def main():
             else:
                 print("\nUnrecognized command.")
                 input("Press Enter to continue...")
+
+        cycle_start = time.perf_counter()
 
         glTranslate(cam_trans[0], cam_trans[1], cam_trans[2])
 
@@ -228,6 +265,7 @@ def main():
             v.update_vel(accel, delta_t)
             v.update_pos(delta_t)
             v.update_traj_history()
+            v.update_draw_traj_history()
 
         for x in bodies:
             accel = [0,0,0]
@@ -247,6 +285,7 @@ def main():
             os.system("clear")
 
         # display what the user wants in cmd/terminal
+        print("OrbitSim3D Command Interpreter & Output Display\n")
         print("Press C at any time to enter a command.\n")
         for element in output_buffer:
 
@@ -266,13 +305,20 @@ def main():
 
         # do the actual drawing
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        
+
+        drawOrigin()
         drawBodies(bodies)
         drawVessels(vessels)
-        drawTrajectories(vessels, cam_pos)
+        drawTrajectories(vessels)
 
         glfw.swap_buffers(window)
-        time.sleep(0.01)
+
+        cycle_dt = time.perf_counter() - cycle_start
+        if cycle_dt < cycle_time:
+            time.sleep(cycle_time - cycle_dt)
+        elif cycle_time*2 <= cycle_dt:
+            print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
+            print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
 main()
 

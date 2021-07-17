@@ -2,6 +2,19 @@ import OpenGL
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+def drawOrigin():
+    glBegin(GL_LINES)
+    glColor(1,0,0)
+    glVertex3f(0,0,0)
+    glVertex3f(0,1000,0)
+    glColor(0,1,0)
+    glVertex3f(0,0,0)
+    glVertex3f(1000,0,0)
+    glColor(0,0,1)
+    glVertex3f(0,0,0)
+    glVertex3f(0,0,1000)
+    glEnd()
+
 def drawBodies(bodies):
 
     for b in bodies:
@@ -57,13 +70,13 @@ def drawVessels(vessels):
         # now get out
         glPopMatrix()
 
-def drawTrajectories(vessels, cam_pos):
+def drawTrajectories(vessels):
     
     for v in vessels:
         # change color we render with
         glColor(v.get_color()[0], v.get_color()[1], v.get_color()[2])
 
-        vertices = v.get_traj_history()
+        vertices = v.get_draw_traj_history()
 
         if len(vertices) > 3:
             for i in range(1, len(vertices)):
