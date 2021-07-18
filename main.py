@@ -10,6 +10,7 @@ import time
 from graphics import *
 from vessel_class import *
 from body_class import *
+from math_utils import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
@@ -48,6 +49,11 @@ objs = [earth, luna, station_a, station_b, station_c]
 def create_vessel(name, model_name, color, pos, vel):
     global vessels, objs
 
+    if find_obj_by_name(name):
+        print("An object with this name already exists. Please pick another name for the new vessel.\n")
+        input("Press Enter to continue...")
+        return
+
     try:
         model_path = "data\\models\\" + model_name + ".obj"
         model = pywavefront.Wavefront(model_path, collect_faces=True)
@@ -67,6 +73,12 @@ def create_vessel(name, model_name, color, pos, vel):
 def delete_vessel(name):
     global vessels, objs
     vessel_tbd = find_obj_by_name(name)
+
+    if not vessel_tbd:
+        print("Object not found!")
+        time.sleep(2)
+        return
+    
     vessels.remove(vessel_tbd)
     objs.remove(vessel_tbd)
     del vessel_tbd
@@ -116,6 +128,7 @@ def main():
     output_buffer = []
 
     cam_strafe_speed = 100
+    show_trajectories = True
 
     while True:
 
@@ -194,16 +207,23 @@ def main():
                         print("Object not found.")
                         time.sleep(2)
 
+                elif len(command) == 2:
+                    if command[1] == "traj":
+                        show_trajectories = True
+
                 else:
                     print("Wrong number of arguments for command 'show'.")
                     time.sleep(2)
 
             # HIDE command
             elif command[0] == "hide":
-                for i in range(len(output_buffer)):
-                    if output_buffer[i][0] == command[1]:
-                        output_buffer.remove(output_buffer[i])
-                        break
+                if command[1] == "traj":
+                    show_trajectories = False
+                else:
+                    for i in range(len(output_buffer)):
+                        if output_buffer[i][0] == command[1]:
+                            output_buffer.remove(output_buffer[i])
+                            break
 
             # CLEAR command
             elif command[0] == "clear":
@@ -225,8 +245,30 @@ def main():
                                   [float(command[5][1:-1].split(",")[0]),
                                    float(command[5][1:-1].split(",")[1]),
                                    float(command[5][1:-1].split(",")[2])])
+
+                elif len(command) == 7:
+                    # TO DO - SPHERICAL VELOCITY INPUT
+                    parent_pos = find_obj_by_name(command[4]).get_pos()
+                    
+                    vessel_offset_from_parent = spherical2cartesian([float(command[5][1:-1].split(",")[0]),
+                                                                     float(command[5][1:-1].split(",")[1]),
+                                                                     float(command[5][1:-1].split(",")[2])])
+                    
+                    create_vessel(command[1], command[2],
+                                  
+                                  [float(command[3][1:-1].split(",")[0]),
+                                   float(command[3][1:-1].split(",")[1]),
+                                   float(command[3][1:-1].split(",")[2])],
+
+                                  [parent_pos[0] + vessel_offset_from_parent[0],
+                                   parent_pos[1] + vessel_offset_from_parent[1],
+                                   parent_pos[2] + vessel_offset_from_parent[2]],
+
+                                  [float(command[6][1:-1].split(",")[0]),
+                                   float(command[6][1:-1].split(",")[1]),
+                                   float(command[6][1:-1].split(",")[2])])
                 else:
-                    print("Wrong number of arguments for command 'create'.\n")
+                    print("Wrong number of arguments for command 'create_vessel'.\n")
                     time.sleep(2)
 
             # DELETE_VESSEL command
@@ -234,7 +276,7 @@ def main():
                 if len(command) == 2:
                     delete_vessel(command[1])
                 else:
-                    print("Wrong number of arguments for command 'create'.\n")
+                    print("Wrong number of arguments for command 'delete_vessel'.\n")
                     time.sleep(2)
 
             # GET_OBJECTS command
@@ -271,10 +313,12 @@ def main():
                         print("\n'show' command adds an output element to the command prompt/terminal.\n")
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
+                        print("Syntax Option 3: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
-                        print("Syntax: hide <display_label>\n")
+                        print("Syntax Option 1: hide <display_label>\n")
+                        print("Syntax Option 2: hide traj (disables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "clear":
                         print("\n'clear' command removes all output element from the command prompt/terminal.\n")
@@ -282,7 +326,8 @@ def main():
                         input("Press Enter to continue...")
                     elif command[1] == "create_vessel":
                         print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
-                        print("Syntax: create_vessel <name> <model_name> <color> <position> <velocity>\n")
+                        print("Syntax Option 1: create_vessel <name> <model_name> <color> <position> <velocity>\n")
+                        print("Syntax Option 2: create_vessel <name> <model_name> <color> <frame_of_reference_name> <position(spherical)> <velocity>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "delete_vessel":
                         print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
@@ -375,7 +420,9 @@ def main():
         drawOrigin()
         drawBodies(bodies)
         drawVessels(vessels)
-        drawTrajectories(vessels)
+
+        if show_trajectories:
+            drawTrajectories(vessels)
 
         glfw.swap_buffers(window)
 
