@@ -22,6 +22,9 @@ station_a = vessel("Station-Alpha", pywavefront.Wavefront('data\models\ministati
 station_b = vessel("Station-Beta", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
                    [1.0, 0.2, 0.2], [0,0,7000000], [7546,0,0])
 
+station_c = vessel("Station-Gamma", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
+                   [0.2, 1.0, 0.5], [0,7500000,0], [0,0,-7350])
+
 # celestial body args: name, model, mass, radius, color, pos, vel
 earth = body("Earth", pywavefront.Wavefront('data\models\miniearth.obj', collect_faces=True),
              5.972 * 10**24, 6371000, [0.0, 0.25, 1.0], [0,0,0], [0,0,0])
@@ -33,27 +36,40 @@ luna = body("Luna", pywavefront.Wavefront('data\models\miniluna.obj', collect_fa
 cam_trans = [0, 0, -5000]
 cam_pos = [0,0,-5000]
 
-# get user input?
-custom_input = False
-
 if os.name == "nt":
     os.system("cls")
 else:
     os.system("clear")
 
-if input("Custom Input?: ") == "y":
-    custom_input = True
-
-if custom_input:
-    station_a.set_pos(list(input("station_a Position [X,Y,Z]: ")))
-    station_a.set_vel(list(input("station_a Velocity [X,Y,Z]: ")))
-
-    station_b.set_pos(list(input("station_b Position [X,Y,Z]: ")))
-    station_b.set_vel(list(input("station_b Velocity [X,Y,Z]: ")))
-
-vessels = [station_a, station_b]
+vessels = [station_a, station_b, station_c]
 bodies = [earth, luna]
-objs = [earth, luna, station_a, station_b]
+objs = [earth, luna, station_a, station_b, station_c]
+
+def create_vessel(name, model_name, color, pos, vel):
+    global vessels, objs
+
+    try:
+        model_path = "data\\models\\" + model_name + ".obj"
+        model = pywavefront.Wavefront(model_path, collect_faces=True)
+    except:
+        print("Could not load model:", model_path)
+        time.sleep(3)
+        return
+
+    try:
+        new_vessel = vessel(name, model, color, pos, vel)
+    except:
+        print("Could not create vessel:", name)
+        
+    vessels.append(new_vessel)
+    objs.append(new_vessel)
+
+def delete_vessel(name):
+    global vessels, objs
+    vessel_tbd = find_obj_by_name(name)
+    vessels.remove(vessel_tbd)
+    objs.remove(vessel_tbd)
+    del vessel_tbd
 
 def find_obj_by_name(name):
     global objs
@@ -89,14 +105,14 @@ def main():
     glfw.set_window_pos(window,200,200)
     glfw.make_context_current(window)
     
-    gluPerspective(90, 800/600, 0.05, 5000000.0)
+    gluPerspective(70, 800/600, 0.05, 5000000.0)
     glEnable(GL_CULL_FACE)
 
     # put "camera" in starting position
     glTranslate(cam_trans[0], cam_trans[1], cam_trans[2])
 
     delta_t = 1
-    cycle_time = 0.01
+    cycle_time = 0.1
     output_buffer = []
 
     cam_strafe_speed = 100
@@ -193,6 +209,43 @@ def main():
             elif command[0] == "clear":
                 output_buffer = []
 
+            # CREATE_VESSEL command
+            elif command[0] == "create_vessel":
+                if len(command) == 6:
+                    create_vessel(command[1], command[2],
+                                  
+                                  [float(command[3][1:-1].split(",")[0]),
+                                   float(command[3][1:-1].split(",")[1]),
+                                   float(command[3][1:-1].split(",")[2])],
+
+                                  [float(command[4][1:-1].split(",")[0]),
+                                   float(command[4][1:-1].split(",")[1]),
+                                   float(command[4][1:-1].split(",")[2])],
+                                  
+                                  [float(command[5][1:-1].split(",")[0]),
+                                   float(command[5][1:-1].split(",")[1]),
+                                   float(command[5][1:-1].split(",")[2])])
+                else:
+                    print("Wrong number of arguments for command 'create'.\n")
+                    time.sleep(2)
+
+            # DELETE_VESSEL command
+            elif command[0] == "delete_vessel":
+                if len(command) == 2:
+                    delete_vessel(command[1])
+                else:
+                    print("Wrong number of arguments for command 'create'.\n")
+                    time.sleep(2)
+
+            # GET_OBJECTS command
+            elif command[0] == "get_objects":
+                print("Objects currently in simulation:\n")
+                for b in bodies:
+                    print("BODY:", b.get_name() + "\n")
+                for v in vessels:
+                    print("VESSEL:", v.get_name() + "\n")
+                input("Press Enter to continue...")
+
             # CAM_STRAFE_SPEED command
             elif command[0] == "cam_strafe_speed":
                 cam_strafe_speed = float(command[1])
@@ -208,7 +261,8 @@ def main():
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
-                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time\n")
+                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
+                    print("create_vessel, delete_vessel, get_objects\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -225,6 +279,18 @@ def main():
                     elif command[1] == "clear":
                         print("\n'clear' command removes all output element from the command prompt/terminal.\n")
                         print("Syntax: clear\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "create_vessel":
+                        print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
+                        print("Syntax: create_vessel <name> <model_name> <color> <position> <velocity>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delete_vessel":
+                        print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
+                        print("Syntax: delete_vessel <name>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_objects":
+                        print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
+                        print("Syntax: get_objects\n")
                         input("Press Enter to continue...")
                     elif command[1] == "cam_strafe_speed":
                         print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
