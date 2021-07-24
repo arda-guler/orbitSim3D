@@ -84,3 +84,19 @@ def drawTrajectories(vessels):
                 glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
                 glEnd()
+
+def drawManeuvers(maneuvers):
+
+    for m in maneuvers:
+        # change color to maneuver color
+        glColor(1.0, 1.0, 0.0)
+
+        vertices = m.get_draw_vertices()
+
+        if len(vertices) > 3:
+            for i in range(1, len(vertices)):
+                glBegin(GL_LINES)
+                glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
+                glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
+                glEnd()
+            

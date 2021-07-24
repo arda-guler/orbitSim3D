@@ -19,13 +19,13 @@ from maneuver import *
 
 # vessel args: name, model, color, pos, vel
 station_a = vessel("Station-Alpha", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [1.0, 1.0, 1.0], [6771000,0,0], [0,7672,0])
+                   [1.0, 0.2, 0.2], [6771000,0,0], [0,7672,0])
 
 station_b = vessel("Station-Beta", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [1.0, 0.2, 0.2], [0,0,7000000], [7546,0,0])
+                   [1.0, 0.2, 0.5], [0,0,7000000], [7546,0,0])
 
 station_c = vessel("Station-Gamma", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [0.2, 1.0, 0.5], [0,7500000,0], [0,0,-7350])
+                   [0.0, 1.0, 1.0], [0,7500000,0], [0,0,-7350])
 
 # celestial body args: name, model, mass, radius, color, pos, vel
 earth = body("Earth", pywavefront.Wavefront('data\models\miniearth.obj', collect_faces=True),
@@ -54,8 +54,8 @@ maneuvers = [demo_maneuver]
 
 sim_time = 0
 
-def create_maneuver(mnv_name, mnv_type, mnv_vessel, mnv_frame, mnv_orientation, mnv_value, mnv_start,
-                    mnv_duration):
+def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
+                                mnv_duration):
 
     global maneuvers
 
@@ -64,10 +64,24 @@ def create_maneuver(mnv_name, mnv_type, mnv_vessel, mnv_frame, mnv_orientation, 
         input("Press Enter to continue...")
         return
 
-    if mnv_type == "const_accel":
-        new_maneuver = maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_value,
-                                            mnv_start, mnv_duration)
-        maneuvers.append(new_maneuver)
+    new_maneuver = maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel,
+                                        mnv_start, mnv_duration)
+    maneuvers.append(new_maneuver)
+
+def create_maneuver_const_thrust(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_thrust, mnv_mass_init,
+                                 mnv_mass_flow, mnv_start, mnv_duration):
+
+    global maneuvers
+
+    if find_maneuver_by_name(mnv_name):
+        print("A maneuver with this name already exists. Please pick another name for the new maneuver.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_maneuver = maneuver_const_thrust(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_thrust,
+                                         mnv_mass_init, mnv_mass_flow, mnv_start, mnv_duration)
+
+    maneuvers.append(new_maneuver)
 
 def delete_maneuver(mnv_name):
     global maneuvers
@@ -339,17 +353,42 @@ def main():
 
             # CREATE_MANEUVER command
             elif command[0] == "create_maneuver":
-                if len(command) == 9:
+                if command[2] == "const_accel" and len(command) == 9:
                     # name, type, vessel, frame, orientation, accel, start, duration
-                    create_maneuver(command[1], command[2], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
-                                    
-                                    [float(command[5][1:-1].split(",")[0]),
-                                     float(command[5][1:-1].split(",")[1]),
-                                     float(command[5][1:-1].split(",")[2])],
-                                    
-                                    float(command[6]), float(command[7]), float(command[8]))
+                    if not command[5] == "prograde" and not command[5] == "retrograde":
+                        create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                        
+                                                    [float(command[5][1:-1].split(",")[0]),
+                                                    float(command[5][1:-1].split(",")[1]),
+                                                    float(command[5][1:-1].split(",")[2])],
+                                        
+                                                    float(command[6]), float(command[7]), float(command[8]))
+                    else:
+                        create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                        
+                                                    command[5],
+                                        
+                                                    float(command[6]), float(command[7]), float(command[8]))
+                elif command[2] == "const_thrust" and len(command) == 11:
+                    # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
+                    if not command[5] == "prograde" and not command[5] == "retrograde":
+                        create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+
+                                                     [float(command[5][1:-1].split(",")[0]),
+                                                     float(command[5][1:-1].split(",")[1]),
+                                                     float(command[5][1:-1].split(",")[2])],
+
+                                                     float(command[6]), float(command[7]), float(command[8]),
+                                                     float(command[9]), float(command[10]))
+                    else:
+                        create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+
+                                                     command[5],
+
+                                                     float(command[6]), float(command[7]), float(command[8]),
+                                                     float(command[9]), float(command[10]))
                 else:
-                    print("Wrong number of arguments for command 'create_maneuver'.\n")
+                    print("Wrong syntax for command 'create_maneuver'.\n")
                     time.sleep(2)
 
             # DELETE_MANEUVER command
@@ -392,7 +431,7 @@ def main():
             elif command[0] == "help":
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
-                    print("create_vessel, delete_vessel, get_objects\n")
+                    print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -424,7 +463,10 @@ def main():
                         input("Press Enter to continue...")
                     elif command[1] == "create_maneuver":
                         print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
-                        print("Syntax: create_maneuver <name> <type> <vessel_name> <frame_of_reference_name> <orientation> <value> <start_time> <duration>")
+                        print("Syntax: create_maneuver <name> <type> + <<type-specific arguments>>")
+                        print("Maneuver types: const_accel, const_thrust")
+                        print("const_accel params: <vessel> <frame_of_reference> <orientation> <acceleration> <start_time> <duration>")
+                        print("const_thrust params: <vessel> <frame_of_reference> <orientation> <thrust> <initial_mass> <mass_flow> <start_time> <duration>")
                         input("Press Enter to continue...")
                     elif command[1] == "delete_maneuver":
                         print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
@@ -531,6 +573,7 @@ def main():
 
         if show_trajectories:
             drawTrajectories(vessels)
+            drawManeuvers(maneuvers)
 
         glfw.swap_buffers(window)
 
