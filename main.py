@@ -11,6 +11,7 @@ from graphics import *
 from vessel_class import *
 from body_class import *
 from math_utils import *
+from maneuver import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
@@ -33,6 +34,9 @@ earth = body("Earth", pywavefront.Wavefront('data\models\miniearth.obj', collect
 luna = body("Luna", pywavefront.Wavefront('data\models\miniluna.obj', collect_faces=True),
             7.342 * 10**22, 1737000, [0.8, 0.8, 0.8], [0, 202700000, -351086000], [966,0,0])
 
+# constant acceleration maneuver args: vessel, frame body, direction, acceleration, start time, duration
+demo_maneuver = maneuver_const_accel("mnv_demo", station_b, earth, [1, 0, 0], 0.5, 10, 50)
+
 # this is for OpenGL
 cam_trans = [0, 0, -5000]
 cam_pos = [0,0,-5000]
@@ -45,6 +49,50 @@ else:
 vessels = [station_a, station_b, station_c]
 bodies = [earth, luna]
 objs = [earth, luna, station_a, station_b, station_c]
+
+maneuvers = [demo_maneuver]
+
+sim_time = 0
+
+def create_maneuver(mnv_name, mnv_type, mnv_vessel, mnv_frame, mnv_orientation, mnv_value, mnv_start,
+                    mnv_duration):
+
+    global maneuvers
+
+    if find_maneuver_by_name(mnv_name):
+        print("A maneuver with this name already exists. Please pick another name for the new maneuver.\n")
+        input("Press Enter to continue...")
+        return
+
+    if mnv_type == "const_accel":
+        new_maneuver = maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_value,
+                                            mnv_start, mnv_duration)
+        maneuvers.append(new_maneuver)
+
+def delete_maneuver(mnv_name):
+    global maneuvers
+
+    mnv = find_maneuver_by_name(mnv_name)
+
+    if not mnv:
+        print("Maneuver not found!")
+        time.sleep(2)
+        return
+    
+    maneuvers.remove(mnv)
+    del mnv
+
+def find_maneuver_by_name(mnv_name):
+    global maneuvers
+
+    result = None
+
+    for m in maneuvers:
+        if m.name == mnv_name:
+            result = m
+            break
+
+    return result
 
 def create_vessel(name, model_name, color, pos, vel):
     global vessels, objs
@@ -91,6 +139,7 @@ def find_obj_by_name(name):
     for obj in objs:
         if obj.get_name() == name:
             result = obj
+            break
 
     return result
 
@@ -107,7 +156,7 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global vessels, bodies, cam_trans, cam_pos, objs
+    global vessels, bodies, cam_trans, cam_pos, objs, sim_time
 
     # initializing glfw
     glfw.init()
@@ -131,6 +180,8 @@ def main():
     show_trajectories = True
 
     while True:
+
+        sim_time += delta_t
 
         glfw.poll_events()
 
@@ -186,7 +237,7 @@ def main():
             if command[0] == "show":
                 
                 if len(command) == 5:
-                    if not find_obj_by_name(command[1]) == None:
+                    if find_obj_by_name(command[1]):
                         obj = find_obj_by_name(command[1])
                         if command[2] == "pos":
                             output_buffer.append([command[4], "pos_rel", obj, command[3]])
@@ -197,14 +248,21 @@ def main():
                         time.sleep(2)
                             
                 elif len(command) == 4:
-                    if not find_obj_by_name(command[1]) == None:
+                    
+                    if find_obj_by_name(command[1]):
                         obj = find_obj_by_name(command[1])
                         if command[2] == "pos":
                             output_buffer.append([command[3], "pos", obj])
                         elif command[2] == "vel":
                             output_buffer.append([command[3], "vel", obj])
+                            
+                    elif find_maneuver_by_name(command[1]):
+                        maneuver = find_maneuver_by_name(command[1])
+                        if command[2] == "active":
+                            output_buffer.append([command[3], "active", maneuver])
+                            
                     else:
-                        print("Object not found.")
+                        print("Object/maneuver not found.")
                         time.sleep(2)
 
                 elif len(command) == 2:
@@ -279,6 +337,29 @@ def main():
                     print("Wrong number of arguments for command 'delete_vessel'.\n")
                     time.sleep(2)
 
+            # CREATE_MANEUVER command
+            elif command[0] == "create_maneuver":
+                if len(command) == 9:
+                    # name, type, vessel, frame, orientation, accel, start, duration
+                    create_maneuver(command[1], command[2], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                    
+                                    [float(command[5][1:-1].split(",")[0]),
+                                     float(command[5][1:-1].split(",")[1]),
+                                     float(command[5][1:-1].split(",")[2])],
+                                    
+                                    float(command[6]), float(command[7]), float(command[8]))
+                else:
+                    print("Wrong number of arguments for command 'create_maneuver'.\n")
+                    time.sleep(2)
+
+            # DELETE_MANEUVER command
+            elif command[0] == "delete_maneuver":
+                if len(command) == 2:
+                    delete_maneuver(command[1])
+                else:
+                    print("Wrong number of arguments for command 'delete_maneuver'.\n")
+                    time.sleep(2)
+
             # GET_OBJECTS command
             elif command[0] == "get_objects":
                 print("Objects currently in simulation:\n")
@@ -286,6 +367,13 @@ def main():
                     print("BODY:", b.get_name() + "\n")
                 for v in vessels:
                     print("VESSEL:", v.get_name() + "\n")
+                input("Press Enter to continue...")
+
+            # GET_MANEUVERS command
+            elif command[0] == "get_maneuvers":
+                print("\nManeuvers currently in the simulation:\n")
+                for m in maneuvers:
+                    print("MANEUVER:", m.get_name(), "\nIs Performing?:", str(m.is_performing(sim_time)), "\n\n")
                 input("Press Enter to continue...")
 
             # CAM_STRAFE_SPEED command
@@ -313,6 +401,7 @@ def main():
                         print("\n'show' command adds an output element to the command prompt/terminal.\n")
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
+                        print("Syntax Option 3: show <maneuver_name> active <display_label>")
                         print("Syntax Option 3: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
@@ -333,9 +422,21 @@ def main():
                         print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
                         print("Syntax: delete_vessel <name>\n")
                         input("Press Enter to continue...")
+                    elif command[1] == "create_maneuver":
+                        print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
+                        print("Syntax: create_maneuver <name> <type> <vessel_name> <frame_of_reference_name> <orientation> <value> <start_time> <duration>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delete_maneuver":
+                        print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
+                        print("Syntax: delete_maneuver <name>")
+                        input("Press Enter to continue...")
                     elif command[1] == "get_objects":
                         print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
                         print("Syntax: get_objects\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_maneuvers":
+                        print("\n'get_maneuvers' command prints out the names of maneuvers currently in the simulation.\n")
+                        print("Syntax: get_maneuvers\n")
                         input("Press Enter to continue...")
                     elif command[1] == "cam_strafe_speed":
                         print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
@@ -389,6 +490,9 @@ def main():
             x.update_vel(accel, delta_t)
             x.update_pos(delta_t)
 
+        for m in maneuvers:
+            m.perform_maneuver(sim_time, delta_t)
+
         # update output
         if os.name == "nt":
             os.system("cls")
@@ -398,6 +502,7 @@ def main():
         # display what the user wants in cmd/terminal
         print("OrbitSim3D Command Interpreter & Output Display\n")
         print("Press C at any time to enter a command.\n")
+        print("Time:", sim_time, "\n")
         for element in output_buffer:
 
             if element[1] == "pos_rel":
@@ -408,6 +513,9 @@ def main():
                 print(element[0], element[2].get_pos())
             elif element[1] == "vel":
                 print(element[0], element[2].get_vel())
+                
+            elif element[1] == "active":
+                print(element[0], element[2].is_performing(sim_time))
             
             print("\n")
             

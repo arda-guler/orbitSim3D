@@ -112,3 +112,13 @@ class vessel():
 
     def get_color(self):
         return self.color
+
+    def get_orientation_rel_to(self, frame, orientation):
+        if orientation == "prograde":
+            return [self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
+                    self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
+                    self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+        elif orientation == "retrograde":
+            return [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
+                    -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
+                    -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
