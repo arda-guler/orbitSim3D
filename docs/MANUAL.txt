@@ -47,16 +47,18 @@ bodies and spacecraft in small time steps and
 integrates gravitational acceleration from all
 celestial bodies currently in the simulation.
 
+(Spacecraft maneuvers work the same way too.)
+
 This way, no movement happens "on rails", and 
 perturbations from distant bodies are always 
 accounted for.
 
-One important phenomenon the simulation currently 
-lacks is non-spherical gravity due to the 
-"lumpiness" of some celestial bodies such as the
-Moon. Although negligible beyond the low orbit of
-such bodies, this should also be modeled for utmost
-accuracy during lengthy simulations.
+One phenomenon the simulation currently lacks is
+non-spherical gravity due to the  "lumpiness" of
+some celestial bodies such as the Moon. Although
+negligible beyond the low orbit of such bodies,
+this should also be modeled for utmost accuracy,
+especially during lengthy simulations.
 
 Relativistic effects are not taken into account
 whatsoever.
@@ -81,6 +83,10 @@ body_class.py   -- the 'body' class used for
 				-- as planets or asteroids, which DO
 				-- generate notable gravitational
 				-- fields
+				
+maneuver.py     -- the 'maneuver' classes used for
+				-- various types of maneuvers that
+				-- can be performed by spacecraft
 				
 math_utils.py   -- general mathematical functions 
                 -- that are not provided by the
