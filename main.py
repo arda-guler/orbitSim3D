@@ -17,44 +17,98 @@ from maneuver import *
 # because there are system calls to clear the output
 # every physics frame
 
-# vessel args: name, model, color, pos, vel
-station_a = vessel("Station-Alpha", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [1.0, 0.2, 0.2], [6771000,0,0], [0,7672,0])
-
-station_b = vessel("Station-Beta", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [1.0, 0.2, 0.5], [0,0,7000000], [7546,0,0])
-
-station_c = vessel("Station-Gamma", pywavefront.Wavefront('data\models\ministation.obj', collect_faces=True),
-                   [0.0, 1.0, 1.0], [0,7500000,0], [0,0,-7350])
-
-# celestial body args: name, model, mass, radius, color, pos, vel
-earth = body("Earth", pywavefront.Wavefront('data\models\miniearth.obj', collect_faces=True),
-             5.972 * 10**24, 6371000, [0.0, 0.25, 1.0], [0,0,0], [0,0,0])
-
-luna = body("Luna", pywavefront.Wavefront('data\models\miniluna.obj', collect_faces=True),
-            7.342 * 10**22, 1737000, [0.8, 0.8, 0.8], [0, 202700000, -351086000], [966,0,0])
-
-# constant acceleration maneuver args: vessel, frame body, direction, acceleration, start time, duration
-demo_maneuver = maneuver_const_accel("mnv_demo", station_b, earth, "prograde", 0.5, 10, 50)
-demo_maneuver2 = maneuver_const_accel("mnv_demo2", station_a, earth, "normal", 2, 15, 55)
-demo_maneuver3 = maneuver_const_accel("mnv_demo3", station_c, earth, "radial_out", 0.5, 20, 60)
-
 # this is for OpenGL
 cam_trans = [0, 0, -5000]
-cam_pos = [0,0,-5000]
 
 if os.name == "nt":
     os.system("cls")
 else:
     os.system("clear")
 
-vessels = [station_a, station_b, station_c]
-bodies = [earth, luna]
-objs = [earth, luna, station_a, station_b, station_c]
+vessels = []
+bodies = []
+objs = []
 
-maneuvers = [demo_maneuver, demo_maneuver2, demo_maneuver3]
+maneuvers = []
 
 sim_time = 0
+
+def clear_scene():
+    global objs, vessels, bodies, maneuvers, sim_time
+
+    objs = []
+    vessels = []
+    bodies = []
+    maneuvers = []
+    sim_time = 0
+
+def import_scenario(scn_filename):
+    global objs, vessels, bodies, maneuvers, sim_time
+
+    clear_scene()
+    
+    scn_file = open(scn_filename, "r")
+    import_lines = scn_file.readlines()
+
+    for line in import_lines:
+        line = line[0:-1].split("|")
+
+        # import bodies
+        if line[0] == "B":
+            line[5] = line[5][1:-1].split(",")
+            line[6] = line[6][1:-1].split(",")
+            line[7] = line[7][1:-1].split(",")
+            new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True),
+                            float(line[3]), float(line[4]),
+                            [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                            [float(line[6][0]), float(line[6][1]), float(line[6][2])],
+                            [float(line[7][0]), float(line[7][1]), float(line[7][2])])
+            bodies.append(new_body)
+            objs.append(new_body)
+
+        # import vessels
+        elif line[0] == "V":
+            line[3] = line[3][1:-1].split(",")
+            line[4] = line[4][1:-1].split(",")
+            line[5] = line[5][1:-1].split(",")
+            new_vessel = vessel(line[1], pywavefront.Wavefront(line[2], collect_faces=True),
+                                [float(line[3][0]), float(line[3][1]), float(line[3][2])],
+                                [float(line[4][0]), float(line[4][1]), float(line[4][2])],
+                                [float(line[5][0]), float(line[5][1]), float(line[5][2])])
+            vessels.append(new_vessel)
+            objs.append(new_vessel)
+
+        # import maneuvers
+        elif line[0] == "M":
+            if line[2] == "const_accel":
+                if (line[5] == "prograde" or line[5] == "retrograde" or
+                    line[5] == "radial_in" or line[5] == "radial_out" or
+                    line[5] == "normal" or line[5] == "antinormal"):
+                    new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                        line[5], float(line[6]), float(line[7]), float(line[8]))
+                else:
+                    line[5] = line[5][1:-1].split(",")
+                    new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                        [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                                                        float(line[6]), float(line[7]), float(line[8]))
+                    
+            elif line[2] == "const_thrust":
+                if (line[5] == "prograde" or line[5] == "retrograde" or
+                    line[5] == "radial_in" or line[5] == "radial_out" or
+                    line[5] == "normal" or line[5] == "antinormal"):
+                    new_maneuver = maneuver_const_thrust(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                         line[5], float(line[6]), float(line[7]), float(line[8]),
+                                                         float(line[9]), float(line[10]))
+                else:
+                    line[5] = line[5][1:-1].split(",")
+                    new_maneuver = maneuver_const_thrust(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                         [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                                                         float(line[6]), float(line[7]), float(line[8]),
+                                                         float(line[9]), float(line[10]))
+
+            maneuvers.append(new_maneuver)
+
+    main()
 
 def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
                                 mnv_duration):
@@ -172,7 +226,7 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global vessels, bodies, cam_trans, cam_pos, objs, sim_time
+    global vessels, bodies, cam_trans, objs, sim_time
 
     # initializing glfw
     glfw.init()
@@ -222,22 +276,16 @@ def main():
 
         if keyboard.is_pressed("i"):
             cam_trans[2] = cam_strafe_speed
-            cam_pos[2] += cam_strafe_speed
         if keyboard.is_pressed("k"):
             cam_trans[2] = -cam_strafe_speed
-            cam_pos[2] -= cam_strafe_speed
         if keyboard.is_pressed("j"):
             cam_trans[0] = cam_strafe_speed
-            cam_pos[0] += cam_strafe_speed
         if keyboard.is_pressed("l"):
             cam_trans[0] = -cam_strafe_speed
-            cam_pos[0] -= cam_strafe_speed
         if keyboard.is_pressed("o"):
             cam_trans[1] = cam_strafe_speed
-            cam_pos[1] += cam_strafe_speed
         if keyboard.is_pressed("u"):
             cam_trans[1] = -cam_strafe_speed
-            cam_pos[1] -= cam_strafe_speed
 
         if keyboard.is_pressed("c"):
             frame_command = True
@@ -311,7 +359,10 @@ def main():
 
             # CLEAR command
             elif command[0] == "clear":
-                output_buffer = []
+                if command[1] == "output":
+                    output_buffer = []
+                elif command[1] == "scene":
+                    clear_scene()
 
             # CREATE_VESSEL command
             elif command[0] == "create_vessel":
@@ -466,7 +517,8 @@ def main():
                         input("Press Enter to continue...")
                     elif command[1] == "clear":
                         print("\n'clear' command removes all output element from the command prompt/terminal.\n")
-                        print("Syntax: clear\n")
+                        print("Syntax: clear <thing>\n")
+                        print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "create_vessel":
                         print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
@@ -562,7 +614,8 @@ def main():
 
         # display what the user wants in cmd/terminal
         print("OrbitSim3D Command Interpreter & Output Display\n")
-        print("Press C at any time to enter a command.\n")
+        if sim_time < 100:
+            print("Press C at any time to enter a command.\n")
         print("Time:", sim_time, "\n")
         for element in output_buffer:
 
@@ -620,5 +673,13 @@ def main():
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
-main()
+def init_sim():
+    print("\nOrbitSim3D Initialization\n")
+    scn_path = input("Enter scenario file path to load scenario, or leave blank to start an empty scene" +
+                     "\n(for example 'scenarios\\three_vessels.osf'):\n")
+    if scn_path:
+        import_scenario(scn_path)
+    else:
+        main()
 
+init_sim()

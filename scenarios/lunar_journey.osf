@@ -1,0 +1,71 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  LUNAR_JOURNEY.OSF
+;  Author: arda-guler
+;
+;This scenario demonstrates a spacecraft
+;performing a trans-lunar injection at
+;low Earth orbit, and performing a second
+;maneuver near perilune for Lunar orbit
+;insertion.
+;
+;(Depending on your choice of time-step
+;resolution, resulting trajectory might
+;differ from the intended one! Don't
+;increase delta_t too much, especially
+;when close to bodies!)
+;
+;You can enter the following commands to
+;better follow the mission:
+;
+;show lunar-orbiter dist Earth DIST_EARTH
+;    (shows distance from Earth center)
+;
+;show lunar-orbiter vel_mag Earth VEL_EARTH
+;    (shows velocity rel. to Earth)
+;
+;show lunar-orbiter dist Luna DIST_LUNA
+;    (shows distance from Moon center)
+;
+;show lunar-orbiter vel_mag Luna VEL_LUNA
+;    (shows velocity rel. to Moon)
+;
+;show mnv_tli state TLI
+;    (shows state of TLI maneuver)
+;
+;show mnv_loi state LOI
+;    (shows state of LOI maneuver)
+;
+;If you feel up to the task, you can set
+;mid-course correction maneuvers or delete
+;the original lunar orbit injection and
+;create a new, better one.
+;
+
+;Celestial bodies
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]
+B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8, 0.8, 0.8]|[-346410000,10,-200000000]|[483,0,-836.5]
+
+;Vessels
+V|lunar-orbiter|data\models\ministation.obj|[1.0, 1.0, 1.0]|[-590131,-10,6745234]|[7622,0,667]
+
+;Maneuvers
+M|mnv_tli|const_accel|lunar-orbiter|Earth|prograde|10|100|325
+M|mnv_loi|const_accel|lunar-orbiter|Luna|retrograde|10|404800|140

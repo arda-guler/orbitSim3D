@@ -18,7 +18,12 @@ c) Required Python packages:
 QUICKSTART
 
 Run main.py from the command prompt or terminal
-to start the simulation. 
+to start the simulation.
+
+To skip the hassle of setting up a planetary system,
+choose to load a demo scenario at the initialization
+prompt (there are a couple .osf scenario files in the
+'scenarios' folder - simply type the file path).
 
 The command prompt or terminal window will act 
 as the command interpreter for the simulation,
@@ -65,6 +70,21 @@ whatsoever.
 
 = = = = = = = = =
 
+SCENARIOS
+
+There are some scenario files provided in .osf
+format. These are simple text files that can be
+edited by any text editor you like. They contain
+all information on the bodies, vessels and
+maneuvers in a scenario. Syntax is rather
+simple and scenarios are therefore easy to create
+and edit.
+
+Check out any of the provided .osf files and read
+the comments for more information.
+
+= = = = = = = = =
+
 CODE ORGANIZATION
 
 main.py         -- initializer, command interpreter 
@@ -74,19 +94,19 @@ graphics.py     -- OpenGL functions for 3D rendering
 
 vessel_class.py -- the 'vessel' class used for
                 -- representing spacecraft or small
-				-- objects such as debris chunks
-				-- which do not generate notable
-				-- gravitational fields
+                -- objects such as debris chunks
+                -- which do not generate notable
+                -- gravitational fields
 				
 body_class.py   -- the 'body' class used for 
                 -- representing celestial bodies such
-				-- as planets or asteroids, which DO
-				-- generate notable gravitational
-				-- fields
+                -- as planets or asteroids, which DO
+                -- generate notable gravitational
+                -- fields
 				
 maneuver.py     -- the 'maneuver' classes used for
-				-- various types of maneuvers that
-				-- can be performed by spacecraft
+                -- various types of maneuvers that
+                -- can be performed by spacecraft
 				
 math_utils.py   -- general mathematical functions 
                 -- that are not provided by the

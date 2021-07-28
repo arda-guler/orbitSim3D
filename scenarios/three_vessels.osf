@@ -1,0 +1,53 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  THREE_VESSELS.OSF
+;  Author: arda-guler
+;
+;This is a demo scenario provided by
+;the developer. It includes three
+;stations in low Earth orbit, about to
+;perform simple maneuvers several
+;seconds into the simulation.
+;
+;The Moon is also present and will apply
+;perturabtions which will become more
+;apparent over time.
+;
+;You can set maneuvers to try performing
+;Hohmann transfers, orbital
+;rendezvous or even a trans-lunar
+;injection!
+
+;Celestial bodies
+
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]
+B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8, 0.8, 0.8]|[0,202700000,-351086000]|[966,0,0]
+
+;Vessels
+
+V|Station-Alpha|data\models\ministation.obj|[1.0,0.2,0.2]|[6771000,0,0]|[0,7672,0]
+V|Station-Beta|data\models\ministation.obj|[1.0,0.2,0.5]|[0,0,7000000]|[7546,0,0]
+V|Station-Gamma|data\models\ministation.obj|[0.0,1.0,1.0]|[0,7500000,0]|[0,0,-7350]
+
+;Maneuvers
+
+M|mnv_demo|const_accel|Station-Beta|Earth|prograde|0.5|10|50
+M|mnv_demo2|const_accel|Station-Alpha|Earth|normal|2|15|55
+M|mnv_demo2|const_accel|Station-Gamma|Earth|radial_out|0.5|20|60
