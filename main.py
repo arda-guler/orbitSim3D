@@ -35,7 +35,9 @@ luna = body("Luna", pywavefront.Wavefront('data\models\miniluna.obj', collect_fa
             7.342 * 10**22, 1737000, [0.8, 0.8, 0.8], [0, 202700000, -351086000], [966,0,0])
 
 # constant acceleration maneuver args: vessel, frame body, direction, acceleration, start time, duration
-demo_maneuver = maneuver_const_accel("mnv_demo", station_b, earth, [1, 0, 0], 0.5, 10, 50)
+demo_maneuver = maneuver_const_accel("mnv_demo", station_b, earth, "prograde", 0.5, 10, 50)
+demo_maneuver2 = maneuver_const_accel("mnv_demo2", station_a, earth, "normal", 2, 15, 55)
+demo_maneuver3 = maneuver_const_accel("mnv_demo3", station_c, earth, "radial_out", 0.5, 20, 60)
 
 # this is for OpenGL
 cam_trans = [0, 0, -5000]
@@ -50,7 +52,7 @@ vessels = [station_a, station_b, station_c]
 bodies = [earth, luna]
 objs = [earth, luna, station_a, station_b, station_c]
 
-maneuvers = [demo_maneuver]
+maneuvers = [demo_maneuver, demo_maneuver2, demo_maneuver3]
 
 sim_time = 0
 

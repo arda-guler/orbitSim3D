@@ -19,10 +19,8 @@ class maneuver_const_accel(maneuver):
         self.draw_vertices = []
 
     def set_orientation(self):
-        if self.orientation == "prograde":
-            self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, "prograde")
-        elif self.orientation == "retrograde":
-            self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, "retrograde")
+        if not type(self.orientation) == list:
+            self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
         self.set_orientation()

@@ -1,3 +1,4 @@
+from math_utils import *
 grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
 
 class vessel():
@@ -122,3 +123,23 @@ class vessel():
             return [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
                     -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
                     -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+        elif orientation == "radial_in":
+            return self.get_unit_vector_towards(frame)
+        elif orientation == "radial_out":
+            return [-self.get_unit_vector_towards(frame)[0],
+                    -self.get_unit_vector_towards(frame)[1],
+                    -self.get_unit_vector_towards(frame)[2]]
+        elif orientation == "normal":
+            cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
+            cross_vec_mag = (cross_vec[0]**2 + cross_vec[1]**2 + cross_vec[2]**2)**0.5
+            normal_vec = [cross_vec[0]/cross_vec_mag,
+                          cross_vec[1]/cross_vec_mag,
+                          cross_vec[2]/cross_vec_mag]
+            return normal_vec
+        elif orientation == "antinormal":
+            cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
+            cross_vec_mag = (cross_vec[0]**2 + cross_vec[1]**2 + cross_vec[2]**2)**0.5
+            antinormal_vec = [-cross_vec[0]/cross_vec_mag,
+                              -cross_vec[1]/cross_vec_mag,
+                              -cross_vec[2]/cross_vec_mag]
+            return antinormal_vec
