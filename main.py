@@ -355,7 +355,7 @@ def main():
 
             # CREATE_MANEUVER command
             elif command[0] == "create_maneuver":
-                if command[2] == "const_accel" and len(command) == 9:
+                if len(command) == 9 and command[2] == "const_accel":
                     # name, type, vessel, frame, orientation, accel, start, duration
                     if (not command[5] == "prograde" and not command[5] == "retrograde" and
                         not command[5] == "radial_in" and not command[5] == "radial_out" and
@@ -373,7 +373,7 @@ def main():
                                                     command[5],
                                         
                                                     float(command[6]), float(command[7]), float(command[8]))
-                elif command[2] == "const_thrust" and len(command) == 11:
+                elif len(command) == 11 and command[2] == "const_thrust":
                     # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
                     if (not command[5] == "prograde" and not command[5] == "retrograde" and
                         not command[5] == "radial_in" and not command[5] == "radial_out" and
@@ -506,6 +506,9 @@ def main():
                         print("\nUnknown command.")
                         input("Press Enter to continue...")
 
+            elif command[0] == "":
+                # user probably changed their mind
+                pass
             else:
                 print("\nUnrecognized command.")
                 input("Press Enter to continue...")
