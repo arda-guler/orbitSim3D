@@ -284,6 +284,8 @@ def main():
                         maneuver = find_maneuver_by_name(command[1])
                         if command[2] == "active":
                             output_buffer.append([command[3], "active", maneuver])
+                        elif command[2] == "state":
+                            output_buffer.append([command[3], "state", maneuver])
                             
                     else:
                         print("Object/maneuver not found.")
@@ -426,7 +428,7 @@ def main():
             elif command[0] == "get_maneuvers":
                 print("\nManeuvers currently in the simulation:\n")
                 for m in maneuvers:
-                    print("MANEUVER:", m.get_name(), "\nIs Performing?:", str(m.is_performing(sim_time)), "\n\n")
+                    print("MANEUVER:", m.get_name(), "\nState:", str(m.get_state(sim_time)), "\n\n")
                 input("Press Enter to continue...")
 
             # CAM_STRAFE_SPEED command
@@ -590,6 +592,8 @@ def main():
                 
             elif element[1] == "active":
                 print(element[0], element[2].is_performing(sim_time))
+            elif element[1] == "state":
+                print(element[0], element[2].get_state(sim_time))
             
             print("\n")
             

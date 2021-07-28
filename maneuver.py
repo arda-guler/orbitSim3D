@@ -43,6 +43,14 @@ class maneuver_const_accel(maneuver):
         else:
             return False
 
+    def get_state(self, current_time):
+        if self.done:
+            return "Completed"
+        elif current_time >= self.t_start:
+            return "Performing"
+        else:
+            return "Pending"
+
     def get_name(self):
         return self.name
 
@@ -99,6 +107,14 @@ class maneuver_const_thrust(maneuver):
             return True
         else:
             return False
+
+    def get_state(self, current_time):
+        if self.done:
+            return "Completed"
+        elif current_time >= self.t_start:
+            return "Performing"
+        else:
+            return "Pending"
 
     def get_name(self):
         return self.name
