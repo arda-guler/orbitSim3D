@@ -357,7 +357,9 @@ def main():
             elif command[0] == "create_maneuver":
                 if command[2] == "const_accel" and len(command) == 9:
                     # name, type, vessel, frame, orientation, accel, start, duration
-                    if not command[5] == "prograde" and not command[5] == "retrograde":
+                    if (not command[5] == "prograde" and not command[5] == "retrograde" and
+                        not command[5] == "radial_in" and not command[5] == "radial_out" and
+                        not command[5] == "normal" and not command[5] == "antinormal"):
                         create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                         
                                                     [float(command[5][1:-1].split(",")[0]),
@@ -373,7 +375,9 @@ def main():
                                                     float(command[6]), float(command[7]), float(command[8]))
                 elif command[2] == "const_thrust" and len(command) == 11:
                     # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
-                    if not command[5] == "prograde" and not command[5] == "retrograde":
+                    if (not command[5] == "prograde" and not command[5] == "retrograde" and
+                        not command[5] == "radial_in" and not command[5] == "radial_out" and
+                        not command[5] == "normal" and not command[5] == "antinormal"):
                         create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
 
                                                      [float(command[5][1:-1].split(",")[0]),
@@ -442,8 +446,8 @@ def main():
                         print("\n'show' command adds an output element to the command prompt/terminal.\n")
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
-                        print("Syntax Option 3: show <maneuver_name> active <display_label>")
-                        print("Syntax Option 3: show traj (enables trajectory trails)\n")
+                        print("Syntax Option 3: show <maneuver_name> active <display_label>\n")
+                        print("Syntax Option 4: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
