@@ -259,6 +259,10 @@ def main():
                             output_buffer.append([command[4], "pos_rel", obj, command[3]])
                         elif command[2] == "vel":
                             output_buffer.append([command[4], "vel_rel", obj, command[3]])
+                        elif command[2] == "pos_mag" or command[2] == "dist":
+                            output_buffer.append([command[4], "pos_mag_rel", obj, command[3]])
+                        elif command[2] == "vel_mag":
+                            output_buffer.append([command[4], "vel_mag_rel", obj, command[3]])
                     else:
                         print("Object not found.")
                         time.sleep(2)
@@ -271,6 +275,10 @@ def main():
                             output_buffer.append([command[3], "pos", obj])
                         elif command[2] == "vel":
                             output_buffer.append([command[3], "vel", obj])
+                        elif command[2] == "pos_mag" or command[2] == "dist":
+                            output_buffer.append([command[3], "pos_mag", obj])
+                        elif command[2] == "vel_mag":
+                            output_buffer.append([command[3], "vel_mag", obj])
                             
                     elif find_maneuver_by_name(command[1]):
                         maneuver = find_maneuver_by_name(command[1])
@@ -560,10 +568,25 @@ def main():
                 print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
             elif element[1] == "vel_rel":
                 print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
+
+            elif element[1] == "pos_mag_rel":
+                print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
+            elif element[1] == "vel_mag_rel":
+                print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
+            
             elif element[1] == "pos":
                 print(element[0], element[2].get_pos())
             elif element[1] == "vel":
                 print(element[0], element[2].get_vel())
+
+            elif element[1] == "pos_mag":
+                print(element[0], float((element[2].get_pos()[0]**2 +
+                                         element[2].get_pos()[1]**2 +
+                                         element[2].get_pos()[2]**2)**0.5))
+            elif element[1] == "vel_mag":
+                print(element[0], float((element[2].get_vel()[0]**2 +
+                                         element[2].get_vel()[1]**2 +
+                                         element[2].get_vel()[2]**2)**0.5))
                 
             elif element[1] == "active":
                 print(element[0], element[2].is_performing(sim_time))
