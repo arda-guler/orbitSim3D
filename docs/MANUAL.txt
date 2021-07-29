@@ -70,7 +70,7 @@ whatsoever.
 
 = = = = = = = = =
 
-SCENARIOS
+SCENARIOS (.OSF)
 
 There are some scenario files provided in .osf
 format. These are simple text files that can be
@@ -82,6 +82,17 @@ and edit.
 
 Check out any of the provided .osf files and read
 the comments for more information.
+
+= = = = = = = = =
+
+BATCH FILES (.OBF)
+
+Instead of repeatedly entering some commands every
+time you start a scenario, you can create batch
+files to read the commands from. These too are
+simple text files, and can be edited using any text
+editor you like. Syntax is the same as the run-time
+commands that are accepted by the interpreter.
 
 = = = = = = = = =
 

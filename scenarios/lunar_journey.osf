@@ -32,26 +32,15 @@
 ;increase delta_t too much, especially
 ;when close to bodies!)
 ;
-;You can enter the following commands to
+;You can enter the following command to
 ;better follow the mission:
 ;
-;show lunar-orbiter dist Earth DIST_EARTH
-;    (shows distance from Earth center)
+; 'batch scenarios\lunar_journey.obf'
 ;
-;show lunar-orbiter vel_mag Earth VEL_EARTH
-;    (shows velocity rel. to Earth)
-;
-;show lunar-orbiter dist Luna DIST_LUNA
-;    (shows distance from Moon center)
-;
-;show lunar-orbiter vel_mag Luna VEL_LUNA
-;    (shows velocity rel. to Moon)
-;
-;show mnv_tli state TLI
-;    (shows state of TLI maneuver)
-;
-;show mnv_loi state LOI
-;    (shows state of LOI maneuver)
+;When entered, the above command (without
+;the quotation marks, of course) will 
+;configure the output buffer to provide 
+;more info about the mission.
 ;
 ;If you feel up to the task, you can set
 ;mid-course correction maneuvers or delete

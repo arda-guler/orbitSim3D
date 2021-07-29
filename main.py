@@ -30,8 +30,21 @@ bodies = []
 objs = []
 
 maneuvers = []
+batch_commands = []
 
 sim_time = 0
+
+def read_batch(batch_path):
+    batch_file = open(batch_path, "r")
+    batch_lines = batch_file.readlines()
+
+    commands = []
+
+    for line in batch_lines:
+        if not line[0] == ";":
+            commands.append(line[0:-1].split(" "))
+            
+    return commands
 
 def clear_scene():
     global objs, vessels, bodies, maneuvers, sim_time
@@ -226,7 +239,7 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global vessels, bodies, cam_trans, objs, sim_time
+    global vessels, bodies, cam_trans, objs, sim_time, batch_commands
 
     # initializing glfw
     glfw.init()
@@ -290,12 +303,22 @@ def main():
         if keyboard.is_pressed("c"):
             frame_command = True
 
-        if frame_command:
+        if frame_command or len(batch_commands) > 0:
             flush_input()
-            command = input("\n > ")
-            command = command.split(" ")
+
+            if frame_command:
+                command = input("\n > ")
+                command = command.split(" ")
 
             # --- COMMAND INTERPRETER ---
+
+            # BATCH command
+            if command[0] == "batch":
+                batch_commands = read_batch(command[1])
+
+            if len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
+                command = batch_commands[0]
+                batch_commands.remove(command)
             
             # SHOW command
             if command[0] == "show":
@@ -498,7 +521,8 @@ def main():
             elif command[0] == "help":
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
-                    print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers\n")
+                    print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
+                    print("batch\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -519,6 +543,10 @@ def main():
                         print("\n'clear' command removes all output element from the command prompt/terminal.\n")
                         print("Syntax: clear <thing>\n")
                         print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene)\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "batch":
+                        print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
+                        print("Syntax: batch <file_path>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "create_vessel":
                         print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
@@ -605,6 +633,11 @@ def main():
 
         for m in maneuvers:
             m.perform_maneuver(sim_time, delta_t)
+            # lower delta_t if a maneuver is in progress
+            if (delta_t > 1 and (m.get_state(sim_time) == "Performing" or
+                                 (m.get_state(sim_time) == "Pending" and
+                                  not m.get_state(sim_time+delta_t) == "Pending"))):
+                delta_t = 1
 
         # update output
         if os.name == "nt":
