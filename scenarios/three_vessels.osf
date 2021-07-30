@@ -48,6 +48,6 @@ V|Station-Gamma|data\models\ministation.obj|[0.0,1.0,1.0]|[0,7500000,0]|[0,0,-73
 
 ;Maneuvers
 
-M|mnv_demo|const_accel|Station-Beta|Earth|prograde|0.5|10|50
+M|mnv_demo1|const_accel|Station-Beta|Earth|prograde|0.5|10|50
 M|mnv_demo2|const_accel|Station-Alpha|Earth|normal|2|15|55
-M|mnv_demo2|const_accel|Station-Gamma|Earth|radial_out|0.5|20|60
+M|mnv_demo3|const_accel|Station-Gamma|Earth|radial_out|0.5|20|60

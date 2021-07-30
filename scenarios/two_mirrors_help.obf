@@ -1,0 +1,24 @@
+;.obf -- orbitSim3D batch format
+;
+;This OBF sets up a few maneuvers to
+;put one of the vessels in the
+;two_mirrors.osf scenario into an
+;easier orbit to manage.
+;
+;(It performs most of the maneuvers
+;required, the player just has to
+;sync orbit intersects and park the
+;vessels next to each other.)
+;
+create_maneuver mnv_align1 const_accel Yang Earth normal 20 2700 200
+;
+create_maneuver mnv_align2 const_accel Yang Earth antinormal 10 6070 25
+;
+create_maneuver mnv_intercept1 const_accel Yang Earth retrograde 20 11800 50
+;
+show mnv_align1 state ALIGN1
+;
+show mnv_align2 state ALIGN2
+;
+show mnv_intercept1 state INTERCEPT1
+;

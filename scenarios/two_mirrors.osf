@@ -1,0 +1,49 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  TWO_MIRRORS.OSF
+;  Author: arda-guler
+;
+;A hands-on challenge scenario.
+;
+;In this scenario, Yin and Yang are 
+;orbiting Earth in out-of-plane orbits
+;at different altitudes. However, they
+;are actually two different mirrors of
+;one large observation satellite. They
+;need to come together in order to get
+;a clear view on their target.
+;
+;Your task is to set up maneuvers and
+;perform a rendezvous.
+;
+;(If you need some help, you can load
+;'two_mirrors_help.obf' batch file after
+;running the scenario. It will set up a
+;few maneuvers to help get the two mirrors
+;closer.)
+
+;Celestial bodies
+
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]
+
+;Vessels
+
+V|Yang|data\models\ministation.obj|[1.0,0.0,1.0]|[6771000,0,0]|[0,3836,-6644]
+V|Yin|data\models\ministation.obj|[0.0,1.0,1.0]|[0,0,7000000]|[7546,0,0]

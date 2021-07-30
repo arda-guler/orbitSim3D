@@ -35,8 +35,13 @@ batch_commands = []
 sim_time = 0
 
 def read_batch(batch_path):
-    batch_file = open(batch_path, "r")
-    batch_lines = batch_file.readlines()
+    try:
+        batch_file = open(batch_path, "r")
+        batch_lines = batch_file.readlines()
+    except:
+        print("\nError reading batch file.\n")
+        time.sleep(2)
+        return [[""]]
 
     commands = []
 
