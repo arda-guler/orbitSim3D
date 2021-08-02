@@ -1,5 +1,7 @@
 from math_utils import *
+
 grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
+visual_scaling_factor = (3*(10**(-4))) # arbitrary, unitless
 
 class vessel():
     def __init__(self, name, model, color, pos, vel):
@@ -8,9 +10,9 @@ class vessel():
         self.color = color
         self.pos = pos
         self.vel = vel
-        self.draw_pos = [self.pos[0]*(3*(10**(-4))),
-                         self.pos[1]*(3*(10**(-4))),
-                         self.pos[2]*(3*(10**(-4)))]
+        self.draw_pos = [self.pos[0]*visual_scaling_factor,
+                         self.pos[1]*visual_scaling_factor,
+                         self.pos[2]*visual_scaling_factor]
         self.traj_history = []
         self.draw_traj_history = []
 
@@ -62,9 +64,9 @@ class vessel():
 
     # drawing scene is scaled down by a factor of 3x10^-4
     def update_draw_pos(self):
-        self.draw_pos = [self.pos[0]*(3*(10**(-4))),
-                         self.pos[1]*(3*(10**(-4))),
-                         self.pos[2]*(3*(10**(-4)))]
+        self.draw_pos = [self.pos[0]*visual_scaling_factor,
+                         self.pos[1]*visual_scaling_factor,
+                         self.pos[2]*visual_scaling_factor]
 
     def get_draw_pos(self):
         return self.draw_pos
