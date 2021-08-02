@@ -387,10 +387,19 @@ def main():
 
             # CLEAR command
             elif command[0] == "clear":
-                if command[1] == "output":
-                    output_buffer = []
-                elif command[1] == "scene":
-                    clear_scene()
+                if len(command) == 2:
+                    if command[1] == "output":
+                        output_buffer = []
+                    elif command[1] == "scene":
+                        clear_scene()
+                    elif command[1] == "traj_visuals":
+                        for v in vessels:
+                            v.clear_draw_traj_history()
+                        for m in maneuvers:
+                            m.clear_draw_vertices()
+                else:
+                    print("Wrong number of arguments for command 'clear'.")
+                    time.sleep(2)
 
             # CREATE_VESSEL command
             elif command[0] == "create_vessel":
@@ -522,12 +531,19 @@ def main():
             elif command[0] == "cycle_time":
                 cycle_time = float(command[1])
 
+            # NOTE command
+            elif command[0] == "note":
+                new_note = ""
+                for i in range(2,len(command)):
+                    new_note = new_note + " " + command[i]
+                output_buffer.append([command[1], "note", new_note])
+
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
-                    print("batch\n")
+                    print("batch, note\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -547,7 +563,8 @@ def main():
                     elif command[1] == "clear":
                         print("\n'clear' command removes all output element from the command prompt/terminal.\n")
                         print("Syntax: clear <thing>\n")
-                        print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene)\n")
+                        print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene),")
+                        print("traj_visuals (clears vessel trajectories up to current time in the 3D scene)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "batch":
                         print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
@@ -586,12 +603,18 @@ def main():
                         print("Syntax: cam_strafe_speed <speed>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "delta_t":
-                        print("\n'delta_t' command sets time steps of each physics frame.\n")
+                        print("\n'delta_t' command sets time steps of each physics frame.")
+                        print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
                         print("Syntax: delta_t <seconds>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "cycle_time":
                         print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
                         print("Syntax: cycle_time <seconds>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "note":
+                        print("\n'note' command lets the user take a note on the output screen.")
+                        print("Syntax: note <note_label> <note>")
+                        print("(<note> represents all words beyond <note_label>, spaces can be used while taking notes)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "help":
                         print("\n'help' command prints out the help text.\n")
@@ -685,6 +708,9 @@ def main():
                 print(element[0], element[2].is_performing(sim_time))
             elif element[1] == "state":
                 print(element[0], element[2].get_state(sim_time))
+
+            elif element[1] == "note":
+                print(element[0], element[2])
             
             print("\n")
             

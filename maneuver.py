@@ -57,6 +57,9 @@ class maneuver_const_accel(maneuver):
     def get_draw_vertices(self):
         return self.draw_vertices
 
+    def clear_draw_vertices(self):
+        self.draw_vertices = []
+
 class maneuver_const_thrust(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, thrust, mass_init, mass_flow,
                  t_start, duration):
@@ -121,3 +124,6 @@ class maneuver_const_thrust(maneuver):
 
     def get_draw_vertices(self):
         return self.draw_vertices
+
+    def clear_draw_vertices(self):
+        self.draw_vertices = []

@@ -22,3 +22,5 @@ show mnv_align2 state ALIGN2
 ;
 show mnv_intercept1 state INTERCEPT1
 ;
+note INSTRUCTIONS These three maneuvers will more-or-less align the orbits of Yang with Yin. Afterwards, you will have to sync their orbit intersects, and finally, match velocities at rendezvous point.
+;
