@@ -362,6 +362,8 @@ def main():
                             output_buffer.append([command[3], "active", maneuver])
                         elif command[2] == "state":
                             output_buffer.append([command[3], "state", maneuver])
+                        elif command[2] == "params":
+                            output_buffer.append([command[3], "params", maneuver])
                             
                     else:
                         print("Object/maneuver not found.")
@@ -552,7 +554,7 @@ def main():
                         print("\n'show' command adds an output element to the command prompt/terminal.\n")
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
-                        print("Syntax Option 3: show <maneuver_name> active <display_label>\n")
+                        print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
                         print("Syntax Option 4: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
@@ -660,12 +662,13 @@ def main():
             x.update_pos(delta_t)
 
         for m in maneuvers:
-            m.perform_maneuver(sim_time, delta_t)
             # lower delta_t if a maneuver is in progress
             if (delta_t > 1 and (m.get_state(sim_time) == "Performing" or
                                  (m.get_state(sim_time) == "Pending" and
                                   not m.get_state(sim_time+delta_t) == "Pending"))):
                 delta_t = 1
+                
+            m.perform_maneuver(sim_time, delta_t)
 
         # update output
         if os.name == "nt":
@@ -675,7 +678,7 @@ def main():
 
         # display what the user wants in cmd/terminal
         print("OrbitSim3D Command Interpreter & Output Display\n")
-        if sim_time < 100:
+        if sim_time < 30:
             print("Press C at any time to enter a command.\n")
         print("Time:", sim_time, "\n")
         for element in output_buffer:
@@ -708,6 +711,8 @@ def main():
                 print(element[0], element[2].is_performing(sim_time))
             elif element[1] == "state":
                 print(element[0], element[2].get_state(sim_time))
+            elif element[1] == "params":
+                print(element[0], "\n" + element[2].get_params_str())
 
             elif element[1] == "note":
                 print(element[0], element[2])

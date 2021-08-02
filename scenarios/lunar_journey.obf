@@ -21,9 +21,11 @@ show lunar-orbiter dist Luna DIST_LUNA
 show lunar-orbiter vel_mag Luna VEL_LUNA
 ;    (shows velocity rel. to Moon)
 ;
-show mnv_tli state TLI
-;    (shows state of TLI maneuver)
+show mnv_tli params TLI_PARAMS
+show mnv_tli state TLI_STATE
 ;
-show mnv_loi state LOI
-;    (shows state of LOI maneuver)
+show mnv_loi params LOI_PARAMS
+show mnv_loi state LOI_STATE
+;
+note NOTE If you increase delta_t too much (typically to above a few hundreds), the simulation may become too inaccurate and you might not end up in the correct position at the correct time. In that case, you might need to delete mnv_loi and create your own maneuvers for lunar orbit injection.
 ;

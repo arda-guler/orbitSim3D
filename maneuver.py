@@ -1,16 +1,18 @@
 class maneuver():
-    def __init__(self, name, vessel):
+    def __init__(self, name, vessel, mnv_type):
         self.name = name
         self.vessel = vessel
+        self.type = mnv_type
 
     def get_vessel(self):
         return self.vessel
 
 class maneuver_const_accel(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, accel, t_start, duration):
-        super().__init__(name, vessel)
+        super().__init__(name, vessel, "const_accel")
         self.frame_body = frame_body
         self.orientation = orientation
+        self.orientation_input = orientation
         self.accel = accel
         self.duration = duration
         self.t_start = t_start
@@ -23,9 +25,10 @@ class maneuver_const_accel(maneuver):
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
-        self.set_orientation()
         
         if (not self.done) and current_time >= self.t_start:
+            self.set_orientation()
+            
             self.vessel.update_vel([self.orientation[0] * self.accel,
                                     self.orientation[1] * self.accel,
                                     self.orientation[2] * self.accel], delta_t)
@@ -60,13 +63,28 @@ class maneuver_const_accel(maneuver):
     def clear_draw_vertices(self):
         self.draw_vertices = []
 
+    def get_params_str(self):
+        output = "Vessel: " + self.vessel.get_name() + "\n"
+        
+        if not type(self.orientation_input) == list:
+            output += "Orientation: " + self.orientation_input + " rel to " + self.frame_body.get_name()
+        else:
+            output += "Orientation: " + str(self.orientation) + " rel to global frame"
+            
+        output += "\nAcceleration: " + str(self.accel) + " m/s^2\n"
+        output += "Start time: " + str(self.t_start) + " s\n"
+        output += "Duration: " + str(self.duration) + " s\n"
+
+        return output
+
 class maneuver_const_thrust(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, thrust, mass_init, mass_flow,
                  t_start, duration):
         
-        super().__init__(name, vessel)
+        super().__init__(name, vessel, "const_thrust")
         self.frame_body = frame_body
         self.orientation = orientation
+        self.orientation_input = orientation
         self.thrust = thrust
         self.mass_init = mass_init
         self.mass_flow = mass_flow
@@ -83,9 +101,9 @@ class maneuver_const_thrust(maneuver):
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
-        self.set_orientation()
 
         if (not self.done) and current_time >= self.t_start:
+            self.set_orientation()
             
             if self.mass <= 0:
                 self.done = True
@@ -127,3 +145,19 @@ class maneuver_const_thrust(maneuver):
 
     def clear_draw_vertices(self):
         self.draw_vertices = []
+
+    def get_params_str(self):
+        output = "Vessel: " + self.vessel.get_name() + "\n"
+        
+        if not type(self.orientation_input) == list:
+            output += "Orientation: " + self.orientation_input + " rel to " + self.frame_body.get_name()
+        else:
+            output += "Orientation: " + str(self.orientation) + " rel to global frame"
+            
+        output += "\nThrust: " + str(self.thrust) + " N\n"
+        output += "Initial mass:" + str(self.mass_init) + " kg\n"
+        output += "Mass flow: " + str(self.mass_flow) + " kg/s\n"
+        output += "Start time: " + str(self.t_start) + " s\n"
+        output += "Duration: " + str(self.duration) + " s\n"
+
+        return output
