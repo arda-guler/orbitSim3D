@@ -10,11 +10,9 @@
 ;sync orbit intersects and park the
 ;vessels next to each other.)
 ;
-create_maneuver mnv_align1 const_accel Yang Earth normal 20 2700 200
+create_maneuver mnv_align1 const_accel Yang Earth normal_dynamic 20 2700 200
 ;
-create_maneuver mnv_align2 const_accel Yang Earth antinormal 10 6070 25
-;
-create_maneuver mnv_intercept1 const_accel Yang Earth retrograde 20 11800 50
+create_maneuver mnv_align2 const_accel Yang Earth antinormal_dynamic 10 4000 25
 ;
 show mnv_align1 params MANUEVER_ALIGN1
 show mnv_align1 state ALIGN1_STATE
@@ -22,8 +20,5 @@ show mnv_align1 state ALIGN1_STATE
 show mnv_align2 params MANEUVER_ALIGN2
 show mnv_align2 state ALIGN2_STATE
 ;
-show mnv_intercept1 params MANEUVER_INTERCEPT1
-show mnv_intercept1 state INTERCEPT1_STATE
-;
-note INSTRUCTIONS These three maneuvers will more-or-less align the orbits of Yang with Yin. Afterwards, you will have to sync their orbit intersects, and finally, match velocities at rendezvous point.
+note INSTRUCTIONS These two maneuvers will more-or-less align the orbits of Yang with Yin. Afterwards, you will have to sync their orbit intersects, and finally, match velocities at rendezvous point.
 ;

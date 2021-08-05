@@ -21,7 +21,7 @@ class maneuver_const_accel(maneuver):
         self.draw_vertices = []
 
     def set_orientation(self):
-        if not type(self.orientation) == list:
+        if not type(self.orientation) == list or self.orientation_input[-8:] == "_dynamic":
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
@@ -36,6 +36,11 @@ class maneuver_const_accel(maneuver):
             self.draw_vertices.append([self.vessel.get_draw_pos()[0],
                                        self.vessel.get_draw_pos()[1],
                                        self.vessel.get_draw_pos()[2]])
+
+            # if the orientation is set as "dynamic"
+            # it needs to be updated every frame
+            if self.orientation_input[-8:] == "_dynamic":
+                self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
             self.done = True
@@ -67,7 +72,10 @@ class maneuver_const_accel(maneuver):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
         if not type(self.orientation_input) == list:
-            output += "Orientation: " + self.orientation_input + " rel to " + self.frame_body.get_name()
+            if self.orientation_input[-8:] == "_dynamic":
+                output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
+            else:
+                output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()
         else:
             output += "Orientation: " + str(self.orientation) + " rel to global frame"
             
@@ -97,7 +105,7 @@ class maneuver_const_thrust(maneuver):
         self.draw_vertices = []
 
     def set_orientation(self):
-        if not type(self.orientation) == list:
+        if not type(self.orientation) == list or self.orientation_input[-8:] == "_dynamic":
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
@@ -119,6 +127,11 @@ class maneuver_const_thrust(maneuver):
             self.draw_vertices.append([self.vessel.get_draw_pos()[0],
                                        self.vessel.get_draw_pos()[1],
                                        self.vessel.get_draw_pos()[2]])
+
+            # if the orientation is set as "dynamic"
+            # it needs to be updated every frame
+            if self.orientation_input[-8:] == "_dynamic":
+                self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
             self.done = True
@@ -150,7 +163,10 @@ class maneuver_const_thrust(maneuver):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
         if not type(self.orientation_input) == list:
-            output += "Orientation: " + self.orientation_input + " rel to " + self.frame_body.get_name()
+            if self.orientation_input[-8:] == "_dynamic":
+                output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
+            else:
+                output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()
         else:
             output += "Orientation: " + str(self.orientation) + " rel to global frame"
             

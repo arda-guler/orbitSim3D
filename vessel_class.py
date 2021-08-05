@@ -117,28 +117,28 @@ class vessel():
         return self.color
 
     def get_orientation_rel_to(self, frame, orientation):
-        if orientation == "prograde":
+        if orientation == "prograde" or orientation == "prograde_dynamic":
             return [self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
                     self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
                     self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
-        elif orientation == "retrograde":
+        elif orientation == "retrograde" or orientation == "retrograde_dynamic":
             return [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
                     -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
                     -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
-        elif orientation == "radial_in":
+        elif orientation == "radial_in" or orientation == "radial_in_dynamic":
             return self.get_unit_vector_towards(frame)
-        elif orientation == "radial_out":
+        elif orientation == "radial_out" or orientation == "radial_out_dynamic":
             return [-self.get_unit_vector_towards(frame)[0],
                     -self.get_unit_vector_towards(frame)[1],
                     -self.get_unit_vector_towards(frame)[2]]
-        elif orientation == "normal":
+        elif orientation == "normal" or orientation == "normal_dynamic":
             cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
             cross_vec_mag = (cross_vec[0]**2 + cross_vec[1]**2 + cross_vec[2]**2)**0.5
             normal_vec = [cross_vec[0]/cross_vec_mag,
                           cross_vec[1]/cross_vec_mag,
                           cross_vec[2]/cross_vec_mag]
             return normal_vec
-        elif orientation == "antinormal":
+        elif orientation == "antinormal" or orientation == "antinormal_dynamic":
             cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
             cross_vec_mag = (cross_vec[0]**2 + cross_vec[1]**2 + cross_vec[2]**2)**0.5
             antinormal_vec = [-cross_vec[0]/cross_vec_mag,

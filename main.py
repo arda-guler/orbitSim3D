@@ -32,6 +32,10 @@ objs = []
 maneuvers = []
 batch_commands = []
 
+preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
+                           "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
+                           "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic"]
+
 sim_time = 0
 
 def read_batch(batch_path):
@@ -99,9 +103,7 @@ def import_scenario(scn_filename):
         # import maneuvers
         elif line[0] == "M":
             if line[2] == "const_accel":
-                if (line[5] == "prograde" or line[5] == "retrograde" or
-                    line[5] == "radial_in" or line[5] == "radial_out" or
-                    line[5] == "normal" or line[5] == "antinormal"):
+                if (line[5] in preset_orientations):
                     new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                         line[5], float(line[6]), float(line[7]), float(line[8]))
                 else:
@@ -111,9 +113,7 @@ def import_scenario(scn_filename):
                                                         float(line[6]), float(line[7]), float(line[8]))
                     
             elif line[2] == "const_thrust":
-                if (line[5] == "prograde" or line[5] == "retrograde" or
-                    line[5] == "radial_in" or line[5] == "radial_out" or
-                    line[5] == "normal" or line[5] == "antinormal"):
+                if (line[5] in preset_orientations):
                     new_maneuver = maneuver_const_thrust(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                          line[5], float(line[6]), float(line[7]), float(line[8]),
                                                          float(line[9]), float(line[10]))
@@ -457,9 +457,7 @@ def main():
             elif command[0] == "create_maneuver":
                 if len(command) == 9 and command[2] == "const_accel":
                     # name, type, vessel, frame, orientation, accel, start, duration
-                    if (not command[5] == "prograde" and not command[5] == "retrograde" and
-                        not command[5] == "radial_in" and not command[5] == "radial_out" and
-                        not command[5] == "normal" and not command[5] == "antinormal"):
+                    if (not command[5] in preset_orientations):
                         create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                         
                                                     [float(command[5][1:-1].split(",")[0]),
@@ -475,9 +473,7 @@ def main():
                                                     float(command[6]), float(command[7]), float(command[8]))
                 elif len(command) == 11 and command[2] == "const_thrust":
                     # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
-                    if (not command[5] == "prograde" and not command[5] == "retrograde" and
-                        not command[5] == "radial_in" and not command[5] == "radial_out" and
-                        not command[5] == "normal" and not command[5] == "antinormal"):
+                    if (not command[5] in preset_orientations):
                         create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
 
                                                      [float(command[5][1:-1].split(",")[0]),
