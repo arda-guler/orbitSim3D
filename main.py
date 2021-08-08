@@ -12,6 +12,7 @@ from vessel_class import *
 from body_class import *
 from math_utils import *
 from maneuver import *
+from kepler_orbit import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
@@ -28,6 +29,7 @@ else:
 vessels = []
 bodies = []
 objs = []
+projections = []
 
 maneuvers = []
 batch_commands = []
@@ -56,12 +58,13 @@ def read_batch(batch_path):
     return commands
 
 def clear_scene():
-    global objs, vessels, bodies, maneuvers, sim_time
+    global objs, vessels, bodies, projections, maneuvers, sim_time
 
     objs = []
     vessels = []
     bodies = []
     maneuvers = []
+    projections = []
     sim_time = 0
 
 def import_scenario(scn_filename):
@@ -231,6 +234,41 @@ def find_obj_by_name(name):
 
     return result
 
+def find_proj_by_name(name):
+    global projections
+
+    result = None
+
+    for proj in projections:
+        if proj.get_name() == name:
+            result = proj
+            break
+
+    return result
+
+def create_keplerian_proj(name, vessel, body):
+    global projections
+
+    if find_proj_by_name(name):
+        print("A projection with this name already exists. Please pick another name for the new projection.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_proj = kepler_projection(name, vessel, body)
+    projections.append(new_proj)
+
+def delete_keplerian_proj(name):
+    global projections
+    proj_tbd = find_proj_by_name(name)
+
+    if not proj_tbd:
+        print("Projection not found!")
+        time.sleep(2)
+        return
+    
+    projections.remove(proj_tbd)
+    del proj_tbd
+    
 # clear all keyboard buffer
 # e.g. don't keep camera movement keys
 # in buffer as we try to enter a command
@@ -244,7 +282,7 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global vessels, bodies, cam_trans, objs, sim_time, batch_commands
+    global vessels, bodies, projections, cam_trans, objs, sim_time, batch_commands
 
     # initializing glfw
     glfw.init()
@@ -501,6 +539,22 @@ def main():
                     print("Wrong number of arguments for command 'delete_maneuver'.\n")
                     time.sleep(2)
 
+            # CREATE_PROJECTION command
+            elif command[0] == "create_projection":
+                if len(command) == 4:
+                    create_keplerian_proj(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]))
+                else:
+                    print("Wrong number of arguments for command 'create_projection'.\n")
+                    time.sleep(2)
+
+            # DELETE_PROJECTION command
+            elif command[0] == "delete_projection":
+                if len(command) == 2:
+                    delete_keplerian_proj(command[1])
+                else:
+                    print("Wrong number of arguments for command 'delete_projection'.\n")
+                    time.sleep(2)
+
             # GET_OBJECTS command
             elif command[0] == "get_objects":
                 print("Objects currently in simulation:\n")
@@ -515,6 +569,13 @@ def main():
                 print("\nManeuvers currently in the simulation:\n")
                 for m in maneuvers:
                     print("MANEUVER:", m.get_name(), "\nState:", str(m.get_state(sim_time)), "\n\n")
+                input("Press Enter to continue...")
+
+            # GET_PROJECTIONS command
+            elif command[0] == "get_projections":
+                print("\nProjections currently in the simulation:\n")
+                for p in projections:
+                    print("PROJECTION:", p.get_name(), "\n")
                 input("Press Enter to continue...")
 
             # CAM_STRAFE_SPEED command
@@ -541,7 +602,7 @@ def main():
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
-                    print("batch, note\n")
+                    print("batch, note, create_projection, delete_projection, get_projections\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -588,6 +649,14 @@ def main():
                         print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
                         print("Syntax: delete_maneuver <name>")
                         input("Press Enter to continue...")
+                    elif command[1] == "create_projection":
+                        print("\n'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.\n")
+                        print("Syntax: create_projection <name> <vessel> <body>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delete_projection":
+                        print("\n'delete_projection' command removes a 2-body Keplerian orbit projection from the simulation.\n")
+                        print("Syntax: delete_projection <name>")
+                        input("Press Enter to continue...")
                     elif command[1] == "get_objects":
                         print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
                         print("Syntax: get_objects\n")
@@ -595,6 +664,10 @@ def main():
                     elif command[1] == "get_maneuvers":
                         print("\n'get_maneuvers' command prints out the names of maneuvers currently in the simulation.\n")
                         print("Syntax: get_maneuvers\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_projections":
+                        print("\n'get_projections' command prints out the names of Keplerian orbit projections currently in the simulation.\n")
+                        print("Syntax: get_projections\n")
                         input("Press Enter to continue...")
                     elif command[1] == "cam_strafe_speed":
                         print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
@@ -728,6 +801,7 @@ def main():
         if show_trajectories:
             drawTrajectories(vessels)
             drawManeuvers(maneuvers)
+            drawProjections(projections)
 
         glfw.swap_buffers(window)
 

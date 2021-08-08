@@ -33,3 +33,27 @@ def cross(a, b):
     return [a[1] * b[2] - a[2] * b[1],
             a[2] * b[0] - a[0] * b[2],
             a[0] * b[1] - a[1] * b[0]]
+
+# dot product
+def dot(a, b):
+    result = 0
+    for a,b in zip(a,b):
+        result += a*b
+
+    return result
+
+# get vector magnitude
+def mag(vect):
+    square_sum = 0
+    for element in vect:
+        square_sum += element**2
+
+    return square_sum**0.5
+
+# multiply vector with scalar
+def vector_scale(vect, sca):
+    result_vec = []
+    for element in vect:
+        result_vec.append(element * sca)
+        
+    return result_vec
