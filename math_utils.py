@@ -1,5 +1,9 @@
 import math
 
+# constants
+grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
+visual_scaling_factor = (3*(10**(-4))) # arbitrary, unitless
+
 # takes cartezian coords list
 # gives spherical coords list
 def cartesian2spherical(cart):

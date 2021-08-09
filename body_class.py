@@ -1,4 +1,4 @@
-grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
+from math_utils import *
 
 class body():
     def __init__(self, name, model, mass, radius, color, pos, vel):
@@ -55,7 +55,7 @@ class body():
                 self.vel[2] - obj.vel[2]]
 
     def get_vel_mag(self):
-        return (self.vel[0] ** 2 + self.vel[1] ** 2 + self.vel[2] ** 2) ** 0.5
+        return mag(self.vel)
 
     def get_vel_mag_rel_to(self, obj):
         return (((self.vel[0] - obj.vel[0])**2 +
@@ -78,10 +78,7 @@ class body():
 
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
-        
-        grav_vec = [grav_mag * self.get_unit_vector_towards(body)[0],
-                    grav_mag * self.get_unit_vector_towards(body)[1],
-                    grav_mag * self.get_unit_vector_towards(body)[2]]
+        grav_vec = vector_scale(self.get_unit_vector_towards(body), grav_mag)
         
         return grav_vec
 
@@ -105,9 +102,7 @@ class body():
         return self.traj_history
 
     def update_draw_pos(self):
-        self.draw_pos = [self.pos[0]*(3*(10**(-4))),
-                         self.pos[1]*(3*(10**(-4))),
-                         self.pos[2]*(3*(10**(-4)))]
+        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
 
     def get_draw_pos(self):
         return self.draw_pos
