@@ -41,13 +41,24 @@ preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde
 sim_time = 0
 
 def read_batch(batch_path):
+
     try:
         batch_file = open(batch_path, "r")
-        batch_lines = batch_file.readlines()
-    except:
-        print("\nError reading batch file.\n")
-        time.sleep(2)
-        return [[""]]
+    except FileNotFoundError:
+        try:
+            batch_file = open("scenarios\\" + batch_path, "r")
+        except FileNotFoundError:
+            try:
+                batch_file = open(batch_path + ".obf", "r")
+            except FileNotFoundError:
+                try:
+                    batch_file = open("scenarios\\" + batch_path + ".obf", "r")
+                except FileNotFoundError:
+                    print("\nError reading batch file.\n")
+                    time.sleep(2)
+                    return [[""]]
+
+    batch_lines = batch_file.readlines()
 
     commands = []
 
@@ -71,8 +82,23 @@ def import_scenario(scn_filename):
     global objs, vessels, bodies, maneuvers, sim_time
 
     clear_scene()
-    
-    scn_file = open(scn_filename, "r")
+
+    try:
+        scn_file = open(scn_filename, "r")
+    except FileNotFoundError:
+        try:
+            scn_file = open("scenarios\\" + scn_filename, "r")
+        except FileNotFoundError:
+            try:
+                scn_file = open(scn_filename + ".osf", "r")
+            except FileNotFoundError:
+                try:
+                    scn_file = open("scenarios\\" + scn_filename + ".osf", "r")
+                except FileNotFoundError:
+                    print("Scenario file not found.")
+                    time.sleep(2)
+                    quit()
+                    
     import_lines = scn_file.readlines()
 
     for line in import_lines:

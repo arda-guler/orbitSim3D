@@ -1,0 +1,48 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  ASCENT.OSF
+;  Author: arda-guler
+;
+;This scenario demonstrates a spacecraft
+;launching from the surface of Luna
+;into a Selenocentric orbit.
+;
+;You can enter the following command to
+;better follow the mission:
+;
+; 'batch scenarios\ascent.obf'
+;
+;When entered, the above command (without
+;the quotation marks, of course) will 
+;configure the output buffer to provide 
+;more info about the mission.
+;
+
+;Celestial bodies
+B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[0,0,0]|[0,0,0]
+
+;Vessels
+V|ascent-module|data\models\ministation.obj|[0.0,0.8,0.7]|[0,0,1737000]|[0,0,0]
+
+;Maneuvers
+M|liftoff|const_accel|ascent-module|Luna|radial_out_dynamic|5|0|90
+M|gturn1|const_accel|ascent-module|Luna|[1,0,0]|5|90|100
+M|gturn2|const_accel|ascent-module|Luna|prograde_dynamic|5|190|150
+M|circular|const_accel|ascent-module|Luna|prograde_dynamic|5|510|80

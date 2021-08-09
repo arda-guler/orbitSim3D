@@ -1,0 +1,23 @@
+;.obf -- orbitSim3D batch format
+;
+;This OBF configures the output
+;buffer to provide info on the
+;maneuvers that are performed in
+;the ascent.osf scenario.
+;
+;
+show ascent-module dist Luna LUNA_R
+show ascent-module vel_mag Luna LUNA_VEL
+;
+show liftoff params LIFTOFF
+show liftoff state LIFTOFF_STATE
+;
+show gturn1 params GRAV_TURN_1
+show gturn1 state GRAV_TURN_1_STATE
+;
+show gturn2 params GRAV_TURN_2
+show gturn2 state GRAV_TURN_2_STATE
+;
+show circular params CIRCULARIZATION
+show circular state CIRCULARIZATION_STATE
+;
