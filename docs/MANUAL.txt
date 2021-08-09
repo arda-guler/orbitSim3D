@@ -129,7 +129,7 @@ math_utils.py   -- general mathematical functions
                 -- that are not provided by the
                 -- math library
 				
-kepler_orbit.py -- 2-body Keplerian orbit class
+orbit.py        -- 2-body Keplerian orbit class
                 -- that is used for making quick
                 -- trajectory projections into
                 -- the future
