@@ -58,6 +58,12 @@ This way, no movement happens "on rails", and
 perturbations from distant bodies are always 
 accounted for.
 
+(However, if you wish, you can still make Kepler
+style orbit projections, determine apoapsis and
+periapsis; but if the perturbations are too high,
+the spacecraft wouldn't necessarily follow the
+calculated 2-body orbit path.)
+
 One phenomenon the simulation currently lacks is
 non-spherical gravity due to the  "lumpiness" of
 some celestial bodies such as the Moon. Although
@@ -122,3 +128,8 @@ maneuver.py     -- the 'maneuver' classes used for
 math_utils.py   -- general mathematical functions 
                 -- that are not provided by the
                 -- math library
+				
+kepler_orbit.py -- 2-body Keplerian orbit class
+                -- that is used for making quick
+                -- trajectory projections into
+                -- the future
