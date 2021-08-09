@@ -825,9 +825,9 @@ def main():
         drawVessels(vessels)
 
         if show_trajectories:
+            drawProjections(projections)
             drawTrajectories(vessels)
             drawManeuvers(maneuvers)
-            drawProjections(projections)
 
         glfw.swap_buffers(window)
 
@@ -841,7 +841,7 @@ def main():
 def init_sim():
     print("\nOrbitSim3D Initialization\n")
     print("Enter scenario file path to load scenario, or leave blank to start an empty scene.")
-    print("(for example 'scenarios\\three_vessels.osf')\n")
+    print("(for example 'scenarios\\three_vessels.osf' or just 'three_vessels')\n")
     scn_path = input("Scenario path: ")
     if scn_path:
         import_scenario(scn_path)
