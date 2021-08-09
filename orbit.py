@@ -1,8 +1,5 @@
 from math_utils import *
 
-grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
-visual_scaling_factor = (3*(10**(-4))) # arbitrary, unitless
-
 class kepler_projection():
     def __init__(self, name, vessel, body):
         self.name = name

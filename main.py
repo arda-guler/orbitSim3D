@@ -12,7 +12,7 @@ from vessel_class import *
 from body_class import *
 from math_utils import *
 from maneuver import *
-from kepler_orbit import *
+from orbit import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
