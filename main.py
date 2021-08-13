@@ -655,7 +655,8 @@ def main():
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
                         print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
-                        print("Syntax Option 4: show traj (enables trajectory trails)\n")
+                        print("Syntax Option 4: show <projection_name> <(attrib_name/params)> <display_label>\n")
+                        print("Syntax Option 5: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
