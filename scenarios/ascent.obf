@@ -6,7 +6,7 @@
 ;the ascent.osf scenario.
 ;
 ;
-show ascent-module dist Luna LUNA_R
+show ascent-module alt Luna LUNA_ALT
 show ascent-module vel_mag Luna LUNA_VEL
 ;
 show liftoff params LIFTOFF

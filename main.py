@@ -403,6 +403,13 @@ def main():
                             output_buffer.append([command[4], "pos_mag_rel", obj, command[3]])
                         elif command[2] == "vel_mag":
                             output_buffer.append([command[4], "vel_mag_rel", obj, command[3]])
+                        elif command[2] == "alt":
+                            if (type(find_obj_by_name(command[3])).__name__ == "body" and
+                                type(find_obj_by_name(command[1])).__name__ == "vessel"):
+                                output_buffer.append([command[4], "alt", obj, command[3]])
+                            else:
+                                print("You can only get altitude of a vessel above a celestial body!\n")
+                                time.sleep(2)
                     else:
                         print("Object not found.")
                         time.sleep(2)
@@ -776,8 +783,9 @@ def main():
         if sim_time < 30:
             print("Press C at any time to enter a command.\n")
         print("Time:", sim_time, "\n")
+        
         for element in output_buffer:
-
+            
             if element[1] == "pos_rel":
                 print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
             elif element[1] == "vel_rel":
@@ -794,13 +802,13 @@ def main():
                 print(element[0], element[2].get_vel())
 
             elif element[1] == "pos_mag":
-                print(element[0], float((element[2].get_pos()[0]**2 +
-                                         element[2].get_pos()[1]**2 +
-                                         element[2].get_pos()[2]**2)**0.5))
+                print(element[0], mag(element[2].get_pos()))
+
             elif element[1] == "vel_mag":
-                print(element[0], float((element[2].get_vel()[0]**2 +
-                                         element[2].get_vel()[1]**2 +
-                                         element[2].get_vel()[2]**2)**0.5))
+                print(element[0], mag(element[2].get_vel()))
+
+            elif element[1] == "alt":
+                print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
                 
             elif element[1] == "active":
                 print(element[0], element[2].is_performing(sim_time))
