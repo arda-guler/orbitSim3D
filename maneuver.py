@@ -84,6 +84,9 @@ class maneuver_const_accel(maneuver):
         output += "Duration: " + str(self.duration) + " s\n"
 
         return output
+    
+    def get_duration(self):
+        return self.duration
 
 class maneuver_const_thrust(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, thrust, mass_init, mass_flow,
@@ -177,3 +180,6 @@ class maneuver_const_thrust(maneuver):
         output += "Duration: " + str(self.duration) + " s\n"
 
         return output
+
+    def get_duration(self):
+        return self.duration

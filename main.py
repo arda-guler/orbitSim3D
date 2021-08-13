@@ -35,8 +35,8 @@ maneuvers = []
 batch_commands = []
 
 preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
-                           "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
-                           "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic"]
+                       "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
+                       "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic"]
 
 sim_time = 0
 
@@ -272,7 +272,7 @@ def find_proj_by_name(name):
 
     return result
 
-def create_keplerian_proj(name, vessel, body):
+def create_keplerian_proj(name, vessel, body, proj_time):
     global projections
 
     if find_proj_by_name(name):
@@ -280,7 +280,7 @@ def create_keplerian_proj(name, vessel, body):
         input("Press Enter to continue...")
         return
 
-    new_proj = kepler_projection(name, vessel, body)
+    new_proj = kepler_projection(name, vessel, body, proj_time)
     projections.append(new_proj)
 
 def delete_keplerian_proj(name):
@@ -429,15 +429,25 @@ def main():
                             
                     elif find_maneuver_by_name(command[1]):
                         maneuver = find_maneuver_by_name(command[1])
-                        if command[2] == "active":
-                            output_buffer.append([command[3], "active", maneuver])
-                        elif command[2] == "state":
-                            output_buffer.append([command[3], "state", maneuver])
-                        elif command[2] == "params":
-                            output_buffer.append([command[3], "params", maneuver])
+                        if command[2] == "active" or command[2] == "state" or command[2] == "params":
+                            output_buffer.append([command[3], command[2], maneuver, "m"])
+                        else:
+                            print("Illegal parameter!\n")
+                            time.sleep(2)
+
+                    elif find_proj_by_name(command[1]):
+                        proj = find_proj_by_name(command[1])
+                        if (command[2] == "apoapsis" or command[2] == "periapsis" or command[2] == "params" or
+                            command[2] == "apoapsis_r" or command[2] == "periapsis_r" or
+                            command[2] == "period" or command[2] == "body" or command[2] == "vessel" or
+                            command[2] == "energy" or command[2] == "semimajor_axis" or command[2] == "eccentricity"):
+                            output_buffer.append([command[3], command[2], proj, "p"])
+                        else:
+                            print("Illegal parameter!\n")
+                            time.sleep(2)
                             
                     else:
-                        print("Object/maneuver not found.")
+                        print("Object/maneuver/projection not found.")
                         time.sleep(2)
 
                 elif len(command) == 2:
@@ -575,7 +585,7 @@ def main():
             # CREATE_PROJECTION command
             elif command[0] == "create_projection":
                 if len(command) == 4:
-                    create_keplerian_proj(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]))
+                    create_keplerian_proj(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]), sim_time)
                 else:
                     print("Wrong number of arguments for command 'create_projection'.\n")
                     time.sleep(2)
@@ -785,38 +795,68 @@ def main():
         print("Time:", sim_time, "\n")
         
         for element in output_buffer:
-            
+
+            # relative pos and vel
             if element[1] == "pos_rel":
                 print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
             elif element[1] == "vel_rel":
                 print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
 
+            # relative pos and vel magnitude
             elif element[1] == "pos_mag_rel":
                 print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
             elif element[1] == "vel_mag_rel":
                 print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
-            
+
+            # absolute pos and vel
             elif element[1] == "pos":
                 print(element[0], element[2].get_pos())
             elif element[1] == "vel":
                 print(element[0], element[2].get_vel())
 
+            # absolute pos and vel magnitude
             elif element[1] == "pos_mag":
                 print(element[0], mag(element[2].get_pos()))
-
             elif element[1] == "vel_mag":
                 print(element[0], mag(element[2].get_vel()))
 
+            # altitude
             elif element[1] == "alt":
                 print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
-                
+
+            # maneuver state and parameters
             elif element[1] == "active":
                 print(element[0], element[2].is_performing(sim_time))
             elif element[1] == "state":
                 print(element[0], element[2].get_state(sim_time))
-            elif element[1] == "params":
+            elif element[1] == "params" and element[3] == "m":
                 print(element[0], "\n" + element[2].get_params_str())
 
+            # orbit projection parameters
+            elif element[1] == "apoapsis":
+                print(element[0], proj.get_apoapsis_alt())
+            elif element[1] == "apoapsis_r":
+                print(element[0], proj.get_apoapsis())
+            elif element[1] == "periapsis":
+                print(element[0], proj.get_periapsis_alt())
+            elif element[1] == "periapsis_r":
+                print(element[0], proj.get_periapsis())
+            elif element[1] == "period":
+                print(element[0], proj.get_period())
+            elif element[1] == "body":
+                print(element[0], proj.get_body())
+            elif element[1] == "vessel":
+                print(element[0], proj.get_vessel())
+            elif element[1] == "semimajor_axis":
+                print(element[0], proj.get_semimajor_axis())
+            elif element[1] == "eccentricity":
+                print(element[0], proj.eccentricity)
+            elif element[1] == "energy":
+                print(element[0], proj.get_energy())
+            elif element[1] == "params" and element[3] == "p":
+                print(element[0], "\n" + element[2].get_params_str())
+                
+            # note taking
             elif element[1] == "note":
                 print(element[0], element[2])
             

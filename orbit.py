@@ -1,10 +1,12 @@
 from math_utils import *
 
 class kepler_projection():
-    def __init__(self, name, vessel, body):
+    def __init__(self, name, vessel, body, proj_time):
         self.name = name
         self.vessel = vessel
         self.body = body
+
+        self.proj_time = proj_time
 
         # state vectors
         self.pos0 = vessel.get_pos_rel_to(body)
@@ -28,6 +30,12 @@ class kepler_projection():
 
     def get_name(self):
         return self.name
+
+    def get_body(self):
+        return self.body
+
+    def get_vessel(self):
+        return self.vessel
 
     def get_eccentricity_vector(self):
         r_scaler = self.vessel.get_vel_mag_rel_to(self.body)**2 - (self.mu/self.vessel.get_dist_to(self.body))
@@ -64,6 +72,9 @@ class kepler_projection():
 
         return p
 
+    def get_periapsis_alt(self):
+        return self.get_periapsis() - self.body.get_radius()
+
     def get_apoapsis(self):
         if not self.semimajor_axis == "inf":
             a = self.semimajor_axis * (1 + (self.eccentricity**2))
@@ -71,6 +82,9 @@ class kepler_projection():
             a = "inf"
 
         return a
+
+    def get_apoapsis_alt(self):
+        return self.get_apoapsis() - self.body.get_radius()
 
     def get_period(self):
         if not self.semimajor_axis == "inf":
@@ -151,3 +165,12 @@ class kepler_projection():
 
     def get_draw_vertices(self):
         return self.draw_vertices
+
+    def get_params_str(self):
+        output = "Kepler orbit projection of " + self.get_vessel().get_name() + " around " + self.get_body().get_name() + " at t = " + str(self.proj_time) + "\n"
+        output += "Apoapsis_R: " + str(self.get_apoapsis()) + "   Apoapsis_Alt: " + str(self.get_apoapsis_alt()) + "\n"
+        output += "Periapsis_R: " + str(self.get_periapsis()) + "   Periapsis_Alt: " + str(self.get_periapsis_alt()) + "\n"
+        output += "Orbital Period: " + str(self.get_period()) + "\n"
+        output += "Semi-major Axis: " + str(self.get_semimajor_axis()) + "   Eccentricity: " + str(self.eccentricity) + "\n"
+
+        return output
