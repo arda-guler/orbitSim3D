@@ -115,7 +115,8 @@ def import_scenario(scn_filename):
                             float(line[3]), float(line[4]),
                             [float(line[5][0]), float(line[5][1]), float(line[5][2])],
                             [float(line[6][0]), float(line[6][1]), float(line[6][2])],
-                            [float(line[7][0]), float(line[7][1]), float(line[7][2])])
+                            [float(line[7][0]), float(line[7][1]), float(line[7][2])],
+                            float(line[8]))
             bodies.append(new_body)
             objs.append(new_body)
 

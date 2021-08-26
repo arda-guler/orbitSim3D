@@ -1,0 +1,35 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  FAT_EARTH.OSF
+;  Author: arda-guler
+;
+;This scenario demonstrates perturbations
+;on the orbit of a satellite due to Earth's
+;oblateness.
+
+;Celestial bodies
+
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|0.00108262668
+
+;Vessels
+
+V|Enterprise|data\models\minicapsule.obj|[0.0,1.0,1.0]|[6771000,0,0]|[0,3836,-6644]
+V|Regula-1|data\models\ministation.obj|[0.2,1.0,0.0]|[-3385500,5863858,0]|[0,0,7672]
+V|Reliant|data\models\minicapsule.obj|[1.0,0.0,0.0]|[-6771000,0,0]|[0,-7597.3,-1067.7]

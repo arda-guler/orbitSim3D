@@ -65,12 +65,9 @@ periapsis; but if the perturbations are too high,
 the spacecraft wouldn't necessarily follow the
 calculated 2-body orbit path.)
 
-One phenomenon the simulation currently lacks is
-non-spherical gravity due to the  "lumpiness" of
-some celestial bodies such as the Moon. Although
-negligible beyond the low orbit of such bodies,
-this should also be modeled for utmost accuracy,
-especially during lengthy simulations.
+Given a J2 value on scenario setup, the simulation
+can also account for the oblateness of celestial 
+bodies and apply J2 perturbations.
 
 Relativistic effects are not taken into account
 whatsoever.

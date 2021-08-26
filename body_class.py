@@ -1,7 +1,7 @@
 from math_utils import *
 
 class body():
-    def __init__(self, name, model, mass, radius, color, pos, vel):
+    def __init__(self, name, model, mass, radius, color, pos, vel, J2):
         self.name = name
         self.model = model
         self.mass = mass
@@ -10,6 +10,7 @@ class body():
         self.pos = pos
         self.vel = vel
         self.traj_history = []
+        self.J2 = J2
 
     def get_name(self):
         return self.name
@@ -106,3 +107,6 @@ class body():
 
     def get_draw_pos(self):
         return self.draw_pos
+
+    def get_J2(self):
+        return self.J2

@@ -61,3 +61,10 @@ def vector_scale(vect, sca):
         result_vec.append(element * sca)
         
     return result_vec
+
+# add vectors
+def vector_add(vect1, vect2):
+    for i in range(len(vect1)):
+        vect1[i] = vect1[i] + vect2[i]
+
+    return vect1
