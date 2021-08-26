@@ -13,6 +13,7 @@ from body_class import *
 from math_utils import *
 from maneuver import *
 from orbit import *
+from plot import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
@@ -30,6 +31,7 @@ vessels = []
 bodies = []
 objs = []
 projections = []
+plots = []
 
 maneuvers = []
 batch_commands = []
@@ -294,6 +296,63 @@ def delete_keplerian_proj(name):
     
     projections.remove(proj_tbd)
     del proj_tbd
+
+def find_plot_by_name(name):
+    global plots
+
+    result = None
+
+    for plot in plots:
+        if plot.get_name() == name:
+            result = plot
+            break
+
+    return result
+
+def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1):
+    global plots, sim_time
+
+    if find_plot_by_name(name):
+        print("A plot with this name already exists. Please pick another name for the new plot.\n")
+        input("Press Enter to continue...")
+        return
+
+    if start_time == -1:
+        start_time = sim_time
+
+    if end_time == -1:
+        end_time = start_time + 100
+
+    # plot title, x name, x list, y name, y list, obj1, obj2, variable, start_time, end_time
+    if variable == "alt":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Altitude of " + obj1_name + " above " + obj2_name, [],
+                        obj1, obj2, "alt", start_time, end_time)
+    elif variable == "dist":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Distance between " + obj1_name + " and " + obj2_name, [],
+                        obj1, obj2, "dist", start_time, end_time)
+    elif variable == "vel_mag":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Velocity of " + obj1_name + " rel to " + obj2_name, [],
+                        obj1, obj2, "vel_mag", start_time, end_time)
+
+    plots.append(new_plot)
+
+def delete_plot(name):
+    global plots
+    plot_tbd = find_plot_by_name(name)
+
+    if not plot_tbd:
+        print("Plot not found!")
+        time.sleep(2)
+        return
+
+    plots.remove(plot_tbd)
+    del plot_tbd
     
 # clear all keyboard buffer
 # e.g. don't keep camera movement keys
@@ -308,7 +367,8 @@ def flush_input():
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def main():
-    global vessels, bodies, projections, cam_trans, objs, sim_time, batch_commands
+    global vessels, bodies, projections, cam_trans, objs, sim_time, batch_commands,\
+           plots
 
     # initializing glfw
     glfw.init()
@@ -598,6 +658,45 @@ def main():
                     print("Wrong number of arguments for command 'delete_projection'.\n")
                     time.sleep(2)
 
+            # CREATE_PLOT command
+            elif command[0] == "create_plot":
+                if len(command) == 5:
+                    create_plot(command[1], command[2], command[3], command[4])
+                elif len(command) == 6:
+                    if command[5].startswith("end_time"):
+                        create_plot(command[1], command[2], command[3], command[4], -1, float(command[5].split("=")[1]))
+                    elif command[5].startswith("start_time"):
+                        create_plot(command[1], command[2], command[3], command[4], float(command[5].split("=")[1]))
+                    else:
+                        create_plot(command[1], command[2], command[3], command[4], float(command[5]))
+                elif len(command) == 7:
+                    create_plot(command[1], command[2], command[3], command[4], float(command[5]), float(command[6]))
+                else:
+                    print("Wrong number of arguments for command 'create_plot'.\n")
+                    time.sleep(2)
+                    
+            # DELETE_PLOT command
+            elif command[0] == "delete_plot":
+                if len(command) == 2:
+                    delete_plot(command[1])
+                else:
+                    print("Wrong number of arguments for command 'delete_plot'.\n")
+                    time.sleep(2)
+
+            # DISPLAY_PLOT
+            # this is not within 'show' command because this doesn't use the output buffer
+            elif command[0] == "display_plot":
+                if len(command) == 2:
+                    plot_to_display = find_plot_by_name(command[1])
+                    if plot_to_display and sim_time > plot_to_display.get_start_time():
+                        plot_to_display.display()
+                    else:
+                        print("This plotter doesn't exist, or it didn't start plotting yet!")
+                        time.sleep(2)
+                else:
+                    print("Wrong number of arguments for command 'display_plot'.\n")
+                    time.sleep(2)
+
             # GET_OBJECTS command
             elif command[0] == "get_objects":
                 print("Objects currently in simulation:\n")
@@ -619,6 +718,13 @@ def main():
                 print("\nProjections currently in the simulation:\n")
                 for p in projections:
                     print("PROJECTION:", p.get_name(), "\n")
+                input("Press Enter to continue...")
+
+            # GET_PLOTS command
+            elif command[0] == "get_plots":
+                print("\nProjections currently in the simulation:\n")
+                for p in plots:
+                    print("PLOT:", p.get_name(), "\n")
                 input("Press Enter to continue...")
 
             # CAM_STRAFE_SPEED command
@@ -645,7 +751,8 @@ def main():
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
-                    print("batch, note, create_projection, delete_projection, get_projections\n")
+                    print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
+                    print("display_plot, get_plots\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -701,6 +808,19 @@ def main():
                         print("\n'delete_projection' command removes a 2-body Keplerian orbit projection from the simulation.\n")
                         print("Syntax: delete_projection <name>")
                         input("Press Enter to continue...")
+                    elif command[1] == "create_plot":
+                        print("\n'create_plot' command adds a plotter to the simulation to plot some value against simulation time")
+                        print("during some interval. It will display automatically when finished, or on demand with 'display_plot' command.")
+                        print("Syntax: create_plot <name> <variable> <obj_1_name> <obj_2_name> (+ <start_time> <end_time>)")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delete_plot":
+                        print("\n'delete_plot' command removes a plotter from the simulation.\n")
+                        print("Syntax: delete_plot <name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "display_plot":
+                        print("\n'display_plot' command displays a plotter with matplotlib.\n")
+                        print("Syntax: display_plot <name>")
+                        input("Press Enter to continue...")
                     elif command[1] == "get_objects":
                         print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
                         print("Syntax: get_objects\n")
@@ -712,6 +832,10 @@ def main():
                     elif command[1] == "get_projections":
                         print("\n'get_projections' command prints out the names of Keplerian orbit projections currently in the simulation.\n")
                         print("Syntax: get_projections\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_plots":
+                        print("\n'get_plots' command prints out the names of plotters currently in the simulation.\n")
+                        print("Syntax: get_plots\n")
                         input("Press Enter to continue...")
                     elif command[1] == "cam_strafe_speed":
                         print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
@@ -788,6 +912,14 @@ def main():
             os.system("cls")
         else:
             os.system("clear")
+
+        # update plots
+        for p in plots:
+            p.update(sim_time)
+            
+            # going to display any of the plots?
+            if sim_time >= p.get_end_time() and (sim_time - delta_t) < p.get_end_time():
+                p.display()
 
         # display what the user wants in cmd/terminal
         print("OrbitSim3D Command Interpreter & Output Display\n")
