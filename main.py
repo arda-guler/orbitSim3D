@@ -722,7 +722,7 @@ def main():
 
             # GET_PLOTS command
             elif command[0] == "get_plots":
-                print("\nProjections currently in the simulation:\n")
+                print("\nPlots currently in the simulation:\n")
                 for p in plots:
                     print("PLOT:", p.get_name(), "\n")
                 input("Press Enter to continue...")

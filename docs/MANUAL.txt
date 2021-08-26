@@ -12,6 +12,7 @@ c) Required Python packages:
  - glfw
  - pywavefront
  - keyboard
+ - matplotlib
 
 = = = = = = = = =
 
