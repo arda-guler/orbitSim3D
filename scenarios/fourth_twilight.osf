@@ -17,12 +17,13 @@
 ;
 ;= = = = = = = = = =
 ;
-;  FAT_EARTH.OSF
+;  FOURTH_TWILIGHT.OSF
 ;  Author: arda-guler
 ;
 ;This scenario demonstrates perturbations
-;on the orbit of a satellite due to Earth's
-;oblateness.
+;on the orbits of spacecraft due to the
+;oblateness of Earth. One vessel, Reliant,
+;is on a nearly Sun-synchronous orbit.
 
 ;Celestial bodies
 
