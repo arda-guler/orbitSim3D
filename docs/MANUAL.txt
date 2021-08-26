@@ -133,3 +133,7 @@ orbit.py        -- 2-body Keplerian orbit class
                 -- that is used for making quick
                 -- trajectory projections into
                 -- the future
+				
+plot.py         -- plot class that handles plotting
+                -- of variables in certain time
+                -- intervals on user's demand
