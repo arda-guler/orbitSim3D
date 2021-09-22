@@ -101,9 +101,9 @@ class vessel():
 
             J2_perturbation_accel = vector_scale(J2_perturbation_accel, J2_mult)
 
-            grav_vec = [grav_vec[0] + J2_perturbation_accel[0],
-                        grav_vec[1] + J2_perturbation_accel[1],
-                        grav_vec[2] + J2_perturbation_accel[2]]
+            grav_vec = [grav_vec[0] + (J2_perturbation_accel[0] * body.orient[0][0]) + (J2_perturbation_accel[1] * body.orient[1][0]) + (J2_perturbation_accel[2] * body.orient[2][0]),
+                        grav_vec[1] + (J2_perturbation_accel[0] * body.orient[0][1]) + (J2_perturbation_accel[1] * body.orient[1][1]) + (J2_perturbation_accel[2] * body.orient[2][1]),
+                        grav_vec[2] + (J2_perturbation_accel[0] * body.orient[0][2]) + (J2_perturbation_accel[1] * body.orient[1][2]) + (J2_perturbation_accel[2] * body.orient[2][2])]
         
         return grav_vec
 
