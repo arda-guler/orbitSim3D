@@ -1,7 +1,8 @@
 from math_utils import *
+import math
 
 class body():
-    def __init__(self, name, model, mass, radius, color, pos, vel, J2):
+    def __init__(self, name, model, mass, radius, color, pos, vel, orient, day_length, J2):
         self.name = name
         self.model = model
         self.mass = mass
@@ -9,6 +10,8 @@ class body():
         self.color = color
         self.pos = pos
         self.vel = vel
+        self.orient = orient
+        self.day_length = day_length
         self.traj_history = []
         self.J2 = J2
 
@@ -66,6 +69,12 @@ class body():
     def set_vel(self, vel):
         self.vel = vel
 
+    def get_orient(self):
+        return self.orient
+
+    def rotate_body(self, rotation):
+        self.orient = rotate_matrix(self.orient, rotation)
+
     # dist. between centers (ignore surface)
     def get_dist_to(self, obj):
         return ((self.pos[0] - obj.pos[0])**2 +
@@ -92,6 +101,11 @@ class body():
         self.pos[0] += self.vel[0] * dt
         self.pos[1] += self.vel[1] * dt
         self.pos[2] += self.vel[2] * dt
+
+    # rotate the planet around its rotation axis
+    def update_orient(self, dt):
+        rotation_amount = dt*360/self.day_length
+        self.rotate_body([0,rotation_amount,0])
 
     def update_traj_history(self):
         self.traj_history.append(self.pos)

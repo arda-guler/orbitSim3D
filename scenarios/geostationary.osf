@@ -1,0 +1,34 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  GEOSTATIONARY.OSF
+;  Author: arda-guler
+;
+;In this scenario, there are two satellites in
+;geostationary orbit around Earth, with their
+;phases 180 degree apart.
+
+;Celestial bodies
+
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0
+
+;Vessels
+
+V|Hacivat|data\models\minisat.obj|[0.0,1.0,0.0]|[42164000,0,0]|[0,0,-3075]
+V|Karagoz|data\models\minisat.obj|[1.0,0.1,0.1]|[-42164000,0,0]|[0,0,3075]

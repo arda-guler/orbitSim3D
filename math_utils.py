@@ -1,4 +1,6 @@
 import math
+import numpy
+from pyquaternion import Quaternion
 
 # constants
 grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
@@ -68,3 +70,23 @@ def vector_add(vect1, vect2):
         vect1[i] = vect1[i] + vect2[i]
 
     return vect1
+
+# rotate an orientation matrix
+def rotate_matrix(orientation_matrix, rotation):
+    # orientation matrix is a 3x3 matrix, rotation is a list of three angles in degrees
+    orientation_matrix = numpy.array(orientation_matrix)
+        
+    if rotation[0]:
+        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
+        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+
+    if rotation[1]:
+        rotator = Quaternion(axis=orientation_matrix[1], angle=math.radians(rotation[1]))
+        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+
+    if rotation[2]:
+        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
+        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+
+    return orientation_matrix.tolist()
+        

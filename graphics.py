@@ -28,16 +28,14 @@ def drawBodies(bodies):
 
         glTranslatef(b.get_draw_pos()[0], b.get_draw_pos()[1], b.get_draw_pos()[2])
 
-        # no rotation yet
-        #glRotate(0, 1, 0, 0)
-        #glRotate(0, 0, 1, 0)
-        #glRotate(0, 0, 0, 1)
-
         for mesh in b.model.mesh_list:
             glBegin(GL_TRIANGLES)
             for face in mesh.faces:
                 for vertex_i in face:
-                    glVertex3f(*b.model.vertices[vertex_i])
+                    vertex_i = b.model.vertices[vertex_i]
+                    vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
+                    vertex_i = [vertex_i[0] + b.pos[0], vertex_i[1] + b.pos[1], vertex_i[2] + b.pos[2]]
+                    glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
             glEnd()
 
         glPopMatrix()

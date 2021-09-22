@@ -71,11 +71,18 @@ class vessel():
                 ((obj.pos[1] - self.pos[1])/(self.get_dist_to(obj))),
                 ((obj.pos[2] - self.pos[2])/(self.get_dist_to(obj)))]
 
+    # convert abosulte coords to body-centered reference frame coords, both cartezian
+    # it's like the ECEF coordinate system
+    def get_body_centered_coords(self, body):
+        return [((body.pos[0] - self.pos[0]) * body.orient[0][0]) + ((body.pos[1] - self.pos[1]) * body.orient[1][0]) + ((body.pos[2] - self.pos[2]) * body.orient[2][0]),
+                ((body.pos[0] - self.pos[0]) * body.orient[0][1]) + ((body.pos[1] - self.pos[1]) * body.orient[1][1]) + ((body.pos[2] - self.pos[2]) * body.orient[2][1]),
+                ((body.pos[0] - self.pos[0]) * body.orient[0][2]) + ((body.pos[1] - self.pos[1]) * body.orient[1][2]) + ((body.pos[2] - self.pos[2]) * body.orient[2][2])]
+
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
         grav_vec = vector_scale(self.get_unit_vector_towards(body), grav_mag)
 
-        # Apply J2 perturbation (only use this for bodies with their axis on global coord sys, for now)
+        # Apply J2 perturbation
         # https://www.vcalc.com/equation/?uuid=1e5aa6ea-95a3-11e7-9770-bc764e2038f2
         if body.get_J2():
             # (3 J2 mu R_body^2) / (2 R^5)
@@ -84,10 +91,10 @@ class vessel():
             J2_mult = J2_mult_numerator / J2_mult_denominator
 
             R_squared = self.get_dist_to(body)**2
-            Z_squared = (body.pos[2] - self.pos[2])**2
-            X = body.pos[0] - self.pos[0]
-            Y = body.pos[1] - self.pos[1]
-            Z = body.pos[2] - self.pos[2]
+            Z_squared = self.get_body_centered_coords(body)[2]**2
+            X = self.get_body_centered_coords(body)[0]
+            Y = self.get_body_centered_coords(body)[1]
+            Z = self.get_body_centered_coords(body)[2]
             J2_perturbation_accel = [(((5*(Z_squared/R_squared))-1) * X),
                                      (((5*(Z_squared/R_squared))-1) * Y),
                                      (((5*(Z_squared/R_squared))-3) * Z)]

@@ -6,6 +6,7 @@ import os
 import keyboard
 import glfw
 import time
+import re
 
 from graphics import *
 from vessel_class import *
@@ -111,12 +112,23 @@ def import_scenario(scn_filename):
             line[5] = line[5][1:-1].split(",")
             line[6] = line[6][1:-1].split(",")
             line[7] = line[7][1:-1].split(",")
+
+            orient_nums = re.findall(r"[-+]?\d*\.\d+|\d+", line[8])
+            
             new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True),
                             float(line[3]), float(line[4]),
+                            
                             [float(line[5][0]), float(line[5][1]), float(line[5][2])],
                             [float(line[6][0]), float(line[6][1]), float(line[6][2])],
                             [float(line[7][0]), float(line[7][1]), float(line[7][2])],
-                            float(line[8]))
+                            
+                            [[float(orient_nums[0]), float(orient_nums[1]), float(orient_nums[2])],
+                             [float(orient_nums[3]), float(orient_nums[4]), float(orient_nums[5])],
+                             [float(orient_nums[6]), float(orient_nums[7]), float(orient_nums[8])]],
+
+                            float(line[9]),
+                            
+                            float(line[10]))
             bodies.append(new_body)
             objs.append(new_body)
 
@@ -387,7 +399,7 @@ def main():
 
     delta_t = 1
     cycle_time = 0.1
-    output_rate = 10
+    output_rate = 1
     output_buffer = []
 
     cam_strafe_speed = 100
@@ -910,6 +922,9 @@ def main():
             x.update_vel(accel, delta_t)
             x.update_pos(delta_t)
 
+            # planets rotate!
+            x.update_orient(delta_t)
+
         for m in maneuvers:
             # lower delta_t if a maneuver is in progress
             if (delta_t > 1 and (m.get_state(sim_time) == "Performing" or
@@ -1008,23 +1023,23 @@ def main():
                     print(element[0], element[2])
                 
                 print("\n")
-                
-        # clear stuff from last frame
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+                    
+            # clear stuff from last frame
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-        # do the actual drawing
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+            # do the actual drawing
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
-        drawOrigin()
-        drawBodies(bodies)
-        drawVessels(vessels)
+            drawOrigin()
+            drawBodies(bodies)
+            drawVessels(vessels)
 
-        if show_trajectories:
-            drawProjections(projections)
-            drawTrajectories(vessels)
-            drawManeuvers(maneuvers)
+            if show_trajectories:
+                drawProjections(projections)
+                drawTrajectories(vessels)
+                drawManeuvers(maneuvers)
 
-        glfw.swap_buffers(window)
+            glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start
         if cycle_dt < cycle_time:
