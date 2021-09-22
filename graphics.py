@@ -34,7 +34,7 @@ def drawBodies(bodies):
                 for vertex_i in face:
                     vertex_i = b.model.vertices[vertex_i]
                     vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
-                    vertex_i = [vertex_i[0] + b.pos[0], vertex_i[1] + b.pos[1], vertex_i[2] + b.pos[2]]
+                    vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
                     glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
             glEnd()
 
@@ -53,11 +53,6 @@ def drawVessels(vessels):
 
         # put us in correct position
         glTranslatef(v.get_draw_pos()[0], v.get_draw_pos()[1], v.get_draw_pos()[2])
-
-        # (we don't rotate things yet)
-        #glRotate(vessel_rot[0], 1, 0, 0)
-        #glRotate(vessel_rot[1], 0, 1, 0)
-        #glRotate(vessel_rot[2], 0, 0, 1)
 
         # actually render model now, with triangles
         for mesh in v.model.mesh_list:
