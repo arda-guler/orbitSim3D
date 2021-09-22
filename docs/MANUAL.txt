@@ -13,6 +13,7 @@ c) Required Python packages:
  - pywavefront
  - keyboard
  - matplotlib
+ - pyquaternion
 
 = = = = = = = = =
 
