@@ -387,6 +387,7 @@ def main():
 
     delta_t = 1
     cycle_time = 0.1
+    output_rate = 10
     output_buffer = []
 
     cam_strafe_speed = 100
@@ -439,6 +440,7 @@ def main():
             if frame_command:
                 command = input("\n > ")
                 command = command.split(" ")
+                command[0] = command[0].lower()
 
             # --- COMMAND INTERPRETER ---
 
@@ -736,6 +738,10 @@ def main():
             elif command[0] == "delta_t":
                 delta_t = float(command[1])
 
+            # OUTPUT_RATE command
+            elif command[0] == "output_rate":
+                output_rate = int(command[1])
+
             # CYCLE_TIME command
             elif command[0] == "cycle_time":
                 cycle_time = float(command[1])
@@ -753,7 +759,7 @@ def main():
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
-                    print("display_plot, get_plots\n")
+                    print("display_plot, get_plots, output_rate\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -847,6 +853,11 @@ def main():
                         print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
                         print("Syntax: delta_t <seconds>\n")
                         input("Press Enter to continue...")
+                    elif command[1] == "output_rate":
+                        print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
+                        print("Must be a positive integer.\n")
+                        print("Syntax: output_rate <integer>\n")
+                        input("Press Enter to continue...")
                     elif command[1] == "cycle_time":
                         print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
                         print("Syntax: cycle_time <seconds>\n")
@@ -908,12 +919,6 @@ def main():
                 
             m.perform_maneuver(sim_time, delta_t)
 
-        # update output
-        if os.name == "nt":
-            os.system("cls")
-        else:
-            os.system("clear")
-
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -922,80 +927,88 @@ def main():
             if sim_time >= p.get_end_time() and (sim_time - delta_t) < p.get_end_time():
                 p.display()
 
-        # display what the user wants in cmd/terminal
-        print("OrbitSim3D Command Interpreter & Output Display\n")
-        if sim_time < 30:
-            print("Press C at any time to enter a command.\n")
-        print("Time:", sim_time, "\n")
-        
-        for element in output_buffer:
+        if int(sim_time) % int(output_rate) < delta_t:
 
-            # relative pos and vel
-            if element[1] == "pos_rel":
-                print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
-            elif element[1] == "vel_rel":
-                print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
+            # update output
+            if os.name == "nt":
+                os.system("cls")
+            else:
+                os.system("clear")
 
-            # relative pos and vel magnitude
-            elif element[1] == "pos_mag_rel":
-                print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
-            elif element[1] == "vel_mag_rel":
-                print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
+            # display what the user wants in cmd/terminal
+            print("OrbitSim3D Command Interpreter & Output Display\n")
+            if sim_time < 30 * delta_t:
+                print("Press C at any time to enter a command.\n")
+            print("Time:", sim_time, "\n")
 
-            # absolute pos and vel
-            elif element[1] == "pos":
-                print(element[0], element[2].get_pos())
-            elif element[1] == "vel":
-                print(element[0], element[2].get_vel())
+            for element in output_buffer:
 
-            # absolute pos and vel magnitude
-            elif element[1] == "pos_mag":
-                print(element[0], mag(element[2].get_pos()))
-            elif element[1] == "vel_mag":
-                print(element[0], mag(element[2].get_vel()))
+                # relative pos and vel
+                if element[1] == "pos_rel":
+                    print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
+                elif element[1] == "vel_rel":
+                    print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
 
-            # altitude
-            elif element[1] == "alt":
-                print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
+                # relative pos and vel magnitude
+                elif element[1] == "pos_mag_rel":
+                    print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
+                elif element[1] == "vel_mag_rel":
+                    print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
 
-            # maneuver state and parameters
-            elif element[1] == "active":
-                print(element[0], element[2].is_performing(sim_time))
-            elif element[1] == "state":
-                print(element[0], element[2].get_state(sim_time))
-            elif element[1] == "params" and element[3] == "m":
-                print(element[0], "\n" + element[2].get_params_str())
+                # absolute pos and vel
+                elif element[1] == "pos":
+                    print(element[0], element[2].get_pos())
+                elif element[1] == "vel":
+                    print(element[0], element[2].get_vel())
 
-            # orbit projection parameters
-            elif element[1] == "apoapsis":
-                print(element[0], proj.get_apoapsis_alt())
-            elif element[1] == "apoapsis_r":
-                print(element[0], proj.get_apoapsis())
-            elif element[1] == "periapsis":
-                print(element[0], proj.get_periapsis_alt())
-            elif element[1] == "periapsis_r":
-                print(element[0], proj.get_periapsis())
-            elif element[1] == "period":
-                print(element[0], proj.get_period())
-            elif element[1] == "body":
-                print(element[0], proj.get_body())
-            elif element[1] == "vessel":
-                print(element[0], proj.get_vessel())
-            elif element[1] == "semimajor_axis":
-                print(element[0], proj.get_semimajor_axis())
-            elif element[1] == "eccentricity":
-                print(element[0], proj.eccentricity)
-            elif element[1] == "energy":
-                print(element[0], proj.get_energy())
-            elif element[1] == "params" and element[3] == "p":
-                print(element[0], "\n" + element[2].get_params_str())
+                # absolute pos and vel magnitude
+                elif element[1] == "pos_mag":
+                    print(element[0], mag(element[2].get_pos()))
+                elif element[1] == "vel_mag":
+                    print(element[0], mag(element[2].get_vel()))
+
+                # altitude
+                elif element[1] == "alt":
+                    print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
+
+                # maneuver state and parameters
+                elif element[1] == "active":
+                    print(element[0], element[2].is_performing(sim_time))
+                elif element[1] == "state":
+                    print(element[0], element[2].get_state(sim_time))
+                elif element[1] == "params" and element[3] == "m":
+                    print(element[0], "\n" + element[2].get_params_str())
+
+                # orbit projection parameters
+                elif element[1] == "apoapsis":
+                    print(element[0], proj.get_apoapsis_alt())
+                elif element[1] == "apoapsis_r":
+                    print(element[0], proj.get_apoapsis())
+                elif element[1] == "periapsis":
+                    print(element[0], proj.get_periapsis_alt())
+                elif element[1] == "periapsis_r":
+                    print(element[0], proj.get_periapsis())
+                elif element[1] == "period":
+                    print(element[0], proj.get_period())
+                elif element[1] == "body":
+                    print(element[0], proj.get_body())
+                elif element[1] == "vessel":
+                    print(element[0], proj.get_vessel())
+                elif element[1] == "semimajor_axis":
+                    print(element[0], proj.get_semimajor_axis())
+                elif element[1] == "eccentricity":
+                    print(element[0], proj.eccentricity)
+                elif element[1] == "energy":
+                    print(element[0], proj.get_energy())
+                elif element[1] == "params" and element[3] == "p":
+                    print(element[0], "\n" + element[2].get_params_str())
+                    
+                # note taking
+                elif element[1] == "note":
+                    print(element[0], element[2])
                 
-            # note taking
-            elif element[1] == "note":
-                print(element[0], element[2])
-            
-            print("\n")
-            
+                print("\n")
+                
         # clear stuff from last frame
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
