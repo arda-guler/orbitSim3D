@@ -73,10 +73,10 @@ class vessel():
 
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system
-    def get_body_centered_coords(self, body):
-        return [((body.pos[0] - self.pos[0]) * body.orient[0][0]) + ((body.pos[1] - self.pos[1]) * body.orient[1][0]) + ((body.pos[2] - self.pos[2]) * body.orient[2][0]),
-                ((body.pos[0] - self.pos[0]) * body.orient[0][1]) + ((body.pos[1] - self.pos[1]) * body.orient[1][1]) + ((body.pos[2] - self.pos[2]) * body.orient[2][1]),
-                ((body.pos[0] - self.pos[0]) * body.orient[0][2]) + ((body.pos[1] - self.pos[1]) * body.orient[1][2]) + ((body.pos[2] - self.pos[2]) * body.orient[2][2])]
+    def get_body_centered_coords(self, body):        
+        return [((self.pos[0] - body.pos[0]) * body.orient[0][0]) + ((self.pos[1] - body.pos[1]) * body.orient[0][1]) + ((self.pos[2] - body.pos[2]) * body.orient[0][2]),
+                ((self.pos[0] - body.pos[0]) * body.orient[1][0]) + ((self.pos[1] - body.pos[1]) * body.orient[1][1]) + ((self.pos[2] - body.pos[2]) * body.orient[1][2]),
+                ((self.pos[0] - body.pos[0]) * body.orient[2][0]) + ((self.pos[1] - body.pos[1]) * body.orient[2][1]) + ((self.pos[2] - body.pos[2]) * body.orient[2][2])]
 
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
@@ -91,13 +91,13 @@ class vessel():
             J2_mult = J2_mult_numerator / J2_mult_denominator
 
             R_squared = self.get_dist_to(body)**2
-            Z_squared = self.get_body_centered_coords(body)[2]**2
+            Z_squared = self.get_body_centered_coords(body)[1]**2
             X = self.get_body_centered_coords(body)[0]
-            Y = self.get_body_centered_coords(body)[1]
-            Z = self.get_body_centered_coords(body)[2]
+            Y = self.get_body_centered_coords(body)[2]
+            Z = self.get_body_centered_coords(body)[1]
             J2_perturbation_accel = [(((5*(Z_squared/R_squared))-1) * X),
-                                     (((5*(Z_squared/R_squared))-1) * Y),
-                                     (((5*(Z_squared/R_squared))-3) * Z)]
+                                     (((5*(Z_squared/R_squared))-3) * Z),
+                                     (((5*(Z_squared/R_squared))-1) * Y)]
 
             J2_perturbation_accel = vector_scale(J2_perturbation_accel, J2_mult)
 
