@@ -121,6 +121,12 @@ body_class.py   -- the 'body' class used for
                 -- generate notable gravitational
                 -- fields
 				
+camera_class.py -- the 'camera' class used for 
+                -- representing camera objects
+                -- to move and rotate the user's
+                -- point of view, as well as track
+                -- objects in the 3D scene
+				
 maneuver.py     -- the 'maneuver' classes used for
                 -- various types of maneuvers that
                 -- can be performed by spacecraft
