@@ -797,7 +797,7 @@ def main():
 
             # LOCK_CAM command
             elif command[0] == "lock_cam":
-                if command[1]:
+                if len(command) > 1:
                     lock_active_cam_by_obj_name(command[1])
                 else:
                     lock_active_cam_by_proximity()
@@ -1080,7 +1080,7 @@ def main():
             # do the actual drawing
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
-            drawOrigin()
+            # drawOrigin() -- maybe it'll be useful for debugging one day
             drawBodies(bodies)
             drawVessels(vessels)
 
