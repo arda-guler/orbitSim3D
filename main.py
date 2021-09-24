@@ -11,6 +11,7 @@ import re
 from graphics import *
 from vessel_class import *
 from body_class import *
+from camera_class import *
 from math_utils import *
 from maneuver import *
 from orbit import *
@@ -21,7 +22,7 @@ from plot import *
 # every physics frame
 
 # this is for OpenGL
-cam_trans = [0, 0, -5000]
+main_cam = camera("main_cam", [0,0,-5000], [[1,0,0],[0,1,0],[0,0,1]], True)
 
 if os.name == "nt":
     os.system("cls")
@@ -33,6 +34,7 @@ bodies = []
 objs = []
 projections = []
 plots = []
+cameras = [main_cam]
 
 maneuvers = []
 batch_commands = []
@@ -275,6 +277,27 @@ def find_obj_by_name(name):
 
     return result
 
+# 'point' here can either be an object with property 'pos' or an
+# arbitrary point in the 3D scene
+def get_closest_object_to(point):
+    global objs
+    current_pos = [0,0,0]
+    result_obj = None
+    
+    if point.get_pos:
+        current_pos = point.get_pos()
+    else:
+        current_pos = point
+
+    min_dist = None
+    for obj in objs:
+        current_dist = ((obj.get_pos()[0] - current_pos[0])**2 + (obj.get_pos()[1] - current_pos[1])**2 + (obj.get_pos()[2] - current_pos[2])**2)**0.5
+        if not min_dist or current_dist < min_dist:
+            min_dist = current_dist
+            result_obj = obj
+
+    return obj
+
 def find_proj_by_name(name):
     global projections
 
@@ -366,6 +389,23 @@ def delete_plot(name):
 
     plots.remove(plot_tbd)
     del plot_tbd
+
+def lock_active_cam_by_obj_name(name):
+    target = find_obj_by_name(name)
+
+    if not target:
+        print("Object '" + name + "' not found.")
+        time.sleep(2)
+        return
+
+    get_active_cam().lock_to_target(target)
+
+def lock_active_cam_by_proximity():
+    target = get_closest_object_to(get_active_cam())
+    get_active_cam().lock_to_target(target)
+
+def unlock_active_cam():
+    get_active_cam().unlock()
     
 # clear all keyboard buffer
 # e.g. don't keep camera movement keys
@@ -379,9 +419,19 @@ def flush_input():
         import sys, termios    #for linux/unix
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
+def get_active_cam():
+    global cameras
+
+    for cam in cameras:
+        if cam.active:
+            return cam
+
+    # just a fail-safe
+    return cameras[0]
+
 def main():
-    global vessels, bodies, projections, cam_trans, objs, sim_time, batch_commands,\
-           plots
+    global vessels, bodies, projections, objs, sim_time, batch_commands,\
+           plots, cameras
 
     # initializing glfw
     glfw.init()
@@ -394,8 +444,9 @@ def main():
     gluPerspective(70, 800/600, 0.05, 5000000.0)
     glEnable(GL_CULL_FACE)
 
+    main_cam = cameras[0]
     # put "camera" in starting position
-    glTranslate(cam_trans[0], cam_trans[1], cam_trans[2])
+    glTranslate(main_cam.get_pos()[0], main_cam.get_pos()[1], main_cam.get_pos()[2])
 
     delta_t = 1
     cycle_time = 0.1
@@ -411,37 +462,16 @@ def main():
 
         glfw.poll_events()
 
-        # set to 0 so the "camera" doesn't fly off
-        cam_trans = [0,0,0]
-
         frame_command = False
 
         # get input and move the "camera" around
-        if keyboard.is_pressed("a"):
-            glRotate(1,0,1,0)
-        if keyboard.is_pressed("d"):
-            glRotate(-1,0,1,0)
-        if keyboard.is_pressed("w"):
-            glRotate(1,1,0,0)
-        if keyboard.is_pressed("s"):
-            glRotate(-1,1,0,0)
-        if keyboard.is_pressed("q"):
-            glRotate(1,0,0,1)
-        if keyboard.is_pressed("e"):
-            glRotate(-1,0,0,1)
+        get_active_cam().rotate([keyboard.is_pressed("w") - keyboard.is_pressed("s"),
+                                 keyboard.is_pressed("a") - keyboard.is_pressed("d"),
+                                 -keyboard.is_pressed("q") + keyboard.is_pressed("e")])
 
-        if keyboard.is_pressed("i"):
-            cam_trans[2] = cam_strafe_speed
-        if keyboard.is_pressed("k"):
-            cam_trans[2] = -cam_strafe_speed
-        if keyboard.is_pressed("j"):
-            cam_trans[0] = cam_strafe_speed
-        if keyboard.is_pressed("l"):
-            cam_trans[0] = -cam_strafe_speed
-        if keyboard.is_pressed("o"):
-            cam_trans[1] = cam_strafe_speed
-        if keyboard.is_pressed("u"):
-            cam_trans[1] = -cam_strafe_speed
+        get_active_cam().move([(keyboard.is_pressed("j") - keyboard.is_pressed("l")) * cam_strafe_speed,
+                               (keyboard.is_pressed("o") - keyboard.is_pressed("u")) * cam_strafe_speed,
+                               (keyboard.is_pressed("i") - keyboard.is_pressed("k")) * cam_strafe_speed])
 
         if keyboard.is_pressed("c"):
             frame_command = True
@@ -765,13 +795,23 @@ def main():
                     new_note = new_note + " " + command[i]
                 output_buffer.append([command[1], "note", new_note])
 
+            # LOCK_CAM command
+            elif command[0] == "lock_cam":
+                if command[1]:
+                    lock_active_cam_by_obj_name(command[1])
+                else:
+                    lock_active_cam_by_proximity()
+
+            elif command[0] == "unlock_cam":
+                unlock_active_cam()
+
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
-                    print("display_plot, get_plots, output_rate\n")
+                    print("display_plot, get_plots, output_rate, lock_cam, unlock_cam\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -879,6 +919,14 @@ def main():
                         print("Syntax: note <note_label> <note>")
                         print("(<note> represents all words beyond <note_label>, spaces can be used while taking notes)\n")
                         input("Press Enter to continue...")
+                    elif command[1] == "lock_cam":
+                        print("\n'lock_cam' command locks the active camera to an object (if it exists).")
+                        print("Syntax: lock_cam <object_name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "unlock_cam":
+                        print("\n'lock_cam' command unlocks the active camera and makes it stationary rel. to global coordinates.")
+                        print("Syntax: unlock_cam")
+                        input("Press Enter to continue...")
                     elif command[1] == "help":
                         print("\n'help' command prints out the help text.\n")
                         print("Syntax: help\n")
@@ -895,8 +943,6 @@ def main():
                 input("Press Enter to continue...")
 
         cycle_start = time.perf_counter()
-
-        glTranslate(cam_trans[0], cam_trans[1], cam_trans[2])
 
         # update physics
         for v in vessels:
@@ -941,6 +987,10 @@ def main():
             # going to display any of the plots?
             if sim_time >= p.get_end_time() and (sim_time - delta_t) < p.get_end_time():
                 p.display()
+
+        # update cameras
+        for cam in cameras:
+            cam.move_with_lock()
 
         if int(sim_time) % int(output_rate) < delta_t:
 
