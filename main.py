@@ -452,6 +452,7 @@ def main():
     cycle_time = 0.1
     output_rate = 1
     output_buffer = []
+    auto_dt_buffer = []
 
     cam_strafe_speed = 100
     show_trajectories = True
@@ -780,6 +781,30 @@ def main():
             elif command[0] == "delta_t":
                 delta_t = float(command[1])
 
+            # AUTO_DT command
+            elif command[0] == "auto_dt":
+                if len(command) == 3:
+                    auto_dt_buffer.append([float(command[1]), float(command[2])])
+                    # keep this sorted because the simulation only looks at index 0
+                    auto_dt_buffer = sorted(auto_dt_buffer)
+                else:
+                    print("Wrong number of arguments for command 'auto_dt'.")
+                    time.sleep(2)
+
+            # AUTO_DT_REMOVE command
+            elif command[0] == "auto_dt_remove":
+                if len(command) == 2:
+                    auto_dt_buffer.remove(auto_dt_buffer[int(command[1])])
+
+            # GET_AUTO_DT_BUFFER command
+            elif command[0] == "get_auto_dt_buffer":
+                print(auto_dt_buffer)
+                input("Press enter to continue...")
+
+            # AUTO_DT_CLEAR command
+            elif command[0] == "auto_dt_clear":
+                auto_dt_buffer = []
+
             # OUTPUT_RATE command
             elif command[0] == "output_rate":
                 output_rate = int(command[1])
@@ -811,7 +836,8 @@ def main():
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
-                    print("display_plot, get_plots, output_rate, lock_cam, unlock_cam\n")
+                    print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
+                    print("auto_dt_clear, get_auto_dt_buffer\n")
                     print("Simulation is paused while typing a command.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
@@ -905,6 +931,26 @@ def main():
                         print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
                         print("Syntax: delta_t <seconds>\n")
                         input("Press Enter to continue...")
+                    elif command[1] == "auto_dt":
+                        print("\n'auto_dt' command adds an automatic delta_t adjustment to happen at a certain time in the simulation.")
+                        print("This is usually useful for playing back certain scenarios exactly the way they were initially created, since the.")
+                        print("choice of delta_t can have a big influence on the physics.\n")
+                        print("Syntax: auto_dt <simulation_time_at_which_the_change_should_happen> <delta_t_value>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "auto_dt_remove":
+                        print("\n'auto_dt_remove' command removes an auto_dt command from the buffer.")
+                        print("It is a good idea to see the buffer first with the 'get_auto_dt_buffer' command.\n")
+                        print("Syntax: auto_dt_remove <buffer_index>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "auto_dt_clear":
+                        print("\n'auto_dt_clear' command clears the auto_dt buffer.")
+                        print("Syntax: auto_dt_clear\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_auto_dt_buffer":
+                        print("\n'get_auto_dt_buffer' command displays the current state of the auto_dt buffer.")
+                        print("The commands are displayed in format [[<time>, <delta_t>],[<time>, <delta_t>],[<time>, <delta_t>]...]")
+                        print("Syntax: get_auto_dt_buffer\n")
+                        input("Press Enter to continue...")     
                     elif command[1] == "output_rate":
                         print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
                         print("Must be a positive integer.\n")
@@ -943,6 +989,11 @@ def main():
                 input("Press Enter to continue...")
 
         cycle_start = time.perf_counter()
+
+        # change delta_t according to auto_dt_buffer
+        if auto_dt_buffer and auto_dt_buffer[0][0] <= sim_time:
+            delta_t = auto_dt_buffer[0][1]
+            auto_dt_buffer.remove(auto_dt_buffer[0])
 
         # update physics
         for v in vessels:

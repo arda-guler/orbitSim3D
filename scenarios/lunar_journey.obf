@@ -24,10 +24,14 @@ show lunar-orbiter vel_mag Luna VEL_LUNA
 show mnv_tli params TLI_PARAMS
 show mnv_tli state TLI_STATE
 ;
-show mnv_loi1 params LOI_PARAMS
-show mnv_loi1 state LOI_STATE
+show mnv_loi1 params LOI1_PARAMS
+show mnv_loi1 state LOI1_STATE
 ;
-note NOTE If you increase delta_t too much (typically to above a few hundreds), the simulation may become too inaccurate and you might not end up in the correct position at the correct time. In that case, you might need to delete mnv_loi and create your own maneuvers for lunar orbit injection.
+auto_dt 1500 10
+auto_dt 5000 25
+auto_dt 10000 100
+auto_dt 50000 500
+auto_dt 350000 100
 ;
-note NOTE2 A tried and working time increase sequence is dt=1500 at 50sec, dt=25 at 5000sec, dt=100 at 10000sec, dt=500 at 50000sec.
+note CAUTION This scenario uses auto_dt function to adjust delta_t until Lunar Orbit Injection. Adjusting delta_t manually may result in divergence from intended trajectory.
 ;
