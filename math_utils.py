@@ -85,7 +85,7 @@ def rotate_matrix(orientation_matrix, rotation):
         orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
 
     if rotation[2]:
-        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
+        rotator = Quaternion(axis=orientation_matrix[2], angle=math.radians(rotation[2]))
         orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
 
     return orientation_matrix.tolist()

@@ -468,7 +468,7 @@ def main():
         # get input and move the "camera" around
         get_active_cam().rotate([keyboard.is_pressed("w") - keyboard.is_pressed("s"),
                                  keyboard.is_pressed("a") - keyboard.is_pressed("d"),
-                                 -keyboard.is_pressed("q") + keyboard.is_pressed("e")])
+                                 keyboard.is_pressed("q") - keyboard.is_pressed("e")])
 
         get_active_cam().move([(keyboard.is_pressed("j") - keyboard.is_pressed("l")) * cam_strafe_speed,
                                (keyboard.is_pressed("o") - keyboard.is_pressed("u")) * cam_strafe_speed,
