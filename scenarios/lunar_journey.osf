@@ -57,4 +57,4 @@ V|lunar-orbiter|data\models\miniprobe.obj|[0.0,0.8,0.7]|[-590131,-10,6745234]|[7
 
 ;Maneuvers
 M|mnv_tli|const_accel|lunar-orbiter|Earth|prograde|10|50|315
-M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|399300|80
+M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|399300|50

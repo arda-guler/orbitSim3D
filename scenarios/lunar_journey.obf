@@ -32,6 +32,7 @@ auto_dt 5000 25
 auto_dt 10000 100
 auto_dt 50000 500
 auto_dt 350000 100
+auto_dt 399400 100
 ;
 note CAUTION This scenario uses auto_dt function to adjust delta_t until Lunar Orbit Injection. Adjusting delta_t manually may result in divergence from intended trajectory.
 ;
