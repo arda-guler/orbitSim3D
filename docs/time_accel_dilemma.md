@@ -23,7 +23,7 @@ Decreasing cycle_time usually increases the work load on your machine. If your m
 Physics-wise, there is no downside for "overclocking" the simulation by setting cycle_time too low, the machine will simply update each frame at the fastest rate it can. The only downside would be the *possibly* inconsistent frame update rate, which would otherwise be controlled by a dynamic interrupter built into the simulation. (If a frame is calculated faster than the expected cycle_time, the simulation momentarily halts calculation to keep a consistent frame update rate.) If you are only using the simulation for fun, this usually will not create a major inconvenience. (...but don't quote me on that.)
 
 ### However!
-You can only really lower cycle_time until you hit the limit of your machine's capabilities. You'll eventually have to increase delta_t for long space trips, such as a multiple day trip to Luna from Low Earth Orbit. (Or you'll have to keep the simulation running for a long time.)
+You can only really lower cycle_time until you hit the limit of your machine's capabilities. (HINT: If you really want to squeeze an extra bit of cycle_time decrease, you can increase output_rate (which determines how many physics frames will be calculated per one screen drawing cycle (default is 1, so one physics frame is calculated every screen update)). You'll eventually have to increase delta_t for long space trips, such as a multiple day trip to Luna from Low Earth Orbit. (Or you'll have to keep the simulation running for a long time.)
 
 To lower the inaccuracies and use delta_t responsibly, there are some rules you can follow.
 
