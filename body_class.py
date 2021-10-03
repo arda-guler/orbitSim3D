@@ -106,8 +106,9 @@ class body():
 
     # rotate the planet around its rotation axis
     def update_orient(self, dt):
-        rotation_amount = dt*360/self.day_length
-        self.rotate_body([0,rotation_amount,0])
+        if self.day_length:
+            rotation_amount = dt*360/self.day_length
+            self.rotate_body([0,rotation_amount,0])
 
     def update_traj_history(self):
         self.traj_history.append(self.pos)
