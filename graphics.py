@@ -145,7 +145,7 @@ def drawProjections(projections):
 
         # draw lines to apoapsis and periapsis
 
-        center = p.body.get_pos()
+        center = p.body.get_draw_pos()
 
         glBegin(GL_LINES)
         glVertex3f(center[0], center[1], center[2])

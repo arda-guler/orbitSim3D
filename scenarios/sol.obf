@@ -1,0 +1,13 @@
+;.obf -- orbitSim3D batch format
+;this obf shows planet orbits around the Sun
+create_projection p1 Mercury Sol
+create_projection p2 Venus Sol
+create_projection p3 Earth Sol
+create_projection p4 Mars Sol
+create_projection p5 Jupiter Sol
+create_projection p6 Saturn Sol
+create_projection p7 Uranus Sol
+create_projection p8 Neptune Sol
+lock_cam Sol
+cam_strafe_speed 500000
+;

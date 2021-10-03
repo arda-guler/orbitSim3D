@@ -101,7 +101,7 @@ class kepler_projection():
             end_time = self.period
 
         if end_time > 100000:
-            time_step = end_time / 5000
+            time_step = end_time / 25000
         else:
             time_step = 0.1
         

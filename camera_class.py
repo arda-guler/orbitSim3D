@@ -76,7 +76,8 @@ class camera():
     def lock_to_target(self, target):
         self.lock = target
         if type(target).__name__ == "body":
-            self.offset = [0,0,-target.get_radius() * 2 * visual_scaling_factor]
+            offset_amount = target.get_radius() * 2 * visual_scaling_factor
+            self.offset = vector_scale(self.orient[2], -offset_amount)
         else:
             self.offset = [0,0,-100]
 
