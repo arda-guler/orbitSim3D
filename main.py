@@ -443,6 +443,7 @@ def main():
     
     gluPerspective(70, 800/600, 0.05, 5000000.0)
     glEnable(GL_CULL_FACE)
+    glPointSize(2)
 
     main_cam = cameras[0]
     # put "camera" in starting position
@@ -1129,17 +1130,10 @@ def main():
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
             # do the actual drawing
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+            glPolygonMode(GL_FRONT, GL_FILL)
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawBodies(bodies)
-            drawVessels(vessels)
-
-            if show_trajectories:
-                drawProjections(projections)
-                drawTrajectories(vessels)
-                drawManeuvers(maneuvers)
-
+            drawScene(bodies, vessels, projections, maneuvers, get_active_cam(), show_trajectories)
             glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start

@@ -13,6 +13,8 @@ class vessel():
         self.traj_history = []
         self.draw_traj_history = []
 
+        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+
     def get_name(self):
         return self.name
 

@@ -15,6 +15,8 @@ class body():
         self.traj_history = []
         self.J2 = J2
 
+        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+
     def get_name(self):
         return self.name
 
