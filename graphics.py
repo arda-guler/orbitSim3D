@@ -157,17 +157,41 @@ def drawProjections(projections):
         glVertex3f(p.draw_ap[0], p.draw_ap[1], p.draw_ap[2])
         glEnd()
 
-def drawScene(bodies, vessels, projections, maneuvers, active_cam, show_trajectories=True):
+def drawSurfacePoints(surface_points, active_cam):
+
+    for sp in surface_points:
+        b = sp.get_body()
+        
+        camera_distance = mag([-b.get_draw_pos()[0] - active_cam.get_pos()[0],
+                               -b.get_draw_pos()[1] - active_cam.get_pos()[1],
+                               -b.get_draw_pos()[2] - active_cam.get_pos()[2]])
+
+        camera_physical_distance = camera_distance * (1/visual_scaling_factor)
+
+        # only draw if the parent body does not appear too small on the screen
+
+        if not math.degrees(math.atan(b.get_radius()*2/camera_physical_distance)) < 1.5:
+            glColor(sp.get_color()[0], sp.get_color()[1], sp.get_color()[2])
+            glPushMatrix()
+            glTranslate(sp.get_draw_pos()[0], sp.get_draw_pos()[1], sp.get_draw_pos()[2])
+            glBegin(GL_POINTS)
+            glVertex3f(0,0,0)
+            glEnd()
+            glPopMatrix()
+
+def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_cam, show_trajectories=True):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
     # (cam and object coord systems are opposite for some reason!!)
     bodies.sort(key=lambda x: mag([-x.get_draw_pos()[0] - active_cam.get_pos()[0], -x.get_draw_pos()[1] - active_cam.get_pos()[1], -x.get_draw_pos()[2] - active_cam.get_pos()[2]]), reverse=True)
     vessels.sort(key=lambda x: mag([-x.get_draw_pos()[0] - active_cam.get_pos()[0], -x.get_draw_pos()[1] - active_cam.get_pos()[1], -x.get_draw_pos()[2] - active_cam.get_pos()[2]]), reverse=True)
+    surface_points.sort(key=lambda x: mag([-x.get_draw_pos()[0] - active_cam.get_pos()[0], -x.get_draw_pos()[1] - active_cam.get_pos()[1], -x.get_draw_pos()[2] - active_cam.get_pos()[2]]), reverse=True)
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
     drawBodies(bodies, active_cam)
+    drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam)
 
     # draw trajectory and predictions

@@ -12,6 +12,7 @@ from graphics import *
 from vessel_class import *
 from body_class import *
 from camera_class import *
+from surface_point_class import *
 from math_utils import *
 from maneuver import *
 from orbit import *
@@ -31,6 +32,7 @@ else:
 
 vessels = []
 bodies = []
+surface_points = []
 objs = []
 projections = []
 plots = []
@@ -84,7 +86,7 @@ def clear_scene():
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, maneuvers, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, sim_time
 
     clear_scene()
 
@@ -171,6 +173,17 @@ def import_scenario(scn_filename):
                                                          float(line[9]), float(line[10]))
 
             maneuvers.append(new_maneuver)
+
+        # import surface points
+        elif line[0] == "S":
+            line[3] = line[3][1:-1].split(",") # color
+            line[4] = line[4][1:-1].split(",") # gpos
+            new_sp = surface_point(line[1], find_obj_by_name(line[2]),
+                                   [float(line[3][0]), float(line[3][1]), float(line[3][2])],
+                                   [float(line[4][0]), float(line[4][1]), float(line[4][2])])
+
+            surface_points.append(new_sp)
+            objs.append(new_sp)
 
     main()
 
@@ -430,7 +443,7 @@ def get_active_cam():
     return cameras[0]
 
 def main():
-    global vessels, bodies, projections, objs, sim_time, batch_commands,\
+    global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, cameras
 
     # initializing glfw
@@ -751,6 +764,8 @@ def main():
                     print("BODY:", b.get_name() + "\n")
                 for v in vessels:
                     print("VESSEL:", v.get_name() + "\n")
+                for sp in surface_points:
+                    print("SURFACE POINT:", sp.get_name() + "\n")
                 input("Press Enter to continue...")
 
             # GET_MANEUVERS command
@@ -1032,6 +1047,12 @@ def main():
                 
             m.perform_maneuver(sim_time, delta_t)
 
+        # update surface point positions
+        for sp in surface_points:
+            # this doesn't require a delta_t since it only uses
+            # parent body attributes
+            sp.update_state_vectors(delta_t)
+
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -1133,7 +1154,7 @@ def main():
             glPolygonMode(GL_FRONT, GL_FILL)
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, projections, maneuvers, get_active_cam(), show_trajectories)
+            drawScene(bodies, vessels, surface_points, projections, maneuvers, get_active_cam(), show_trajectories)
             glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start

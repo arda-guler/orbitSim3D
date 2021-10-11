@@ -127,3 +127,6 @@ class body():
 
     def get_J2(self):
         return self.J2
+
+    def get_day_length(self):
+        return self.day_length

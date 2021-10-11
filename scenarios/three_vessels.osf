@@ -42,12 +42,19 @@ B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8, 0.8, 0.8]|
 
 ;Vessels
 
-V|Station-Alpha|data\models\minisat.obj|[1.0,0.2,0.2]|[6771000,0,0]|[0,7672,0]
+V|Station-Alpha|data\models\ministation.obj|[1.0,0.2,0.2]|[6771000,0,0]|[0,7672,0]
 V|Station-Beta|data\models\ministation.obj|[1.0,0.2,0.5]|[0,0,7000000]|[7546,0,0]
-V|Station-Gamma|data\models\minisat.obj|[0.0,1.0,1.0]|[0,7500000,0]|[0,0,-7350]
+V|Station-Gamma|data\models\ministation.obj|[0.0,1.0,1.0]|[0,7500000,0]|[0,0,-7350]
 
 ;Maneuvers
-
 M|mnv_demo1|const_accel|Station-Beta|Earth|prograde|0.5|10|50
 M|mnv_demo2|const_accel|Station-Alpha|Earth|normal_dynamic|2|15|55
 M|mnv_demo3|const_accel|Station-Gamma|Earth|radial_out_dynamic|0.5|20|60
+
+;Surface points
+S|Istanbul|Earth|[1,0.30,0]|[41,28.9,0]
+S|London|Earth|[0.5,0.7,0]|[51,7,0]
+S|Moscow|Earth|[0.5,0.37,0.5]|[55.7,37.6,0]
+S|NY|Earth|[0,1,0.8]|[40,-73,0]
+S|Tokyo|Earth|[1,0.2,0.6]|[35.6,139.8,0]
+S|Sydney|Earth|[0,0.9,0]|[-33.8,151.0,0]

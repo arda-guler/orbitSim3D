@@ -127,6 +127,13 @@ camera_class.py -- the 'camera' class used for
                 -- point of view, as well as track
                 -- objects in the 3D scene
 				
+surface_point_class.py
+                -- the 'surface_point' class used for
+                -- representing points on the surfaces
+                -- of celestial bodies, such as tracking
+                -- stations, geographical features or
+                -- landing zones
+				
 maneuver.py     -- the 'maneuver' classes used for
                 -- various types of maneuvers that
                 -- can be performed by spacecraft
