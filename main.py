@@ -546,6 +546,12 @@ def main():
                             output_buffer.append([command[3], "pos_mag", obj])
                         elif command[2] == "vel_mag":
                             output_buffer.append([command[3], "vel_mag", obj])
+                        elif command[2] == "gps" or command[2] == "gpos":
+                            if type(obj).__name__ == "surface_point":
+                                output_buffer.append([command[3], "gpos", obj])
+                            else:
+                                print("You can only get ground position of a surface point!\n")
+                                time.sleep(2) 
                             
                     elif find_maneuver_by_name(command[1]):
                         maneuver = find_maneuver_by_name(command[1])
@@ -1108,6 +1114,13 @@ def main():
                 # altitude
                 elif element[1] == "alt":
                     print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
+
+                # ground pos
+                elif element[1] == "gpos":
+                    print(element[0] +
+                          "\nLat: " + str(element[2].get_gpos()[0]) + " deg" +
+                          "\nLong: " + str(element[2].get_gpos()[1]) + " deg" +
+                          "\nAlt: " + str(element[2].get_gpos()[2]) + " m")
 
                 # maneuver state and parameters
                 elif element[1] == "active":
