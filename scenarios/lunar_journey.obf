@@ -9,16 +9,18 @@
 ;try to read those lines as well as
 ;the actual commands.
 ;
-show lunar-orbiter dist Earth DIST_EARTH
+create_projection luna-orbit Luna Earth
+;
+show lunar-orbiter alt Earth ALT_EARTH_M
 ;    (shows distance from Earth center)
 ;
-show lunar-orbiter vel_mag Earth VEL_EARTH
+show lunar-orbiter vel_mag Earth VEL_EARTH_M/S
 ;    (shows velocity rel. to Earth)
 ;
-show lunar-orbiter dist Luna DIST_LUNA
+show lunar-orbiter alt Luna ALT_LUNA_M
 ;    (shows distance from Moon center)
 ;
-show lunar-orbiter vel_mag Luna VEL_LUNA
+show lunar-orbiter vel_mag Luna VEL_LUNA_M/S
 ;    (shows velocity rel. to Moon)
 ;
 show mnv_tli params TLI_PARAMS

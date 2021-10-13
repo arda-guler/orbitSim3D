@@ -104,8 +104,15 @@ def import_scenario(scn_filename):
                 except FileNotFoundError:
                     print("Scenario file not found.")
                     time.sleep(2)
-                    quit()
                     
+                    if os.name == "nt":
+                        os.system("cls")
+                    else:
+                        os.system("clear")
+                        
+                    init_sim()
+
+    print("\nImporting scenario:", scn_filename, "\n")             
     import_lines = scn_file.readlines()
 
     for line in import_lines:
@@ -135,6 +142,7 @@ def import_scenario(scn_filename):
                             float(line[10]))
             bodies.append(new_body)
             objs.append(new_body)
+            print("Loading body:", new_body.get_name())
 
         # import vessels
         elif line[0] == "V":
@@ -147,6 +155,7 @@ def import_scenario(scn_filename):
                                 [float(line[5][0]), float(line[5][1]), float(line[5][2])])
             vessels.append(new_vessel)
             objs.append(new_vessel)
+            print("Loading vessel:", new_vessel.get_name())
 
         # import maneuvers
         elif line[0] == "M":
@@ -173,6 +182,7 @@ def import_scenario(scn_filename):
                                                          float(line[9]), float(line[10]))
 
             maneuvers.append(new_maneuver)
+            print("Loading maneuver:", new_maneuver.get_name())
 
         # import surface points
         elif line[0] == "S":
@@ -184,8 +194,9 @@ def import_scenario(scn_filename):
 
             surface_points.append(new_sp)
             objs.append(new_sp)
+            print("Loading surface point:", new_sp.get_name())
 
-    main()
+    main(scn_filename)
 
 def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
                                 mnv_duration):
@@ -442,7 +453,7 @@ def get_active_cam():
     # just a fail-safe
     return cameras[0]
 
-def main():
+def main(scn_filename=None):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, cameras
 
@@ -1180,7 +1191,7 @@ def main():
 def init_sim():
     print("\nOrbitSim3D Initialization\n")
     print("Enter scenario file path to load scenario, or leave blank to start an empty scene.")
-    print("(for example 'scenarios\\three_vessels.osf' or just 'three_vessels')\n")
+    print("(for example 'scenarios\\lunar_journey.osf' or just 'lunar_journey')\n")
     scn_path = input("Scenario path: ")
     if scn_path:
         import_scenario(scn_path)
