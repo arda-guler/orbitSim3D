@@ -36,9 +36,13 @@ You can move around the OpenGL scene using WASDQE
 keys for rotation and UIOJKL for translation
 (strafing) in all axes.
 
-To control the simulation, press C in the command
-interpreter window and enter commands. While you
-are typing, the simulation will remain paused.
+To control the simulation, you can either press C
+in the command interpreter window and enter 
+commands, or press P to use the command panel
+window (which will appear after the keypress). While
+you are typing on the command line or using the
+command panel window, the simulation will remain
+paused.
 
 To learn more about using the command interpreter
 and see the available commands (and their syntax),

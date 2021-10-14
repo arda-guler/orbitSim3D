@@ -17,6 +17,7 @@ from math_utils import *
 from maneuver import *
 from orbit import *
 from plot import *
+from command_panel import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
@@ -502,6 +503,13 @@ def main(scn_filename=None):
         if keyboard.is_pressed("c"):
             frame_command = True
 
+        if keyboard.is_pressed("p"):
+            panel_commands = use_command_panel(vessels, bodies, surface_points, projections, plots)
+            if panel_commands:
+                for panel_command in panel_commands:
+                    panel_command = panel_command.split(" ")
+                    batch_commands.append(panel_command)
+
         if frame_command or len(batch_commands) > 0:
             flush_input()
 
@@ -871,7 +879,8 @@ def main(scn_filename=None):
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer\n")
-                    print("Simulation is paused while typing a command.\n")
+                    print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
+                    print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
                     input("Press Enter to continue...")
                 elif len(command) == 2:
@@ -1093,7 +1102,7 @@ def main(scn_filename=None):
             # display what the user wants in cmd/terminal
             print("OrbitSim3D Command Interpreter & Output Display\n")
             if sim_time < 30 * delta_t:
-                print("Press C at any time to enter a command.\n")
+                print("Press C at any time to use the command line or P to open the command panel interface.\n")
             print("Time:", sim_time, "\n")
 
             for element in output_buffer:
