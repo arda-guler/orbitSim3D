@@ -423,7 +423,7 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
                 dm_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "create_projection":
-                cp_help = tk.Label(entry_panel, text="'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.")
+                cp_help = tk.Label(entry_panel, text="'create_projection' command creates a 2-body Keplerian orbit projection of an object around a body.")
                 cp_help.grid(row=0, column=0, columnspan=10)
                 
                 cp_s1t1_label = tk.Label(entry_panel, text="Projection Name")

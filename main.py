@@ -503,7 +503,7 @@ def main(scn_filename=None):
         if keyboard.is_pressed("c"):
             frame_command = True
 
-        if keyboard.is_pressed("p"):
+        elif keyboard.is_pressed("p"):
             panel_commands = use_command_panel(vessels, bodies, surface_points, projections, plots)
             if panel_commands:
                 for panel_command in panel_commands:
@@ -520,13 +520,13 @@ def main(scn_filename=None):
 
             # --- COMMAND INTERPRETER ---
 
-            # BATCH command
-            if command[0] == "batch":
-                batch_commands = read_batch(command[1])
-
             if len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
                 command = batch_commands[0]
                 batch_commands.remove(command)
+
+            # BATCH command
+            if command[0] == "batch":
+                batch_commands = read_batch(command[1])
             
             # SHOW command
             if command[0] == "show":
