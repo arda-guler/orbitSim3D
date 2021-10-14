@@ -154,3 +154,8 @@ orbit.py        -- 2-body Keplerian orbit class
 plot.py         -- plot class that handles plotting
                 -- of variables in certain time
                 -- intervals on user's demand
+				
+command_panel.py
+                -- command panel window which
+                -- provides a basic GUI interface
+                -- for entering commands easily
