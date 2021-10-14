@@ -529,7 +529,7 @@ def main(scn_filename=None):
                 batch_commands = read_batch(command[1])
             
             # SHOW command
-            if command[0] == "show":
+            elif command[0] == "show":
                 
                 if len(command) == 5:
                     if find_obj_by_name(command[1]):
