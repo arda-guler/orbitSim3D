@@ -504,7 +504,7 @@ def main(scn_filename=None):
             frame_command = True
 
         elif keyboard.is_pressed("p"):
-            panel_commands = use_command_panel(vessels, bodies, surface_points, projections, plots)
+            panel_commands = use_command_panel(vessels, bodies, surface_points, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed)
             if panel_commands:
                 for panel_command in panel_commands:
                     panel_command = panel_command.split(" ")
@@ -969,7 +969,7 @@ def main(scn_filename=None):
                         print("Syntax: cam_strafe_speed <speed>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "delta_t":
-                        print("\n'delta_t' command sets time steps of each physics frame.")
+                        print("\n'delta_t' command sets time step length of each physics frame.")
                         print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
                         print("Syntax: delta_t <seconds>\n")
                         input("Press Enter to continue...")

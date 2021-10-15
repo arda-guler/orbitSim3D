@@ -3,12 +3,16 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, projections, plots):
+def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed):
     command_buffer = []
 
     def on_panel_close():
         root.destroy()
         return command_buffer
+
+    def clear_command_buffer():
+        for i in range(len(command_buffer)):
+            remove_from_buffer(0)
 
     def generate_objects_text():
         objects_text = ""
@@ -46,6 +50,17 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
         cbx.delete(1.0, "end")
         cbx.insert(1.0, cb_out)
         cbx.config(state="disabled")
+
+    def set_vars_field():
+        sim_variables_field.config(state="normal")
+        vars_text = "Sim. Time: " + str(sim_time) + "\n"
+        vars_text += "Delta T: " + str(delta_t) + "\n"
+        vars_text += "Cycle Time: " + str(cycle_time) + "\n"
+        vars_text += "Output Rate: " + str(output_rate) + "\n"
+        vars_text += "\nCam. Strafe Speed: " + str(cam_strafe_speed) + "\n"
+        sim_variables_field.delete(1.0, "end")
+        sim_variables_field.insert(1.0, vars_text)
+        sim_variables_field.config(state="disabled")
 
     def add_to_buffer(command):
         command_buffer.append(command)
@@ -217,7 +232,7 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
                 hide_s2_button.config(width=20,height=1)
 
             elif cmd_a == "clear":
-                clear_help = tk.Label(entry_panel, text="'clear' command removes all output element from the command prompt/terminal.")
+                clear_help = tk.Label(entry_panel, text="'clear' command can remove all output element from the command prompt/terminal,\nremove all objects from the simulation, or clear trajectory trails up to current simulation time.")
                 clear_help.grid(row=0, column=0, columnspan=10)
                 
                 clear_s1_button = tk.Button(entry_panel, text="Clear Output", command=lambda:add_to_buffer("clear output"))
@@ -548,52 +563,294 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
 
                 dpl_s1_button = tk.Button(entry_panel, text="Delete Plotter", command=generate_s1)
                 dpl_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "batch":
+                bch_help = tk.Label(entry_panel, text="'batch' command reads a batch file and queues the commands to be sent to the interpreter.")
+                bch_help.grid(row=0, column=0, columnspan=10)
+                
+                bch_s1t1_label = tk.Label(entry_panel, text="Batch File (name or full path)")
+                bch_s1t1_label.grid(row=1, column=1)
+
+                bch_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                bch_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if bch_s1t1.get("1.0","end-1c"):
+                        command = "batch " + bch_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                bch_s1_button = tk.Button(entry_panel, text="Read Batch", command=generate_s1)
+                bch_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "cam_strafe_speed":
+                css_help = tk.Label(entry_panel, text="'cam_strafe_speed' command sets the speed of linear camera movement.")
+                css_help.grid(row=0, column=0, columnspan=10)
+                
+                css_s1t1_label = tk.Label(entry_panel, text="Speed")
+                css_s1t1_label.grid(row=1, column=1)
+
+                css_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                css_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if css_s1t1.get("1.0","end-1c"):
+                        command = "cam_strafe_speed " + css_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                css_s1_button = tk.Button(entry_panel, text="Set Speed", command=generate_s1)
+                css_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "lock_cam":
+                loc_help = tk.Label(entry_panel, text="'lock_cam' command locks the active camera to an object (if it exists).")
+                loc_help.grid(row=0, column=0, columnspan=10)
+                
+                loc_s1t1_label = tk.Label(entry_panel, text="Target Obj.")
+                loc_s1t1_label.grid(row=1, column=1)
+
+                loc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                loc_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if loc_s1t1.get("1.0","end-1c"):
+                        command = "lock_cam " + loc_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                loc_s1_button = tk.Button(entry_panel, text="Lock Camera", command=generate_s1)
+                loc_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "delta_t":
+                det_help = tk.Label(entry_panel, text="'delta_t' command sets time step length of each physics frame.")
+                det_help.grid(row=0, column=0, columnspan=10)
+                
+                det_s1t1_label = tk.Label(entry_panel, text="Delta T")
+                det_s1t1_label.grid(row=1, column=1)
+
+                det_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                det_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if det_s1t1.get("1.0","end-1c"):
+                        command = "delta_t " + det_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                det_s1_button = tk.Button(entry_panel, text="Set Dt", command=generate_s1)
+                det_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "cycle_time":
+                cyt_help = tk.Label(entry_panel, text="'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.")
+                cyt_help.grid(row=0, column=0, columnspan=10)
+                
+                cyt_s1t1_label = tk.Label(entry_panel, text="Cycle Time")
+                cyt_s1t1_label.grid(row=1, column=1)
+
+                cyt_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                cyt_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if cyt_s1t1.get("1.0","end-1c"):
+                        command = "cycle_time " + cyt_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                cyt_s1_button = tk.Button(entry_panel, text="Set Cycle Time", command=generate_s1)
+                cyt_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "output_rate":
+                otr_help = tk.Label(entry_panel, text="'output_rate' command sets the number of cycles per update for the output buffer.\n(Higher number, higher interval between updates.)")
+                otr_help.grid(row=0, column=0, columnspan=10)
+                
+                otr_s1t1_label = tk.Label(entry_panel, text="Output Rate")
+                otr_s1t1_label.grid(row=1, column=1)
+
+                otr_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                otr_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if otr_s1t1.get("1.0","end-1c"):
+                        command = "output_rate " + otr_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                otr_s1_button = tk.Button(entry_panel, text="Set Output Rate", command=generate_s1)
+                otr_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "note":
+                nte_help = tk.Label(entry_panel, text="'note' command lets the user take a note on the output screen.")
+                nte_help.grid(row=0, column=0, columnspan=10)
+                
+                nte_s1t1_label = tk.Label(entry_panel, text="Note Label")
+                nte_s1t2_label = tk.Label(entry_panel, text="Note (spaces allowed)")
+                nte_s1t1_label.grid(row=1, column=1)
+                nte_s1t2_label.grid(row=1, column=2)
+
+                nte_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                nte_s1t2 = tk.Text(entry_panel, width=50, height=3)
+                nte_s1t1.grid(row=2, column=1)
+                nte_s1t2.grid(row=2, column=2)
+
+                def generate_s1():
+                    if nte_s1t1.get("1.0","end-1c") and nte_s1t2.get("1.0","end-1c"):
+                        command = "note " + nte_s1t1.get("1.0","end-1c") + " " + nte_s1t2.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                nte_s1_button = tk.Button(entry_panel, text="Take Note", command=generate_s1)
+                nte_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "auto_dt":
+                auto_dt_help = tk.Label(entry_panel, text="'auto_dt' is a system that automatically adjusts delta_t at user-set moments in simulation.\nUsually helpful for high-precision playbacks of scenarios.")
+                auto_dt_help.grid(row=0, column=0, columnspan=10)
+
+                auto_dt_buffer_field_label = tk.Label(entry_panel, text="Auto-Dt Buffer at T = " + str(sim_time))
+                auto_dt_buffer_field_label.grid(row=1, column=0)
+                auto_dt_buffer_field = tk.Text(entry_panel, width=20, height=15)
+                auto_dt_buffer_field.grid(row=2, column=0, rowspan=5)
+                auto_dt_buffer_field.config(state="disabled")
+
+                def set_auto_dt_field():
+                    field_text = "Sim. Time - Delta_T\n"
+                    
+                    n = 0
+                    for setting in auto_dt_buffer:
+                        field_text += str(n) + ": " + str(setting[0]) + " - " + str(setting[1]) + "\n"
+                        n += 1
+
+                    auto_dt_buffer_field.config(state="normal")
+                    auto_dt_buffer_field.delete(1.0, "end")
+                    auto_dt_buffer_field.insert(1.0, field_text)
+                    auto_dt_buffer_field.config(state="disabled")
+
+                set_auto_dt_field()
+
+                # auto_dt
+                auto_dt_s1t1_label = tk.Label(entry_panel, text="Sim. Time")
+                auto_dt_s1t2_label = tk.Label(entry_panel, text="Delta T")
+                auto_dt_s1t1_label.grid(row=1, column=2)
+                auto_dt_s1t2_label.grid(row=1, column=3)
+
+                auto_dt_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                auto_dt_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                auto_dt_s1t1.grid(row=2, column=2)
+                auto_dt_s1t2.grid(row=2, column=3)
+
+                def generate_s1():
+                    if auto_dt_s1t1.get("1.0","end-1c") and auto_dt_s1t2.get("1.0","end-1c"):
+                        command = "auto_dt " + auto_dt_s1t1.get("1.0","end-1c") + " " + auto_dt_s1t2.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                auto_dt_s1_button = tk.Button(entry_panel, text="Add Auto-Dt", command=generate_s1)
+                auto_dt_s1_button.grid(row=2, column=1)
+
+                # auto_dt_remove
+                auto_dt_s2t1_label = tk.Label(entry_panel, text="Auto-Dt Index")
+                auto_dt_s2t1_label.grid(row=3, column=2)
+
+                auto_dt_s2t1 = tk.Text(entry_panel, width=20, height=1)
+                auto_dt_s2t1.grid(row=4, column=2)
+
+                def generate_s2():
+                    if auto_dt_s2t1.get("1.0","end-1c"):
+                        command = "auto_dt " + auto_dt_s2t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                auto_dt_s2_button = tk.Button(entry_panel, text="Remove Auto-Dt", command=generate_s2)
+                auto_dt_s2_button.grid(row=4, column=1)
+
+                # auto_dt_clear
+                auto_dt_s3_button = tk.Button(entry_panel, text="Clear Auto-Dt", command=lambda:add_to_buffer("auto_dt_clear"))
+                auto_dt_s3_button.grid(row=5, column=1)
                 
         cmd_window = tk.Tk()
         cmd_window.protocol("WM_DELETE_WINDOW", on_command_window_close)
         cmd_window.title("Commands")
-        cmd_window.geometry("250x300")
 
         # why no 'sender' functionality, tkinter!?
         # anyway, here comes a wall of button definitions
         # it better look decent at runtime, at least...
+
+        output_commands_label = tk.Label(cmd_window, text="Output Management")
+        output_commands_label.grid(row=0, column=0, columnspan=3)
         show_button = tk.Button(cmd_window, text="Show", command=lambda:enter_cmd("show"))
         show_button.config(width=15,height=1)
-        show_button.grid(row=0, column=0)
+        show_button.grid(row=1, column=0)
         hide_button = tk.Button(cmd_window, text="Hide", command=lambda:enter_cmd("hide"))
         hide_button.config(width=15,height=1)
-        hide_button.grid(row=0, column=1)
+        hide_button.grid(row=1, column=1)
         clear_button = tk.Button(cmd_window, text="Clear", command=lambda:enter_cmd("clear"))
         clear_button.config(width=15,height=1)
-        clear_button.grid(row=5, column=0)
+        clear_button.grid(row=1, column=2)
 
+        vessel_commands_label = tk.Label(cmd_window, text="Vessel")
+        vessel_commands_label.grid(row=2, column=0, columnspan=3)
         create_vessel_button = tk.Button(cmd_window, text="Create Vessel", command=lambda:enter_cmd("create_vessel"))
         create_vessel_button.config(width=15,height=1)
-        create_vessel_button.grid(row=1, column=0)
+        create_vessel_button.grid(row=3, column=0)
         delete_vessel_button = tk.Button(cmd_window, text="Delete Vessel", command=lambda:enter_cmd("delete_vessel"))
         delete_vessel_button.config(width=15,height=1)
-        delete_vessel_button.grid(row=1, column=1)
+        delete_vessel_button.grid(row=3, column=1)
 
+        mnv_commands_label = tk.Label(cmd_window, text="Maneuver")
+        mnv_commands_label.grid(row=4, column=0, columnspan=3)
         create_maneuver_button = tk.Button(cmd_window, text="Create Maneuver", command=lambda:enter_cmd("create_maneuver"))
         create_maneuver_button.config(width=15,height=1)
-        create_maneuver_button.grid(row=2, column=0)
+        create_maneuver_button.grid(row=5, column=0)
         delete_maneuver_button = tk.Button(cmd_window, text="Delete Maneuver", command=lambda:enter_cmd("delete_maneuver"))
         delete_maneuver_button.config(width=15,height=1)
-        delete_maneuver_button.grid(row=2, column=1)
+        delete_maneuver_button.grid(row=5, column=1)
 
+        proj_commands_label = tk.Label(cmd_window, text="Orbit Projection")
+        proj_commands_label.grid(row=6, column=0, columnspan=3)
         create_projection_button = tk.Button(cmd_window, text="Create Projection", command=lambda:enter_cmd("create_projection"))
         create_projection_button.config(width=15,height=1)
-        create_projection_button.grid(row=3, column=0)
+        create_projection_button.grid(row=7, column=0)
         delete_projection_button = tk.Button(cmd_window, text="Delete Projection", command=lambda:enter_cmd("delete_projection"))
         delete_projection_button.config(width=15,height=1)
-        delete_projection_button.grid(row=3, column=1)
+        delete_projection_button.grid(row=7, column=1)
 
+        plot_commands_label = tk.Label(cmd_window, text="Plotting")
+        plot_commands_label.grid(row=8, column=0, columnspan=3)
         create_plot_button = tk.Button(cmd_window, text="Create Plot", command=lambda:enter_cmd("create_plot"))
         create_plot_button.config(width=15,height=1)
-        create_plot_button.grid(row=4, column=0)
+        create_plot_button.grid(row=9, column=0)
         delete_plot_button = tk.Button(cmd_window, text="Delete Plot", command=lambda:enter_cmd("delete_plot"))
         delete_plot_button.config(width=15,height=1)
-        delete_plot_button.grid(row=4, column=1)
+        delete_plot_button.grid(row=9, column=1)
+
+        batch_commands_label = tk.Label(cmd_window, text="Batch File Operations")
+        batch_commands_label.grid(row=10, column=0, columnspan=3)
+        read_batch_button = tk.Button(cmd_window, text="Read Batch", command=lambda:enter_cmd("batch"))
+        read_batch_button.config(width=15,height=1)
+        read_batch_button.grid(row=11, column=0)
+
+        cam_commands_label = tk.Label(cmd_window, text="Camera Controls")
+        cam_commands_label.grid(row=12, column=0, columnspan=3)
+        cam_strafe_speed_button = tk.Button(cmd_window, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
+        cam_strafe_speed_button.config(width=15,height=1)
+        cam_strafe_speed_button.grid(row=13, column=0)
+        lock_cam_button = tk.Button(cmd_window, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
+        lock_cam_button.config(width=15,height=1)
+        lock_cam_button.grid(row=13, column=1)
+        unlock_cam_button = tk.Button(cmd_window, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
+        unlock_cam_button.config(width=15,height=1)
+        unlock_cam_button.grid(row=13, column=2)
+
+        time_commands_label = tk.Label(cmd_window, text="Time Controls")
+        time_commands_label.grid(row=14, column=0, columnspan=3)
+        delta_t_button = tk.Button(cmd_window, text="Delta T", command=lambda:enter_cmd("delta_t"))
+        delta_t_button.config(width=15,height=1)
+        delta_t_button.grid(row=15, column=0)
+        cycle_time_button = tk.Button(cmd_window, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
+        cycle_time_button.config(width=15, height=1)
+        cycle_time_button.grid(row=15, column=1)
+        output_rate_button = tk.Button(cmd_window, text="Output Rate", command=lambda:enter_cmd("output_rate"))
+        output_rate_button.config(width=15, height=1)
+        output_rate_button.grid(row=15, column=2)
+        autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
+        autodt_button.config(width=15, height=1)
+        autodt_button.grid(row=16, column=1)
+
+        misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
+        misc_commands_label.grid(row=17, column=0, columnspan=3)
+        note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
+        note_button.config(width=15, height=1)
+        note_button.grid(row=18, column=0)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)
@@ -609,11 +866,24 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
 
     # COLUMN - COMMAND BUTTONS
     command_button = tk.Button(root, text="Enter Command", command=lambda:use_command_window())
+    command_button.config(width=25, height=1)
     command_button.grid(row=1, column=2)
     delete_command_button = tk.Button(root, text="Delete Command", command=lambda:use_command_delete_window())
+    delete_command_button.config(width=25, height=1)
     delete_command_button.grid(row=2, column=2)
     confirm_and_close_button = tk.Button(root, text="Confirm Commands and Close", command=on_panel_close)
+    confirm_and_close_button.config(width=25, height=1)
     confirm_and_close_button.grid(row=3, column=2)
+    clear_button = tk.Button(root, text="Clear Command Buffer", command=clear_command_buffer)
+    clear_button.config(width=25, height=1)
+    clear_button.grid(row=4, column=2)
+
+    sim_variables_field_label = tk.Label(root, text="Simulation Variables")
+    sim_variables_field_label.grid(row=5, column=2)
+    sim_variables_field = tk.Text(root, width=25, height=7)
+    sim_variables_field.grid(row=6, column=2, rowspan=5)
+
+    set_vars_field()
 
     # COLUMN - COMMAND BUFFER
     cbx_label = tk.Label(root, text="Command Buffer")
@@ -625,6 +895,3 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots):
     root.mainloop()
 
     return command_buffer
-
-
-    
