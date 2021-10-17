@@ -71,6 +71,18 @@ def vector_add(vect1, vect2):
 
     return vect1
 
+def vector_add_safe(vect1, vect2):
+    result_vect = []
+
+    if len(vect1) == len(vect2):
+        for i in range(len(vect1)):
+            result_vect.append(vect1[i] + vect2[i])
+
+    else:
+        return -1
+
+    return result_vect
+
 # rotate an orientation matrix
 def rotate_matrix(orientation_matrix, rotation):
     # orientation matrix is a 3x3 matrix, rotation is a list of three angles in degrees

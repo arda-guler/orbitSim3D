@@ -128,13 +128,16 @@ def drawProjections(projections):
         glColor(p.vessel.get_color()[0]/1.5, p.vessel.get_color()[1]/1.5, p.vessel.get_color()[2]/1.5)
 
         # draw dashed lines for trajectory
+
         vertices = p.get_draw_vertices()
+            
         num_of_vertices = len(vertices)
         vertex_groups = []
 
         i = 0
         while i+500 < len(vertices):
-            vertex_groups.append([vertices[i], vertices[i+500]])
+            vertex_groups.append([vector_add_safe(vertices[i], vector_scale(p.get_body().get_pos(), visual_scaling_factor)),
+                                  vector_add_safe(vertices[i+500], vector_scale(p.get_body().get_pos(), visual_scaling_factor))])
             i += 500
 
         for i in range(1, len(vertex_groups)-1, 2):
@@ -146,15 +149,17 @@ def drawProjections(projections):
         # draw lines to apoapsis and periapsis
 
         center = p.body.get_draw_pos()
+        pe_adjusted = vector_add_safe(p.draw_pe, p.get_body().get_draw_pos())
+        ap_adjusted = vector_add_safe(p.draw_ap, p.get_body().get_draw_pos())
 
         glBegin(GL_LINES)
         glVertex3f(center[0], center[1], center[2])
-        glVertex3f(p.draw_pe[0], p.draw_pe[1], p.draw_pe[2])
+        glVertex3f(pe_adjusted[0], pe_adjusted[1], pe_adjusted[2])
         glEnd()
 
         glBegin(GL_LINES)
         glVertex3f(center[0], center[1], center[2])
-        glVertex3f(p.draw_ap[0], p.draw_ap[1], p.draw_ap[2])
+        glVertex3f(ap_adjusted[0], ap_adjusted[1], ap_adjusted[2])
         glEnd()
 
 def drawSurfacePoints(surface_points, active_cam):

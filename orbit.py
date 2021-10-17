@@ -28,6 +28,8 @@ class kepler_projection():
         
         self.vertices, self.draw_vertices, self.draw_ap, self.draw_pe = self.generate_projection()
 
+        self.body_draw_pos_prev = self.body.get_draw_pos()
+
     def get_name(self):
         return self.name
 
@@ -99,15 +101,14 @@ class kepler_projection():
             end_time = 10000
         else:
             end_time = self.period
-
-        if end_time > 100000:
-            time_step = end_time / 25000
-        else:
-            time_step = 0.1
         
         current_pos = self.pos0
         current_vel = self.vel0
 
+        draw_vertices = []
+        Rs = []
+
+        time_step = 0.1
         t = 0
         while t <= end_time:
             # update gravity
@@ -125,41 +126,18 @@ class kepler_projection():
             current_pos[1] += current_vel[1] * time_step
             current_pos[2] += current_vel[2] * time_step
             
-            vertices.append([self.body.get_pos()[0] + current_pos[0],
-                             self.body.get_pos()[1] + current_pos[1],
-                             self.body.get_pos()[2] + current_pos[2]])
+            vertices.append(current_pos)
+            draw_vertices.append(vector_scale(current_pos, visual_scaling_factor))
+            Rs.append(mag(current_pos))
 
             t += time_step
+            time_step = min((self.mu/mag(current_grav) * 0.000000000000001), end_time/100000)
 
-        draw_vertices = []
-        ap = None
-        pe = None
-        
-        for vertex in vertices:
-            draw_vertices.append(vector_scale(vertex, visual_scaling_factor))
-            
-            # get apoapsis and periapsis
-            adjusted_r = mag([vertex[0] - self.body.get_pos()[0],
-                              vertex[1] - self.body.get_pos()[1],
-                              vertex[2] - self.body.get_pos()[2]])
+        ap_index = Rs.index(max(Rs))
+        pe_index = Rs.index(min(Rs))
 
-            if ap:
-                adjusted_ap = mag([ap[0] - self.body.get_pos()[0],
-                                   ap[1] - self.body.get_pos()[1],
-                                   ap[2] - self.body.get_pos()[2]])
-
-            if pe:
-                adjusted_pe = mag([pe[0] - self.body.get_pos()[0],
-                                   pe[1] - self.body.get_pos()[1],
-                                   pe[2] - self.body.get_pos()[2]])
-
-            if not ap or adjusted_r > adjusted_ap:
-                ap = vertex
-            if not pe or adjusted_r < adjusted_pe:
-                pe = vertex
-
-        draw_ap = vector_scale(ap, visual_scaling_factor)
-        draw_pe = vector_scale(pe, visual_scaling_factor)
+        draw_ap = draw_vertices[ap_index]
+        draw_pe = draw_vertices[pe_index]
 
         return vertices, draw_vertices, draw_ap, draw_pe
 
