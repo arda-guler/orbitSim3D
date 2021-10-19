@@ -24,7 +24,7 @@ Run main.py from the command prompt or terminal
 to start the simulation.
 
 To skip the hassle of setting up a planetary system,
-choose to load a demo scenario at the initialization
+choose to load a scenario at the initialization
 prompt (there are a couple .osf scenario files in the
 'scenarios' folder - simply type the file path).
 
@@ -34,7 +34,10 @@ and an OpenGL window will appear for 3D rendering.
 
 You can move around the OpenGL scene using WASDQE
 keys for rotation and UIOJKL for translation
-(strafing) in all axes.
+(strafing) in all axes. If you are not happy with the
+controls, you can change them via the 'Configure
+OrbitSim3D' option in the initialization menu, or by 
+editing data/config/current.cfg file.
 
 To control the simulation, you can either press C
 in the command interpreter window and enter 
@@ -106,6 +109,21 @@ commands that are accepted by the interpreter.
 
 = = = = = = = = =
 
+CONFIG FILES (.CFG)
+
+These are text files which hold the options such as
+window size and keyboard control settings, as well as
+initial values for the simulation such as time step
+length (delta_t) or physics-to-output-frame ratio 
+(output_rate).
+
+There are only two configuration files;
+
+ - data/config/current.cfg --> the settings currently in use
+ - data/config/default.cfg --> the fallback option
+
+= = = = = = = = =
+
 CODE ORGANIZATION
 
 main.py         -- initializer, command interpreter 
@@ -159,3 +177,10 @@ command_panel.py
                 -- command panel window which
                 -- provides a basic GUI interface
                 -- for entering commands easily
+				
+config_utils.py -- handles reading and editing of config
+                -- files at data/config which hold values
+                -- that the simulations are initialized with
+                --
+                -- more of a convenience utility rather than
+                -- a necessity

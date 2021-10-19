@@ -7,6 +7,7 @@ import keyboard
 import glfw
 import time
 import re
+import shutil
 
 from graphics import *
 from vessel_class import *
@@ -18,18 +19,17 @@ from maneuver import *
 from orbit import *
 from plot import *
 from command_panel import *
+from config_utils import *
 
 # DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
 # because there are system calls to clear the output
 # every physics frame
 
-# this is for OpenGL
-main_cam = camera("main_cam", [0,0,-5000], [[1,0,0],[0,1,0],[0,0,1]], True)
-
-if os.name == "nt":
-    os.system("cls")
-else:
-    os.system("clear")
+def clear_cmd_terminal():
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
 
 vessels = []
 bodies = []
@@ -37,7 +37,7 @@ surface_points = []
 objs = []
 projections = []
 plots = []
-cameras = [main_cam]
+cameras = []
 
 maneuvers = []
 batch_commands = []
@@ -458,29 +458,31 @@ def main(scn_filename=None):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, cameras
 
+    # read config to get start values
+    sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
+    window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
+    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down = read_current_config()
+
     # initializing glfw
     glfw.init()
 
     # creating a window with 800 width and 600 height
-    window = glfw.create_window(800,600,"OrbitSim3D", None, None)
+    window = glfw.create_window(int(window_x),int(window_y),"OrbitSim3D", None, None)
     glfw.set_window_pos(window,200,200)
     glfw.make_context_current(window)
     
-    gluPerspective(70, 800/600, 0.05, 5000000.0)
+    gluPerspective(fov, int(window_x)/int(window_y), near_clip, far_clip)
     glEnable(GL_CULL_FACE)
     glPointSize(2)
 
-    main_cam = cameras[0]
+    main_cam = camera("main_cam", [cam_pos_x,cam_pos_y,cam_pos_z], [[1,0,0],[0,1,0],[0,0,1]], True)
+    cameras.append(main_cam)
     # put "camera" in starting position
     glTranslate(main_cam.get_pos()[0], main_cam.get_pos()[1], main_cam.get_pos()[2])
 
-    delta_t = 1
-    cycle_time = 0.1
-    output_rate = 1
     output_buffer = []
     auto_dt_buffer = []
 
-    cam_strafe_speed = 100
     show_trajectories = True
 
     while True:
@@ -492,13 +494,13 @@ def main(scn_filename=None):
         frame_command = False
 
         # get input and move the "camera" around
-        get_active_cam().rotate([keyboard.is_pressed("w") - keyboard.is_pressed("s"),
-                                 keyboard.is_pressed("a") - keyboard.is_pressed("d"),
-                                 keyboard.is_pressed("q") - keyboard.is_pressed("e")])
+        get_active_cam().rotate([keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up),
+                                 keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right),
+                                 keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)])
 
-        get_active_cam().move([(keyboard.is_pressed("j") - keyboard.is_pressed("l")) * cam_strafe_speed,
-                               (keyboard.is_pressed("o") - keyboard.is_pressed("u")) * cam_strafe_speed,
-                               (keyboard.is_pressed("i") - keyboard.is_pressed("k")) * cam_strafe_speed])
+        get_active_cam().move([(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed,
+                               (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed,
+                               (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed])
 
         if keyboard.is_pressed("c"):
             frame_command = True
@@ -1198,13 +1200,33 @@ def main(scn_filename=None):
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
 def init_sim():
+    clear_cmd_terminal()
     print("\nOrbitSim3D Initialization\n")
-    print("Enter scenario file path to load scenario, or leave blank to start an empty scene.")
-    print("(for example 'scenarios\\lunar_journey.osf' or just 'lunar_journey')\n")
-    scn_path = input("Scenario path: ")
-    if scn_path:
-        import_scenario(scn_path)
-    else:
+    print("1) (L)oad Scenario")
+    print("2) (S)tart Empty Scene")
+    print("3) (C)onfigure OrbitSim3D")
+
+    menu_select = input("\n > ")
+
+    if menu_select == "1" or menu_select.lower() == "l":
+        print("\nEnter scenario file path to load scenario (or leave blank to cancel).")
+        print("(for example 'scenarios\\lunar_journey.osf' or just 'lunar_journey')\n")
+        scn_path = input("Scenario path: ")
+        if scn_path:
+            import_scenario(scn_path)
+        else:
+            init_sim()
+            
+    elif menu_select == "2" or menu_select.lower() == "s":
         main()
+
+    elif menu_select == "3" or menu_select.lower() == "c":
+        configure_sim()
+        init_sim()
+
+    else:
+        print("Invalid selection!")
+        time.sleep(2)
+        init_sim()
 
 init_sim()
