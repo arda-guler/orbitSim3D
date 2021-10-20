@@ -13,6 +13,14 @@ def configure_sim():
         current_cfg_file.close()
         editor_window.destroy()
 
+    def reset_to_defaults():
+        default_cfg_file = open("data/config/default.cfg", "r")
+        default_cfg_file_text = default_cfg_file.read()
+        default_cfg_file.close()
+        edit_field.delete(1.0, "end")
+        edit_field.insert(1.0, default_cfg_file_text)
+        save()
+
     def on_window_close():
         
         def do_save_exit():
@@ -31,6 +39,8 @@ def configure_sim():
         confirm_disc.grid(row=0, column=0, columnspan=2)
         b_yes = tk.Button(confirm_window, text="Yes", command=do_save_exit)
         b_no = tk.Button(confirm_window, text="No", command=dont_save_exit)
+        b_yes.config(width=6, height=1)
+        b_no.config(width=6, height=1)
         b_yes.grid(row=1, column=0)
         b_no.grid(row=1, column=1)
 
@@ -50,16 +60,21 @@ def configure_sim():
     editor_window.title("Config Editor")
 
     editor_label = tk.Label(editor_window, text="current.cfg")
-    editor_label.grid(row=0,column=0,columnspan=5)
+    editor_label.grid(row=0,column=0,columnspan=3)
 
     edit_field = tk.Text(editor_window, width=100, height=25)
-    edit_field.grid(row=1, column=0, columnspan=5)
+    edit_field.grid(row=1, column=0, columnspan=3)
     edit_field.insert(1.0, current_cfg_file_text)
 
     save_button = tk.Button(editor_window, text="Save", command=save)
+    save_button.config(width=20, height=1)
     cancel_button = tk.Button(editor_window, text="Cancel Edit", command=dont_save_exit)
+    cancel_button.config(width=20, height=1)
+    reset_button = tk.Button(editor_window, text="Reset to Defaults", command=reset_to_defaults)
+    reset_button.config(width=20, height=1)
     save_button.grid(row=2, column=0)
     cancel_button.grid(row=2, column=1)
+    reset_button.grid(row=2, column=2)
 
     editor_window.mainloop()
 
