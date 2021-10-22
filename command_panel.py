@@ -185,7 +185,7 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
                 show_s3_button.config(width=20,height=1)
 
                 # option 5
-                show_s4t1_label = tk.Label(entry_panel, text="Maneuver")
+                show_s4t1_label = tk.Label(entry_panel, text="Projection")
                 show_s4t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
                 show_s4t3_label = tk.Label(entry_panel, text="Display Label")
                 show_s4t1_label.grid(row=8, column=1)

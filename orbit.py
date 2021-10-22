@@ -1,4 +1,6 @@
 from math_utils import *
+import math
+import time
 
 class kepler_projection():
     def __init__(self, name, vessel, body, proj_time):
@@ -26,7 +28,7 @@ class kepler_projection():
 
         self.period = self.get_period()
         
-        self.vertices, self.draw_vertices, self.draw_ap, self.draw_pe = self.generate_projection()
+        self.vertices, self.draw_vertices, self.draw_ap, self.draw_pe, self.draw_an, self.draw_dn, self.inclination = self.generate_projection()
 
         self.body_draw_pos_prev = self.body.get_draw_pos()
 
@@ -94,6 +96,9 @@ class kepler_projection():
         else:
             return "inf"
 
+    def get_inclination(self):
+        return self.inclination
+
     def generate_projection(self):
         vertices = []
 
@@ -105,8 +110,11 @@ class kepler_projection():
         current_pos = self.pos0
         current_vel = self.vel0
 
+        inclination = None
+
         draw_vertices = []
         Rs = []
+        Ys = []
 
         time_step = 0.1
         t = 0
@@ -129,17 +137,38 @@ class kepler_projection():
             vertices.append(current_pos)
             draw_vertices.append(vector_scale(current_pos, visual_scaling_factor))
             Rs.append(mag(current_pos))
+            Ys.append(abs2frame_coords(vector_add_safe(current_pos, self.get_body().get_pos()), self.get_body())[1])
 
             t += time_step
             time_step = min((self.mu/mag(current_grav) * 0.000000000000001), end_time/100000)
 
+            current_rel_pos = abs2frame_coords(vector_add_safe(current_pos, self.get_body().get_pos()), self.get_body())
+            
+            try:
+                current_lat = math.degrees(math.atan(current_rel_pos[1]/math.sqrt(current_rel_pos[0]**2 + current_rel_pos[2]**2)))
+            except ZeroDivisionError:
+                current_lat = 90
+                
+            if not inclination or inclination < current_lat:
+                inclination = current_lat
+
         ap_index = Rs.index(max(Rs))
         pe_index = Rs.index(min(Rs))
+
+        for i in range(len(Ys)-1):
+            if not sign(Ys[i]) == sign(Ys[i+1]):
+                if sign(Ys[i+1]) > 0:
+                    an_index = i+1
+                else:
+                    dn_index = i+1
+
+        draw_an = draw_vertices[an_index]
+        draw_dn = draw_vertices[dn_index]
 
         draw_ap = draw_vertices[ap_index]
         draw_pe = draw_vertices[pe_index]
 
-        return vertices, draw_vertices, draw_ap, draw_pe
+        return vertices, draw_vertices, draw_ap, draw_pe, draw_an, draw_dn, inclination
 
     def get_draw_vertices(self):
         return self.draw_vertices
@@ -150,5 +179,6 @@ class kepler_projection():
         output += "Periapsis_R: " + str(self.get_periapsis()) + "   Periapsis_Alt: " + str(self.get_periapsis_alt()) + "\n"
         output += "Orbital Period: " + str(self.get_period()) + "\n"
         output += "Semi-major Axis: " + str(self.get_semimajor_axis()) + "   Eccentricity: " + str(self.eccentricity) + "\n"
+        output += "Inclination: " + str(self.get_inclination()) + "\n"
 
         return output

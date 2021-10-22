@@ -151,6 +151,8 @@ def drawProjections(projections):
         center = p.body.get_draw_pos()
         pe_adjusted = vector_add_safe(p.draw_pe, p.get_body().get_draw_pos())
         ap_adjusted = vector_add_safe(p.draw_ap, p.get_body().get_draw_pos())
+        an_adjusted = vector_add_safe(p.draw_an, p.get_body().get_draw_pos())
+        dn_adjusted = vector_add_safe(p.draw_dn, p.get_body().get_draw_pos())
 
         glBegin(GL_LINES)
         glVertex3f(center[0], center[1], center[2])
@@ -160,6 +162,18 @@ def drawProjections(projections):
         glBegin(GL_LINES)
         glVertex3f(center[0], center[1], center[2])
         glVertex3f(ap_adjusted[0], ap_adjusted[1], ap_adjusted[2])
+        glEnd()
+
+        glColor(p.vessel.get_color()[0]/2, p.vessel.get_color()[1]/2, p.vessel.get_color()[2]/2)
+
+        glBegin(GL_LINES)
+        glVertex3f(center[0], center[1], center[2])
+        glVertex3f(an_adjusted[0], an_adjusted[1], an_adjusted[2])
+        glEnd()
+
+        glBegin(GL_LINES)
+        glVertex3f(center[0], center[1], center[2])
+        glVertex3f(dn_adjusted[0], dn_adjusted[1], dn_adjusted[2])
         glEnd()
 
 def drawSurfacePoints(surface_points, active_cam):

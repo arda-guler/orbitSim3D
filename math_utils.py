@@ -6,6 +6,12 @@ from pyquaternion import Quaternion
 grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
 visual_scaling_factor = (3*(10**(-4))) # arbitrary, unitless
 
+def sign(x):
+    if x >= 0:
+        return 1
+    else:
+        return -1
+
 # takes cartezian coords list
 # gives spherical coords list
 def cartesian2spherical(cart):
@@ -101,4 +107,10 @@ def rotate_matrix(orientation_matrix, rotation):
         orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
 
     return orientation_matrix.tolist()
-        
+
+def abs2frame_coords(abs_coords, body):
+    # convert abosulte coords to body-centered reference frame coords, both cartezian
+    # it's like the ECEF coordinate system
+    return [((abs_coords[0] - body.pos[0]) * body.orient[0][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[0][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[0][2]),
+            ((abs_coords[0] - body.pos[0]) * body.orient[1][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[1][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[1][2]),
+            ((abs_coords[0] - body.pos[0]) * body.orient[2][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[2][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[2][2])]

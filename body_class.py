@@ -110,6 +110,13 @@ class body():
             rotation_amount = dt*360/self.day_length
             self.rotate_body([0,rotation_amount,0])
 
+    # convert abosulte coords to body-centered reference frame coords, both cartezian
+    # it's like the ECEF coordinate system
+    def get_body_centered_coords(self, body):        
+        return [((self.pos[0] - body.pos[0]) * body.orient[0][0]) + ((self.pos[1] - body.pos[1]) * body.orient[0][1]) + ((self.pos[2] - body.pos[2]) * body.orient[0][2]),
+                ((self.pos[0] - body.pos[0]) * body.orient[1][0]) + ((self.pos[1] - body.pos[1]) * body.orient[1][1]) + ((self.pos[2] - body.pos[2]) * body.orient[1][2]),
+                ((self.pos[0] - body.pos[0]) * body.orient[2][0]) + ((self.pos[1] - body.pos[1]) * body.orient[2][1]) + ((self.pos[2] - body.pos[2]) * body.orient[2][2])]
+
     def update_traj_history(self):
         self.traj_history.append(self.pos)
 
