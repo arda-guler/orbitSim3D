@@ -15,7 +15,7 @@ You can time accelerate by either
 ## What is the trade-off?
 Increasing delta_t reduces accuracy of the simulation. High delta_t values risk the simulation diverging from real-world physics.
 
-Decreasing cycle_time usually increases the work load on your machine. If your machine can calculate each frame at, say, 0.02 seconds, your cycle_time should be just above 0.02 seconds ideally. This ensures the simulation is calculated at the fastest "safe" rate. You could lower cycle_time to 0.01 seconds -lower than what your machine can achieve- but you'll get a warning message stating
+Decreasing cycle_time usually increases the work load on your machine. If your machine can calculate each frame at, say, 0.02 seconds, your cycle_time should be just above 0.02 seconds ideally. This ensures the simulation is calculated at the fastest "safe" rate. You could lower cycle_time to 0.01 seconds -lower than what your machine can achieve- but (if warn_cycle_time is enabled) you'll get a warning message stating
 
 > Cycle time too low! Machine can't update physics at the given cycle time!
 > Consider increasing cycle_time to get more consistent calculation rate.

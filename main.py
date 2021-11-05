@@ -461,7 +461,7 @@ def main(scn_filename=None):
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
-    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down = read_current_config()
+    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time = read_current_config()
 
     # initializing glfw
     glfw.init()
@@ -1195,7 +1195,7 @@ def main(scn_filename=None):
         cycle_dt = time.perf_counter() - cycle_start
         if cycle_dt < cycle_time:
             time.sleep(cycle_time - cycle_dt)
-        elif cycle_time*2 <= cycle_dt:
+        elif warn_cycle_time and cycle_time*2 <= cycle_dt:
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
