@@ -51,4 +51,4 @@ So, conclusion: Lower delta_t when passing close-by a gravity source.
 
 It's basically the Riemann sum problem described above, especially with the vehicle orientation while using dynamic-orientation maneuvers. If you need to make a 3.88 second long mid-course correction burn, use a delta_t <= 0.02 to get a proper amount of precision.
 
-The simulation, by default, decreases delta_t to 1 second prior to any maneuvers if the delta_t is larger than 1 before the maneuver starts.
+The simulation, by default, decreases delta_t to 1 second prior to any maneuvers if the delta_t is larger than 1 before the maneuver starts. (You can change this behaviour by modifying the configuration file.)

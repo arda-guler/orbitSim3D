@@ -461,7 +461,8 @@ def main(scn_filename=None):
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
-    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time = read_current_config()
+    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
+    maneuver_auto_dt = read_current_config()
 
     # initializing glfw
     glfw.init()
@@ -1068,10 +1069,9 @@ def main(scn_filename=None):
 
         for m in maneuvers:
             # lower delta_t if a maneuver is in progress
-            if (delta_t > 1 and (m.get_state(sim_time) == "Performing" or
-                                 (m.get_state(sim_time) == "Pending" and
-                                  not m.get_state(sim_time+delta_t) == "Pending"))):
-                delta_t = 1
+            if maneuver_auto_dt and ((delta_t > maneuver_auto_dt and (m.get_state(sim_time) == "Performing" or
+               (m.get_state(sim_time) == "Pending" and not m.get_state(sim_time+delta_t) == "Pending")))):
+                delta_t = maneuver_auto_dt
                 
             m.perform_maneuver(sim_time, delta_t)
 
