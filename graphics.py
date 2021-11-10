@@ -18,7 +18,7 @@ def drawOrigin():
     glVertex3f(0,0,1000)
     glEnd()
 
-def drawBodies(bodies, active_cam):
+def drawBodies(bodies, active_cam, draw_mode):
 
     for b in bodies:
         glColor(b.get_color()[0], b.get_color()[1], b.get_color()[2])
@@ -43,18 +43,35 @@ def drawBodies(bodies, active_cam):
 
         else:
             for mesh in b.model.mesh_list:
-                glBegin(GL_POLYGON)
-                for face in mesh.faces:
-                    for vertex_i in face:
-                        vertex_i = b.model.vertices[vertex_i]
-                        vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
-                        vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
-                        glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
-                glEnd()
+                
+                if draw_mode == 1 or draw_mode == 2:
+                    glPolygonMode(GL_FRONT, GL_FILL)
+                    glBegin(GL_POLYGON)
+                    for face in mesh.faces:
+                        for vertex_i in face:
+                            vertex_i = b.model.vertices[vertex_i]
+                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
+                            vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
+                            glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+                    glEnd()
+                            
+                if draw_mode == 0 or draw_mode == 2:
+                    glPolygonMode(GL_FRONT, GL_LINE)
+                    if draw_mode == 2:
+                        # darken color a bit so that lines are actually visible
+                        glColor(b.get_color()[0]/1.25, b.get_color()[1]/1.25, b.get_color()[2]/1.25)
+                    glBegin(GL_TRIANGLES)
+                    for face in mesh.faces:
+                        for vertex_i in face:
+                            vertex_i = b.model.vertices[vertex_i]
+                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
+                            vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
+                            glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+                    glEnd()
 
         glPopMatrix()
 
-def drawVessels(vessels, active_cam):
+def drawVessels(vessels, active_cam, draw_mode):
 
     for v in vessels:
         # change color we render with
@@ -83,11 +100,23 @@ def drawVessels(vessels, active_cam):
         else:
             # actually render model now
             for mesh in v.model.mesh_list:
-                glBegin(GL_POLYGON)
-                for face in mesh.faces:
-                    for vertex_i in face:
-                        glVertex3f(*v.model.vertices[vertex_i])
-                glEnd()
+                if draw_mode == 1 or draw_mode == 2:
+                    glPolygonMode(GL_FRONT, GL_FILL)
+                    glBegin(GL_POLYGON)
+                    for face in mesh.faces:
+                        for vertex_i in face:
+                            glVertex3f(*v.model.vertices[vertex_i])
+                    glEnd()
+                if draw_mode == 0 or draw_mode == 2:
+                    glPolygonMode(GL_FRONT, GL_LINE)
+                    if draw_mode == 2:
+                        # darken color a bit so that lines are actually visible
+                        glColor(v.get_color()[0]/1.25, v.get_color()[1]/1.25, v.get_color()[2]/1.25)
+                    glBegin(GL_TRIANGLES)
+                    for face in mesh.faces:
+                        for vertex_i in face:
+                            glVertex3f(*v.model.vertices[vertex_i])
+                    glEnd()
 
         # now get out
         glPopMatrix()
@@ -198,7 +227,7 @@ def drawSurfacePoints(surface_points, active_cam):
             glEnd()
             glPopMatrix()
 
-def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_cam, show_trajectories=True):
+def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -209,9 +238,9 @@ def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_ca
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
-    drawBodies(bodies, active_cam)
+    drawBodies(bodies, active_cam, draw_mode)
     drawSurfacePoints(surface_points, active_cam)
-    drawVessels(vessels, active_cam)
+    drawVessels(vessels, active_cam, draw_mode)
 
     # draw trajectory and predictions
     if show_trajectories:

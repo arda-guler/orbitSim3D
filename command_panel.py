@@ -756,6 +756,52 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
                 # auto_dt_clear
                 auto_dt_s3_button = tk.Button(entry_panel, text="Clear Auto-Dt", command=lambda:add_to_buffer("auto_dt_clear"))
                 auto_dt_s3_button.grid(row=5, column=1)
+
+            elif cmd_a == "draw_mode":
+                draw_mode_help = tk.Label(entry_panel, text="'draw_mode' chooses between scene visualizing methods.")
+                draw_mode_help.grid(row=0, column=0, columnspan=10)
+
+                def generate_s1():
+                    command = "draw_mode 0"
+                    add_to_buffer(command)
+
+                def generate_s2():
+                    command = "draw_mode 1"
+                    add_to_buffer(command)
+
+                def generate_s3():
+                    command = "draw_mode 2"
+                    add_to_buffer(command)
+
+                draw_mode_0_button = tk.Button(entry_panel, text="(0) Wireframe", command=generate_s1)
+                draw_mode_0_button.config(width=20, height=1)
+                draw_mode_0_button.grid(row=1, column=0)
+
+                draw_mode_1_button = tk.Button(entry_panel, text="(1) Filled Polygons", command=generate_s2)
+                draw_mode_1_button.config(width=20, height=1)
+                draw_mode_1_button.grid(row=1, column=1)
+
+                draw_mode_2_button = tk.Button(entry_panel, text="(2) Fill + Wireframe", command=generate_s3)
+                draw_mode_2_button.config(width=20, height=1)
+                draw_mode_2_button.grid(row=1, column=2)
+
+            elif cmd_a == "point_size":
+                psize_help = tk.Label(entry_panel, text="'point_size' command sets the size of points that represent distant objects in the scene (in pixels).")
+                psize_help.grid(row=0, column=0, columnspan=10)
+                
+                psize_s1t1_label = tk.Label(entry_panel, text="Point Size")
+                psize_s1t1_label.grid(row=1, column=1)
+
+                psize_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                psize_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if psize_s1t1.get("1.0","end-1c"):
+                        command = "point_size " + psize_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                psize_s1_button = tk.Button(entry_panel, text="Set Point Size", command=generate_s1)
+                psize_s1_button.grid(row=2, column=0)
                 
         cmd_window = tk.Tk()
         cmd_window.protocol("WM_DELETE_WINDOW", on_command_window_close)
@@ -851,6 +897,15 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
         note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
         note_button.grid(row=18, column=0)
+
+        graphics_commands_label = tk.Label(cmd_window, text="Graphics")
+        graphics_commands_label.grid(row=19, column=0, columnspan=3)
+        draw_mode_button = tk.Button(cmd_window, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
+        draw_mode_button.config(width=15, height=1)
+        draw_mode_button.grid(row=20, column=0)
+        point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
+        point_size_button.config(width=15, height=1)
+        point_size_button.grid(row=20, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)

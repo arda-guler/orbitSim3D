@@ -462,7 +462,7 @@ def main(scn_filename=None):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
-    maneuver_auto_dt = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size = read_current_config()
 
     # initializing glfw
     glfw.init()
@@ -474,7 +474,7 @@ def main(scn_filename=None):
     
     gluPerspective(fov, int(window_x)/int(window_y), near_clip, far_clip)
     glEnable(GL_CULL_FACE)
-    glPointSize(2)
+    glPointSize(point_size)
 
     main_cam = camera("main_cam", [cam_pos_x,cam_pos_y,cam_pos_z], [[1,0,0],[0,1,0],[0,0,1]], True)
     cameras.append(main_cam)
@@ -874,6 +874,22 @@ def main(scn_filename=None):
             elif command[0] == "unlock_cam":
                 unlock_active_cam()
 
+            # DRAW_MODE command
+            elif command[0] == "draw_mode":
+                try:
+                    draw_mode = int(command[1])
+                except ValueError:
+                    print("Illegal command! Accepted draw modes: 0, 1, 2")
+                    time.sleep(2)
+
+            # POINT_SIZE command
+            elif command[0] == "point_size":
+                try:
+                    glPointSize(int(command[1]))
+                except:
+                    print("Illegal command!")
+                    time.sleep(2)
+
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
@@ -881,7 +897,7 @@ def main(scn_filename=None):
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
-                    print("auto_dt_clear, get_auto_dt_buffer\n")
+                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1017,6 +1033,15 @@ def main(scn_filename=None):
                     elif command[1] == "unlock_cam":
                         print("\n'lock_cam' command unlocks the active camera and makes it stationary rel. to global coordinates.")
                         print("Syntax: unlock_cam")
+                        input("Press Enter to continue...")
+                    elif command[1] == "draw_mode":
+                        print("\n'draw_mode' command selects scene visualization mode.")
+                        print("0 = lines, 1 = filled polygon, 2 = filled polygon with line overlay")
+                        print("Syntax: draw_mode <selection>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "point_size":
+                        print("\n'point_size' command sets the size of points that represent distant objects in the scene (in pixels).")
+                        print("Syntax: point_size <size>")
                         input("Press Enter to continue...")
                     elif command[1] == "help":
                         print("\n'help' command prints out the help text.\n")
@@ -1186,10 +1211,9 @@ def main(scn_filename=None):
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
             # do the actual drawing
-            glPolygonMode(GL_FRONT, GL_FILL)
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, projections, maneuvers, get_active_cam(), show_trajectories)
+            drawScene(bodies, vessels, surface_points, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode)
             glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start

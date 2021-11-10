@@ -132,6 +132,9 @@ def read_current_config():
     cam_strafe_down = "o"
 
     warn_cycle_time = 1
+
+    draw_mode = 1
+    point_size = 2
     
     try:
         current_cfg_file = open("data/config/current.cfg", "r")
@@ -204,8 +207,13 @@ def read_current_config():
             warn_cycle_time = get_float_in_line(line[:-1])
         elif line[:-1].startswith("maneuver_auto_dt"):
             maneuver_auto_dt = get_float_in_line(line[:-1])
+            
+        elif line[:-1].startswith("draw_mode"):
+            draw_mode = int(get_float_in_line(line[:-1]))
+        elif line[:-1].startswith("point_size"):
+            point_size = int(get_float_in_line(line[:-1]))
 
     return sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
            window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
            cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
-           maneuver_auto_dt
+           maneuver_auto_dt, draw_mode, point_size
