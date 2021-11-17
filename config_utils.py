@@ -33,16 +33,20 @@ def configure_sim():
             current_cfg_file.close()
             editor_window.destroy()
             confirm_window.destroy()
-            
-        confirm_window = tk.Tk()  
-        confirm_disc = tk.Label(confirm_window, text="Do you want to save your changes?")
-        confirm_disc.grid(row=0, column=0, columnspan=2)
-        b_yes = tk.Button(confirm_window, text="Yes", command=do_save_exit)
-        b_no = tk.Button(confirm_window, text="No", command=dont_save_exit)
-        b_yes.config(width=6, height=1)
-        b_no.config(width=6, height=1)
-        b_yes.grid(row=1, column=0)
-        b_no.grid(row=1, column=1)
+
+        current_cfg_file = open("data/config/current.cfg", "r+")
+        if not edit_field.get("1.0", "end-1c") == current_cfg_file.read():
+            confirm_window = tk.Tk()  
+            confirm_disc = tk.Label(confirm_window, text="Do you want to save your changes?")
+            confirm_disc.grid(row=0, column=0, columnspan=2)
+            b_yes = tk.Button(confirm_window, text="Yes", command=do_save_exit)
+            b_no = tk.Button(confirm_window, text="No", command=dont_save_exit)
+            b_yes.config(width=6, height=1)
+            b_no.config(width=6, height=1)
+            b_yes.grid(row=1, column=0)
+            b_no.grid(row=1, column=1)
+        else:
+            dont_save_exit()
 
     # open current.cfg for edit
     try:
