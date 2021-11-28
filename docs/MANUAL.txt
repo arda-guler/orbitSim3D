@@ -155,6 +155,12 @@ surface_point_class.py
                 -- of celestial bodies, such as tracking
                 -- stations, geographical features or
                 -- landing zones
+
+barycenter_class.py
+                -- the 'barycenter' class used for
+                -- marking barycenters of two or more
+                -- celestial bodies and making calculations
+                -- relative to them
 				
 maneuver.py     -- the 'maneuver' classes used for
                 -- various types of maneuvers that

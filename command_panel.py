@@ -3,7 +3,7 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed):
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed):
     command_buffer = []
 
     def on_panel_close():
@@ -25,6 +25,12 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
             
         for sp in surface_points:
             objects_text += "SURFACE POINT: " + sp.get_name() + "\n"
+
+        for bc in barycenters:
+            objects_text += "BARYCENTER: " + bc.get_name() + "\n"
+
+        for m in maneuvers:
+            objects_text += "MANEUVER: " + m.get_name() + "\n"
             
         for p in projections:
             objects_text += "PROJECTION: " + p.get_name() + "\n"
@@ -757,6 +763,45 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
                 auto_dt_s3_button = tk.Button(entry_panel, text="Clear Auto-Dt", command=lambda:add_to_buffer("auto_dt_clear"))
                 auto_dt_s3_button.grid(row=5, column=1)
 
+            elif cmd_a == "create_barycenter":
+                cbc_help = tk.Label(entry_panel, text="'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
+                cbc_help.grid(row=0, column=0, columnspan=10)
+
+                cbc_s1t1_label = tk.Label(entry_panel, text="Barycenter Name")
+                cbc_s1t1_label.grid(row=1, column=1)
+                cbc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                cbc_s1t1.grid(row=2, column=1)
+
+                cbc_s1t2_label = tk.Label(entry_panel, text="Bodies (separate names with single space)")
+                cbc_s1t2_label.grid(row=1, column=2)
+                cbc_s1t2 = tk.Text(entry_panel, width=30, height=1)
+                cbc_s1t2.grid(row=2, column=2)
+
+                def generate_s1():
+                    if cbc_s1t1.get("1.0","end-1c") and cbc_s1t2.get("1.0","end-1c"):
+                        command = "create_barycenter " + cbc_s1t1.get("1.0","end-1c") + " " + cbc_s1t2.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                cbc_s1_button = tk.Button(entry_panel, text="Create Barycenter", command=generate_s1)
+                cbc_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "delete_barycenter":
+                dbc_help = tk.Label(entry_panel, text="'delete_barycenter' removes a previously marked barycenter.")
+                dbc_help.grid(row=0, column=0, columnspan=10)
+
+                dbc_s1t1_label = tk.Label(entry_panel, text="Barycenter Name")
+                dbc_s1t1_label.grid(row=1, column=1)
+                dbc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                dbc_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if dbc_s1t1.get("1.0","end-1c"):
+                        command = "delete_barycenter " + dbc_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                dbc_s1_button = tk.Button(entry_panel, text="Delete Barycenter", command=generate_s1)
+                dbc_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "draw_mode":
                 draw_mode_help = tk.Label(entry_panel, text="'draw_mode' chooses between scene visualizing methods.")
                 draw_mode_help.grid(row=0, column=0, columnspan=10)
@@ -859,53 +904,62 @@ def use_command_panel(vessels, bodies, surface_points, projections, plots, auto_
         delete_plot_button.config(width=15,height=1)
         delete_plot_button.grid(row=9, column=1)
 
+        barycenter_commands_label = tk.Label(cmd_window, text="Barycenters")
+        barycenter_commands_label.grid(row=10, column=0, columnspan=3)
+        create_barycenter_button = tk.Button(cmd_window, text="Create Barycenter", command=lambda:enter_cmd("create_barycenter"))
+        create_barycenter_button.grid(row=11, column=0)
+        create_barycenter_button.config(width=15, height=1)
+        delete_barycenter_button = tk.Button(cmd_window, text="Delete Barycenter", command=lambda:enter_cmd("delete_barycenter"))
+        delete_barycenter_button.grid(row=11, column=1)
+        delete_barycenter_button.config(width=15, height=1)
+
         batch_commands_label = tk.Label(cmd_window, text="Batch File Operations")
-        batch_commands_label.grid(row=10, column=0, columnspan=3)
+        batch_commands_label.grid(row=12, column=0, columnspan=3)
         read_batch_button = tk.Button(cmd_window, text="Read Batch", command=lambda:enter_cmd("batch"))
         read_batch_button.config(width=15,height=1)
-        read_batch_button.grid(row=11, column=0)
+        read_batch_button.grid(row=13, column=0)
 
         cam_commands_label = tk.Label(cmd_window, text="Camera Controls")
-        cam_commands_label.grid(row=12, column=0, columnspan=3)
+        cam_commands_label.grid(row=14, column=0, columnspan=3)
         cam_strafe_speed_button = tk.Button(cmd_window, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
         cam_strafe_speed_button.config(width=15,height=1)
-        cam_strafe_speed_button.grid(row=13, column=0)
+        cam_strafe_speed_button.grid(row=15, column=0)
         lock_cam_button = tk.Button(cmd_window, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
         lock_cam_button.config(width=15,height=1)
-        lock_cam_button.grid(row=13, column=1)
+        lock_cam_button.grid(row=15, column=1)
         unlock_cam_button = tk.Button(cmd_window, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
         unlock_cam_button.config(width=15,height=1)
-        unlock_cam_button.grid(row=13, column=2)
+        unlock_cam_button.grid(row=15, column=2)
 
         time_commands_label = tk.Label(cmd_window, text="Time Controls")
-        time_commands_label.grid(row=14, column=0, columnspan=3)
+        time_commands_label.grid(row=16, column=0, columnspan=3)
         delta_t_button = tk.Button(cmd_window, text="Delta T", command=lambda:enter_cmd("delta_t"))
         delta_t_button.config(width=15,height=1)
-        delta_t_button.grid(row=15, column=0)
+        delta_t_button.grid(row=17, column=0)
         cycle_time_button = tk.Button(cmd_window, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
         cycle_time_button.config(width=15, height=1)
-        cycle_time_button.grid(row=15, column=1)
+        cycle_time_button.grid(row=17, column=1)
         output_rate_button = tk.Button(cmd_window, text="Output Rate", command=lambda:enter_cmd("output_rate"))
         output_rate_button.config(width=15, height=1)
-        output_rate_button.grid(row=15, column=2)
+        output_rate_button.grid(row=17, column=2)
         autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
         autodt_button.config(width=15, height=1)
-        autodt_button.grid(row=16, column=1)
+        autodt_button.grid(row=18, column=1)
 
         misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
-        misc_commands_label.grid(row=17, column=0, columnspan=3)
+        misc_commands_label.grid(row=19, column=0, columnspan=3)
         note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
-        note_button.grid(row=18, column=0)
+        note_button.grid(row=20, column=0)
 
         graphics_commands_label = tk.Label(cmd_window, text="Graphics")
-        graphics_commands_label.grid(row=19, column=0, columnspan=3)
+        graphics_commands_label.grid(row=21, column=0, columnspan=3)
         draw_mode_button = tk.Button(cmd_window, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
         draw_mode_button.config(width=15, height=1)
-        draw_mode_button.grid(row=20, column=0)
+        draw_mode_button.grid(row=22, column=0)
         point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
-        point_size_button.grid(row=20, column=1)
+        point_size_button.grid(row=22, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)

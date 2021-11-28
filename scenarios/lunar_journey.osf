@@ -61,3 +61,6 @@ M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|399300|50
 
 ;Surface points
 S|science-target|Luna|[1,0,0]|[10,50,0]
+
+;Barycenters
+C|earth-luna-bc|Earth,Luna

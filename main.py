@@ -14,6 +14,7 @@ from vessel_class import *
 from body_class import *
 from camera_class import *
 from surface_point_class import *
+from barycenter_class import *
 from math_utils import *
 from maneuver import *
 from orbit import *
@@ -33,6 +34,7 @@ def clear_cmd_terminal():
 
 vessels = []
 bodies = []
+barycenters = []
 surface_points = []
 objs = []
 projections = []
@@ -77,17 +79,20 @@ def read_batch(batch_path):
     return commands
 
 def clear_scene():
-    global objs, vessels, bodies, projections, maneuvers, sim_time
+    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, plots, sim_time
 
     objs = []
     vessels = []
     bodies = []
     maneuvers = []
     projections = []
+    surface_points = []
+    barycenters = []
+    plots = []
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, sim_time
 
     clear_scene()
 
@@ -196,6 +201,20 @@ def import_scenario(scn_filename):
             surface_points.append(new_sp)
             objs.append(new_sp)
             print("Loading surface point:", new_sp.get_name())
+
+        # import barycenters
+        elif line[0] == "C":
+            line[2] = line[2].split(",")
+            bodies_included = []
+            for body_name in line[2]:
+                print(body_name)
+                bodies_included.append(find_obj_by_name(body_name))
+
+            print(bodies_included)
+            new_bc = barycenter(line[1], bodies_included)
+            barycenters.append(new_bc)
+            objs.append(new_bc)
+            print("Loading barycenter:", new_bc.get_name())
 
     main(scn_filename)
 
@@ -415,6 +434,52 @@ def delete_plot(name):
     plots.remove(plot_tbd)
     del plot_tbd
 
+def find_barycenter_by_name(name):
+    global barycenters
+
+    result = None
+
+    for bc in barycenters:
+        if bc.get_name() == name:
+            result = bc
+            break
+
+    return result
+
+def create_barycenter(name, b_bodies):
+    global barycenters, objs
+
+    if find_barycenter_by_name(name):
+        print("A barycenter with this name already exists. Please pick another name for the new barycenter.\n")
+        input("Press Enter to continue...")
+        return
+
+    for x in b_bodies:
+        x = find_obj_by_name(b_bodies)
+
+    for x in b_bodies:
+        if type(x) == "__body__":
+            print("You must only use celestial bodies when calculating barycenters.")
+            input("Press Enter to continue...")
+            return
+
+    new_barycenter = barycenter(name, b_bodies)
+    barycenters.append(new_barycenter)
+    objs.append(new_barycenter)
+
+def delete_barycenter(name):
+    global barycenters, objs
+    bc_tbd = find_barycenter_by_name(name)
+
+    if not bc_tbd:
+        print("Barycenter not found!")
+        time.sleep(2)
+        return
+
+    objs.remove(new_barycenter)
+    barycenters.remove(bc_tbd)
+    del bc_tbd
+
 def lock_active_cam_by_obj_name(name):
     target = find_obj_by_name(name)
 
@@ -456,7 +521,7 @@ def get_active_cam():
 
 def main(scn_filename=None):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
-           plots, cameras
+           plots, cameras, barycenters
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
@@ -507,7 +572,7 @@ def main(scn_filename=None):
             frame_command = True
 
         elif keyboard.is_pressed("p"):
-            panel_commands = use_command_panel(vessels, bodies, surface_points, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed)
+            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed)
             if panel_commands:
                 for panel_command in panel_commands:
                     panel_command = panel_command.split(" ")
@@ -552,6 +617,7 @@ def main(scn_filename=None):
                             else:
                                 print("You can only get altitude of a vessel above a celestial body!\n")
                                 time.sleep(2)
+                            
                     else:
                         print("Object not found.")
                         time.sleep(2)
@@ -573,7 +639,7 @@ def main(scn_filename=None):
                                 output_buffer.append([command[3], "gpos", obj])
                             else:
                                 print("You can only get ground position of a surface point!\n")
-                                time.sleep(2) 
+                                time.sleep(2)
                             
                     elif find_maneuver_by_name(command[1]):
                         maneuver = find_maneuver_by_name(command[1])
@@ -785,6 +851,21 @@ def main(scn_filename=None):
                     print("Wrong number of arguments for command 'display_plot'.\n")
                     time.sleep(2)
 
+            # CREATE_BARYCENTER
+            elif command[0] == "create_barycenter":
+                if len(command) < 3:
+                    print("Not enough arguments!\n")
+                    time.sleep(2)
+                else:
+                    bodies_names = []
+                    for name in command[2:]:
+                        bodies_names.append(find_obj_by_name(name))
+                    create_barycenter(command[1], bodies_names)
+
+            # DELETE_BARYCENTER
+            elif command[0] == "delete_barycenter":
+                delete_barycenter(command[1])
+
             # GET_OBJECTS command
             elif command[0] == "get_objects":
                 print("Objects currently in simulation:\n")
@@ -897,7 +978,7 @@ def main(scn_filename=None):
                     print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
-                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size\n")
+                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -966,6 +1047,14 @@ def main(scn_filename=None):
                     elif command[1] == "display_plot":
                         print("\n'display_plot' command displays a plotter with matplotlib.\n")
                         print("Syntax: display_plot <name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "create_barycenter":
+                        print("'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
+                        print("Syntax: create_barycenter <name> <bodies (separate names with single space)>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "delete_barycenter":
+                        print("'delete_barycenter' removes a previously marked barycenter.")
+                        print("Syntax: delete_barycenter <name>")
                         input("Press Enter to continue...")
                     elif command[1] == "get_objects":
                         print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
@@ -1213,7 +1302,7 @@ def main(scn_filename=None):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode)
             glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start

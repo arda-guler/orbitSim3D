@@ -227,7 +227,35 @@ def drawSurfacePoints(surface_points, active_cam):
             glEnd()
             glPopMatrix()
 
-def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1):
+def drawBarycenters(barycenters, active_cam):
+
+    for bc in barycenters:
+        
+        cam_dist = mag([-bc.get_draw_pos()[0] - active_cam.get_pos()[0],
+                        -bc.get_draw_pos()[1] - active_cam.get_pos()[1],
+                        -bc.get_draw_pos()[2] - active_cam.get_pos()[2]])
+
+        crossline_length = cam_dist/6
+        
+        glColor(bc.get_color())
+        glPushMatrix()
+        glTranslate(bc.get_draw_pos()[0], bc.get_draw_pos()[1], bc.get_draw_pos()[2])
+        glBegin(GL_LINES)
+        
+        glVertex3f(-crossline_length/2, 0, 0)
+        glVertex3f(crossline_length/2, 0, 0)
+
+        glVertex3f(0, -crossline_length/2, 0)
+        glVertex3f(0, crossline_length/2, 0)
+
+        glVertex3f(0, 0, -crossline_length/2)
+        glVertex3f(0, 0, crossline_length/2)
+
+        glEnd()
+        glPopMatrix()
+        
+
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -238,6 +266,7 @@ def drawScene(bodies, vessels, surface_points, projections, maneuvers, active_ca
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
+    drawBarycenters(barycenters, active_cam)
     drawBodies(bodies, active_cam, draw_mode)
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)
