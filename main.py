@@ -474,7 +474,7 @@ def delete_barycenter(name):
         time.sleep(2)
         return
 
-    objs.remove(new_barycenter)
+    objs.remove(bc_tbd)
     barycenters.remove(bc_tbd)
     del bc_tbd
 
