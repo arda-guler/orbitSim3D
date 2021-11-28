@@ -207,10 +207,8 @@ def import_scenario(scn_filename):
             line[2] = line[2].split(",")
             bodies_included = []
             for body_name in line[2]:
-                print(body_name)
                 bodies_included.append(find_obj_by_name(body_name))
 
-            print(bodies_included)
             new_bc = barycenter(line[1], bodies_included)
             barycenters.append(new_bc)
             objs.append(new_bc)
