@@ -7,6 +7,9 @@ class barycenter:
         self.pos = self.get_pos()
         self.vel = self.get_vel()
 
+        # this is required so that orbit projections work
+        self.orient = [[1,0,0],[0,1,0],[0,0,1]]
+
         self.color = self.calc_color()
 
     def get_name(self):
