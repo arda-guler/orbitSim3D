@@ -155,13 +155,21 @@ class kepler_projection():
         ap_index = Rs.index(max(Rs))
         pe_index = Rs.index(min(Rs))
 
+        # the below two lines are just a failsafe, because
+        # the usual way can fail when an obejct is on a perfect
+        # equatorial orbit - so just assign arbitrary
+        # ascending and descending nodes at the beginning in
+        # case it does fail
+        an_index = 0
+        dn_index = int(len(Rs)/2)
+
         for i in range(len(Ys)-1):
             if not sign(Ys[i]) == sign(Ys[i+1]):
                 if sign(Ys[i+1]) > 0:
                     an_index = i+1
                 else:
                     dn_index = i+1
-
+            
         draw_an = draw_vertices[an_index]
         draw_dn = draw_vertices[dn_index]
 
