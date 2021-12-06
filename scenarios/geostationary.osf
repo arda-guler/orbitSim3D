@@ -6,7 +6,9 @@
 ;
 ;Lines starting in B are for bodies,
 ;lines starting in V are for vessels,
-;lines starting in M are for maneuvers.
+;lines starting in M are for maneuvers,
+;lines starting in S are for surface points,
+;lines starting in C are for barycenters.
 ;
 ;All other lines will be ignored and
 ;can be used for comments.
