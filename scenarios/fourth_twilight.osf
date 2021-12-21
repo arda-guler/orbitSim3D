@@ -34,3 +34,15 @@ B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.
 V|Enterprise|data\models\minicapsule.obj|[0.0,1.0,1.0]|[6771000,0,0]|[0,3836,-6644]
 V|Regula-1|data\models\ministation.obj|[0.2,1.0,0.0]|[-3385500,5863858,0]|[0,0,7672]
 V|Reliant|data\models\minicapsule.obj|[1.0,0.0,0.0]|[-6771000,0,0]|[0,-7597.3,-1067.7]
+
+;Surface points
+
+S|North-Pole|Earth|[0.8,0.8,0.8]|[90,0,0]
+S|South-Pole|Earth|[0.8,0.8,0.8]|[-90,0,0]
+
+S|Equator1|Earth|[1,0.2,1]|[0,0,0]
+S|Equator2|Earth|[1,0.2,1]|[0,60,0]
+S|Equator3|Earth|[1,0.2,1]|[0,120,0]
+S|Equator4|Earth|[1,0.2,1]|[0,180,0]
+S|Equator5|Earth|[1,0.2,1]|[0,240,0]
+S|Equator6|Earth|[1,0.2,1]|[0,300,0]
