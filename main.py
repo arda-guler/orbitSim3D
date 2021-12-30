@@ -8,6 +8,7 @@ import glfw
 import time
 import re
 import shutil
+import sys
 
 from graphics import *
 from vessel_class import *
@@ -31,6 +32,8 @@ def clear_cmd_terminal():
         os.system("cls")
     else:
         os.system("clear")
+
+initial_run = True
 
 vessels = []
 bodies = []
@@ -1311,8 +1314,38 @@ def main(scn_filename=None):
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
 def init_sim():
+    global initial_run
+    
     clear_cmd_terminal()
-    print("\nOrbitSim3D Initialization\n")
+
+    # on windows, change text color to green because yes
+    if os.name == "nt":
+        os.system("color a")
+
+    # display icon because it's cool
+    icon_ascii_file = open("data\\images\\icon_ascii.txt")
+    icon_ascii = icon_ascii_file.readlines()
+    
+    for line in icon_ascii:
+        # do it slowly the first time
+        if initial_run:
+            time.sleep(0.05)
+        print(line)
+
+    for i in range(58):
+        sys.stdout.write("= ")
+        sys.stdout.flush()
+        # this one too
+        if initial_run:
+            time.sleep(0.025)
+
+    # global variable, yes, I know what I'm doing
+    if initial_run:
+        time.sleep(2)
+
+    initial_run = False
+    
+    print("\n\nOrbitSim3D Initialization\n")
     print("1) (L)oad Scenario")
     print("2) (S)tart Empty Scene")
     print("3) (C)onfigure OrbitSim3D")
