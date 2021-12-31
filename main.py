@@ -23,10 +23,6 @@ from plot import *
 from command_panel import *
 from config_utils import *
 
-# DO NOT RUN FROM IDLE, RUN FROM COMMAND PROMPT/TERMINAL
-# because there are system calls to clear the output
-# every physics frame
-
 def clear_cmd_terminal():
     if os.name == "nt":
         os.system("cls")
@@ -1315,6 +1311,14 @@ def main(scn_filename=None):
 
 def init_sim():
     global initial_run
+
+    # do not run if started from IDLE, it must be
+    # run from terminal/command prompt
+    if "idlelib" in sys.modules:
+        print("OrbitSim3D does not run properly on IDLE Shell!")
+        print("Please run this program from the command line/terminal.")
+        print("Exiting...")
+        return -1
     
     clear_cmd_terminal()
 
