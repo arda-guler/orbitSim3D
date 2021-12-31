@@ -1330,9 +1330,11 @@ def init_sim():
         # do it slowly the first time
         if initial_run:
             time.sleep(0.05)
-        print(line)
+        print(line, end="")
 
-    for i in range(58):
+    print("\n")
+
+    for i in range(50):
         sys.stdout.write("= ")
         sys.stdout.flush()
         # this one too
