@@ -7,8 +7,6 @@ N-body orbit and mission simulation in 3D space.
 Place bodies and spacecraft, calculate and simulate trajectories, perform orbital maneuvers, apply perturbations, display or plot variables with as much customization as you want.
 Create scenario or batch files to share your simulations or get rid of repetitive tasks.
 
-![ss2](https://user-images.githubusercontent.com/80536083/138036237-000d032c-21ee-4732-81aa-3ca348af7f15.PNG)
-
 Do all of this in Python, the beloved programming language of science and engineering.
 
 To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL.txt).
