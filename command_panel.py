@@ -335,6 +335,66 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 dv_s1_button = tk.Button(entry_panel, text="Delete Vessel", command=generate_s1)
                 dv_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "fragment":
+                frag_help = tk.Label(entry_panel, text="'fragment' command creates small fragments from an object in space\n(as if it was hit by a kinetic impactor).")
+                frag_help.grid(row=0, column=0, columnspan=10)
+
+                frag_s1t1_label = tk.Label(entry_panel, text="Object to Frag.")
+                frag_s1t1_label.grid(row=1, column=1)
+                frag_s1t2_label = tk.Label(entry_panel, text="Num. of Fragments")
+                frag_s1t2_label.grid(row=1, column=2)
+                frag_s1t3_label = tk.Label(entry_panel, text="Rel. Vel. of Fragments")
+                frag_s1t3_label.grid(row=1, column=3)
+
+                frag_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                frag_s1t1.grid(row=2, column=1)
+                frag_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                frag_s1t2.grid(row=2, column=2)
+                frag_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                frag_s1t3.grid(row=2, column=3)
+
+                def generate_s1():
+                    if frag_s1t1.get("1.0","end-1c") and frag_s1t2.get("1.0","end-1c") and frag_s1t3.get("1.0","end-1c"):
+                        command = "fragment " + frag_s1t1.get("1.0","end-1c") + " " + frag_s1t2.get("1.0","end-1c") + " " + frag_s1t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                frag_s1_button = tk.Button(entry_panel, text="Fragment", command=generate_s1)
+                frag_s1_button.grid(row=2, column=0)
+
+                # s2 ---
+                frag_s2t1_label = tk.Label(entry_panel, text="Object to Frag.")
+                frag_s2t1_label.grid(row=3, column=1)
+                frag_s2t2_label = tk.Label(entry_panel, text="Num. of Fragments")
+                frag_s2t2_label.grid(row=3, column=2)
+
+                frag_s2t1 = tk.Text(entry_panel, width=20, height=1)
+                frag_s2t1.grid(row=4, column=1)
+                frag_s2t2 = tk.Text(entry_panel, width=20, height=1)
+                frag_s2t2.grid(row=4, column=2)
+
+                def generate_s2():
+                    if frag_s2t1.get("1.0","end-1c") and frag_s2t2.get("1.0","end-1c"):
+                        command = "fragment " + frag_s2t1.get("1.0","end-1c") + " " + frag_s2t2.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                frag_s2_button = tk.Button(entry_panel, text="Fragment", command=generate_s2)
+                frag_s2_button.grid(row=4, column=0)
+
+                # s3 ---
+                frag_s3t1_label = tk.Label(entry_panel, text="Object to Frag.")
+                frag_s3t1_label.grid(row=5, column=1)
+
+                frag_s3t1 = tk.Text(entry_panel, width=20, height=1)
+                frag_s3t1.grid(row=6, column=1)
+
+                def generate_s3():
+                    if frag_s3t1.get("1.0","end-1c"):
+                        command = "fragment " + frag_s3t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                frag_s3_button = tk.Button(entry_panel, text="Fragment", command=generate_s3)
+                frag_s3_button.grid(row=6, column=0)
+
             elif cmd_a == "create_maneuver":
                 cm_help = tk.Label(entry_panel, text="'create_maneuver' command adds a new maneuver to be performed by a space vessel.")
                 cm_help.grid(row=0, column=0, columnspan=10)
@@ -876,6 +936,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         delete_vessel_button = tk.Button(cmd_window, text="Delete Vessel", command=lambda:enter_cmd("delete_vessel"))
         delete_vessel_button.config(width=15,height=1)
         delete_vessel_button.grid(row=3, column=1)
+        fragment_button = tk.Button(cmd_window, text="Fragment", command=lambda:enter_cmd("fragment"))
+        fragment_button.config(width=15,height=1)
+        fragment_button.grid(row=3, column=2)
 
         mnv_commands_label = tk.Label(cmd_window, text="Maneuver")
         mnv_commands_label.grid(row=4, column=0, columnspan=3)

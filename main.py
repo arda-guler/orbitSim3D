@@ -9,6 +9,7 @@ import time
 import re
 import shutil
 import sys
+import random
 
 from graphics import *
 from vessel_class import *
@@ -292,6 +293,30 @@ def create_vessel(name, model_name, color, pos, vel):
         
     vessels.append(new_vessel)
     objs.append(new_vessel)
+
+def fragment(vessel_name, num_of_frags, vel_of_frags):
+
+    if num_of_frags <= 1:
+        print("Cannot fragment vessel into less than 2 parts!")
+        input("Press Enter to continue...")
+        return
+    
+    if find_obj_by_name(vessel_name):
+        vessel = find_obj_by_name(vessel_name)
+    else:
+        print("A vessel with name \'" + vessel_name + "\' does not exist! Cannot create fragments!")
+        input("Press Enter to continue...")
+        return
+
+    for i in range(num_of_frags):
+        
+        fragment_vel = [vessel.get_vel()[0] + random.uniform(-vel_of_frags, vel_of_frags),
+                        vessel.get_vel()[1] + random.uniform(-vel_of_frags, vel_of_frags),
+                        vessel.get_vel()[2] + random.uniform(-vel_of_frags, vel_of_frags)]
+
+        fragment_pos = [vessel.get_pos()[0], vessel.get_pos()[1], vessel.get_pos()[2]]
+        
+        create_vessel(vessel_name + "_frag_" + str(i), "fragment", vessel.get_color(), fragment_pos, fragment_vel)
 
 def delete_vessel(name):
     global vessels, objs
@@ -745,6 +770,18 @@ def main(scn_filename=None):
                     print("Wrong number of arguments for command 'delete_vessel'.\n")
                     time.sleep(2)
 
+            # FRAGMENT command
+            elif command[0] == "fragment":
+                if len(command) == 4:
+                    fragment(command[1], int(command[2]), float(command[3]))
+                elif len(command) == 3:
+                    fragment(command[1], int(command[2]), 100)
+                elif len(command) == 2:
+                    fragment(command[1], 5, 100)
+                else:
+                    print("Wrong number of arguments for command 'fragment'.\n")
+                    time.sleep(2)
+
             # CREATE_MANEUVER command
             elif command[0] == "create_maneuver":
                 if len(command) == 9 and command[2] == "const_accel":
@@ -972,7 +1009,7 @@ def main(scn_filename=None):
             elif command[0] == "help":
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
-                    print("create_vessel, delete_vessel, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
+                    print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter\n")
@@ -1012,6 +1049,12 @@ def main(scn_filename=None):
                     elif command[1] == "delete_vessel":
                         print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
                         print("Syntax: delete_vessel <name>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "fragment":
+                        print("\n'fragment' command creates small fragments from an object in space\n(as if it was hit by a kinetic impactor).\n")
+                        print("Syntax Option 1: fragment <object_name> <num_of_fragments> <velocity of fragments>\n")
+                        print("Syntax Option 2: fragment <object_name> <num_of_fragments>\n")
+                        print("Syntax Option 3: fragment <object_name>\n")
                         input("Press Enter to continue...")
                     elif command[1] == "create_maneuver":
                         print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
