@@ -1370,14 +1370,22 @@ def init_sim():
         os.system("color a")
 
     # display icon because it's cool
-    icon_ascii_file = open("data\\images\\icon_ascii.txt")
-    icon_ascii = icon_ascii_file.readlines()
-    
-    for line in icon_ascii:
-        # do it slowly the first time
-        if initial_run:
-            time.sleep(0.05)
-        print(line, end="")
+    icon_stages = []
+    for i in range(10):
+        icon_stages.append(open("data\\images\\anim_icon\\" + str(i) + ".txt").readlines())
+
+    # do it slowly the first time
+    if initial_run:
+        for stage in icon_stages:
+            clear_cmd_terminal()
+            for line in stage:
+                print(line, end="")
+            time.sleep(0.015)
+            
+    # don't bother with eye candy otherwise
+    else:
+        for line in icon_stages[-1]:
+            print(line, end="")
 
     print("\n")
 
@@ -1386,11 +1394,11 @@ def init_sim():
         sys.stdout.flush()
         # this one too
         if initial_run:
-            time.sleep(0.025)
+            time.sleep(0.005)
 
     # global variable, yes, I know what I'm doing
     if initial_run:
-        time.sleep(2)
+        time.sleep(0.5)
 
     initial_run = False
     
@@ -1415,6 +1423,11 @@ def init_sim():
 
     elif menu_select == "3" or menu_select.lower() == "c":
         configure_sim()
+        init_sim()
+
+    # :) do the intro again
+    elif menu_select == ":)" or menu_select == ":-)":
+        initial_run = True
         init_sim()
 
     else:
