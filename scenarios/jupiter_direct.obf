@@ -1,0 +1,22 @@
+;.obf -- orbitSim3D batch format
+;
+create_projection jupiter-orbit Jupiter Sol
+create_projection earth-orbit Earth Sol
+;
+lock_cam Kesif-IV
+cam_strafe_speed 10000
+;
+auto_dt 1000 5
+auto_dt 5000 10
+auto_dt 10000 100
+;
+show mnv_accel state ACCEL
+show mnv_accel params ACCEL_PARAMS
+;
+show mnv_decel state DECEL
+show mnv_decel params DECEL_PARAMS
+;
+output_rate 100
+cycle_time 0.000001
+cam_strafe_speed 500000
+;
