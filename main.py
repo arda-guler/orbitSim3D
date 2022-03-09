@@ -118,11 +118,20 @@ def import_scenario(scn_filename):
                         
                     init_sim()
 
+    start_time = 0
+
     print("\nImporting scenario:", scn_filename, "\n")             
     import_lines = scn_file.readlines()
 
     for line in import_lines:
         line = line[0:-1].split("|")
+
+        # get sim start time
+        if line[0] == "T":
+            try:
+                start_time = float(line[1])
+            except:
+                pass
 
         # import bodies
         if line[0] == "B":
@@ -132,7 +141,7 @@ def import_scenario(scn_filename):
 
             orient_nums = re.findall(r"[-+]?\d*\.\d+|\d+", line[8])
             
-            new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True),
+            new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
                             float(line[3]), float(line[4]),
                             
                             [float(line[5][0]), float(line[5][1]), float(line[5][2])],
@@ -155,7 +164,7 @@ def import_scenario(scn_filename):
             line[3] = line[3][1:-1].split(",")
             line[4] = line[4][1:-1].split(",")
             line[5] = line[5][1:-1].split(",")
-            new_vessel = vessel(line[1], pywavefront.Wavefront(line[2], collect_faces=True),
+            new_vessel = vessel(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
                                 [float(line[3][0]), float(line[3][1]), float(line[3][2])],
                                 [float(line[4][0]), float(line[4][1]), float(line[4][2])],
                                 [float(line[5][0]), float(line[5][1]), float(line[5][2])])
@@ -214,7 +223,90 @@ def import_scenario(scn_filename):
             objs.append(new_bc)
             print("Loading barycenter:", new_bc.get_name())
 
-    main(scn_filename)
+    main(scn_filename, start_time)
+
+def export_scenario(scn_filename):
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, sim_time
+    
+    scn_filename = "scenarios/" + scn_filename
+    if not scn_filename.endswith(".osf"):
+        scn_filename += ".osf"
+
+    clear_cmd_terminal()
+    print("Saving scenario into " + scn_filename)
+        
+    with open(scn_filename, "w") as scn_file:
+        print("Writing header...")
+        header_string = """
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers,
+;lines starting in S are for surface points,
+;lines starting in C are for barycenters.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =\n
+"""
+                         
+        scn_file.write(header_string)
+
+        print("Writing simulation time...")
+        time_save_string = "T|" + str(sim_time)
+        scn_file.write(time_save_string)
+
+        print("Writing bodies...")
+        for b in bodies:
+            body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
+                               str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos()) + "|" +\
+                               str(b.get_vel()) + "|" + str(b.get_orient()) + "|" + str(b.get_day_length()) + "|" +\
+                               str(b.get_J2()) + "\n"
+            scn_file.write(body_save_string)
+
+        print("Writing vessels...")
+        for v in vessels:
+            vessel_save_string = "V|" + v.get_name() + "|" + v.get_model_path() + "|" + str(v.get_color()) + "|" +\
+                                 str(v.get_pos()) + "|" + str(v.get_vel()) + "\n"
+            scn_file.write(vessel_save_string)
+
+        print("Writing maneuvers...")
+        for m in maneuvers:
+            maneuver_save_string = "M|" + m.get_name() + "|"
+            if m.get_type() == "const_accel":
+                maneuver_save_string += "const_accel|" + m.get_vessel().get_name() + "|" + m.frame_body.get_name() + "|" +\
+                                        str(m.orientation_input) + "|" + str(m.accel) + "|" + str(m.t_start) + "|" + str(m.duration) + "\n"
+            elif m.get_type() == "const_thrust":
+                maneuver_save_string += "const_thrust|" + m.get_vessel().get_name() + "|" + m.frame_body.get_name() + "|" +\
+                                        str(m.orientation_input) + "|" + str(m.thrust) + "|" +  str(m.mass_init) + "|" + str(m.mass_flow) + "|" +\
+                                        str(m.t_start) + "|" + str(m.duration) + "\n"
+            scn_file.write(maneuver_save_string)
+
+        print("Writing surface points...")
+        for s in surface_points:
+            sp_save_string = "S|" + s.get_name() + "|" + s.get_body().get_name() + "|" + str(s.get_color()) + "|" + str(s.get_gpos()) + "\n"
+            scn_file.write(sp_save_string)
+
+        print("Writing barycenters...")
+        for bc in barycenters:
+            bc_save_string = "C|" + bc.get_name() + "|"
+            for b in bc.get_bodies():
+                bc_save_string += b.get_name() + ","
+            bc_save_string = bc_save_string[:-1]+"\n"
+            scn_file.write(bc_save_string)
+
+        print("Scenario export complete!")
+        time.sleep(2)
 
 def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
                                 mnv_duration):
@@ -287,7 +379,7 @@ def create_vessel(name, model_name, color, pos, vel):
         return
 
     try:
-        new_vessel = vessel(name, model, color, pos, vel)
+        new_vessel = vessel(name, model, model_path, color, pos, vel)
     except:
         print("Could not create vessel:", name)
         
@@ -541,7 +633,7 @@ def get_active_cam():
     # just a fail-safe
     return cameras[0]
 
-def main(scn_filename=None):
+def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, cameras, barycenters
 
@@ -572,6 +664,8 @@ def main(scn_filename=None):
     auto_dt_buffer = []
 
     show_trajectories = True
+
+    sim_time = start_time
 
     while True:
 
@@ -1005,6 +1099,10 @@ def main(scn_filename=None):
                     print("Illegal command!")
                     time.sleep(2)
 
+            # EXPORT command
+            elif command[0] == "export":
+                export_scenario(command[1])
+
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
@@ -1012,7 +1110,8 @@ def main(scn_filename=None):
                     print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
-                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter\n")
+                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
+                    print("export\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1171,6 +1270,10 @@ def main(scn_filename=None):
                     elif command[1] == "point_size":
                         print("\n'point_size' command sets the size of points that represent distant objects in the scene (in pixels).")
                         print("Syntax: point_size <size>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "export":
+                        print("\n'export' command exports the current scenario state into an OrbitSim3D scenario (.osf) file.")
+                        print("Syntax: export <filename>")
                         input("Press Enter to continue...")
                     elif command[1] == "help":
                         print("\n'help' command prints out the help text.\n")

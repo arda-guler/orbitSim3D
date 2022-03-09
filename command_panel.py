@@ -648,6 +648,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 bch_s1_button = tk.Button(entry_panel, text="Read Batch", command=generate_s1)
                 bch_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "export":
+                exp_help = tk.Label(entry_panel, text="'export' command exports the current scenario state into an OrbitSim3D scenario (.osf) file.")
+                exp_help.grid(row=0, column=0, columnspan=10)
+
+                exp_s1t1_label = tk.Label(entry_panel, text="Filename")
+                exp_s1t1_label.grid(row=1, column=1)
+
+                exp_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                exp_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if exp_s1t1.get("1.0", "end-1c"):
+                        command = "export " + exp_s1t1.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                exp_s1_button = tk.Button(entry_panel, text="Export", command=generate_s1)
+                exp_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "cam_strafe_speed":
                 css_help = tk.Label(entry_panel, text="'cam_strafe_speed' command sets the speed of linear camera movement.")
                 css_help.grid(row=0, column=0, columnspan=10)
@@ -976,11 +994,14 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         delete_barycenter_button.grid(row=11, column=1)
         delete_barycenter_button.config(width=15, height=1)
 
-        batch_commands_label = tk.Label(cmd_window, text="Batch File Operations")
+        batch_commands_label = tk.Label(cmd_window, text="File Operations")
         batch_commands_label.grid(row=12, column=0, columnspan=3)
         read_batch_button = tk.Button(cmd_window, text="Read Batch", command=lambda:enter_cmd("batch"))
         read_batch_button.config(width=15,height=1)
         read_batch_button.grid(row=13, column=0)
+        export_button = tk.Button(cmd_window, text="Export Scenario", command=lambda:enter_cmd("export"))
+        export_button.config(width=15,height=1)
+        export_button.grid(row=13, column=1)
 
         cam_commands_label = tk.Label(cmd_window, text="Camera Controls")
         cam_commands_label.grid(row=14, column=0, columnspan=3)

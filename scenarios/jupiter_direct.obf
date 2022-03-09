@@ -10,6 +10,10 @@ auto_dt 1000 5
 auto_dt 5000 10
 auto_dt 10000 100
 ;
+show Kesif-IV dist Jupiter DIST_JUPITER
+show Kesif-IV dist Earth DIST_EARTH
+show Kesif-IV vel_mag Sol VEL_SOL
+;
 show mnv_accel state ACCEL
 show mnv_accel params ACCEL_PARAMS
 ;

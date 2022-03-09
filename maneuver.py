@@ -7,6 +7,9 @@ class maneuver():
     def get_vessel(self):
         return self.vessel
 
+    def get_type(self):
+        return self.type
+
 class maneuver_const_accel(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, accel, t_start, duration):
         super().__init__(name, vessel, "const_accel")

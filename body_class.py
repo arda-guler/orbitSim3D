@@ -2,9 +2,10 @@ from math_utils import *
 import math
 
 class body():
-    def __init__(self, name, model, mass, radius, color, pos, vel, orient, day_length, J2):
+    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient, day_length, J2):
         self.name = name
         self.model = model
+        self.model_path = model_path
         self.mass = mass
         self.radius = radius
         self.color = color
@@ -22,6 +23,9 @@ class body():
 
     def set_name(self, name):
         self.name = name
+
+    def get_model_path(self):
+        return self.model_path
 
     def get_mass(self):
         return self.mass

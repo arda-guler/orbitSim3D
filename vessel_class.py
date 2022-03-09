@@ -1,9 +1,10 @@
 from math_utils import *
 
 class vessel():
-    def __init__(self, name, model, color, pos, vel):
+    def __init__(self, name, model, model_path, color, pos, vel):
         self.name = name
         self.model = model
+        self.model_path = model_path
         self.color = color
         self.pos = pos
         self.vel = vel
@@ -20,6 +21,9 @@ class vessel():
 
     def set_name(self, name):
         self.name = name
+
+    def get_model_path(self):
+        return self.model_path
 
     def get_pos(self):
         return self.pos
