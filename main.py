@@ -263,7 +263,7 @@ def export_scenario(scn_filename):
         scn_file.write(header_string)
 
         print("Writing simulation time...")
-        time_save_string = "T|" + str(sim_time)
+        time_save_string = "T|" + str(sim_time) + "\n"
         scn_file.write(time_save_string)
 
         print("Writing bodies...")
