@@ -1,0 +1,43 @@
+;.osf -- orbitSim3D scenario format
+;
+;An arbitrary file extension/format to
+;distinguish scenario files from
+;regular text files for human reading.
+;
+;Lines starting in B are for bodies,
+;lines starting in V are for vessels,
+;lines starting in M are for maneuvers,
+;lines starting in S are for surface points,
+;lines starting in C are for barycenters.
+;
+;All other lines will be ignored and
+;can be used for comments.
+;
+;(For redundancy, you can use an
+;arbitrary non-letter character to
+;denote comments.)
+;
+;= = = = = = = = = =
+;
+;  3BODY.OSF
+;  Author: arda-guler
+;
+;A planet orbiting not one, not two but three 
+;stars - and a civilization trying to blossom.
+;Their Kepler will surely have a great time trying
+;to work out the mechanics of motion of heavenly
+;bodies. 
+;
+;Bodies
+;
+B|Heart|data\models\minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[0,0,-75000000000]|[-39259.556,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|0|0
+B|Mind|data\models\minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[-64951905280,0,30000000000]|[19629.778,0,33999.773]|[[1,0,0],[0,1,0],[0,0,1]]|0|0
+B|Soul|data\models\minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[64951905280,0,30000000000]|[19629.778,0,-33999.773]|[[1,0,0],[0,1,0],[0,0,1]]|0|0
+;
+B|Trisolaris|data\models\miniearth.obj|6e+24|6500000|[0.04,0.15,0.85]|[0,0,15e+13]|[5166.848,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0
+B|Minisolaris|data\models\miniluna.obj|7e+22|1737000|[0.8, 0.8, 0.8]|[-500000000,0,15e+13]|[5166.848,0,894.924]|[[1,0,0],[0,1,0],[0,0,1]]|0|0
+;
+;Barycenters
+;
+C|StellarBC|Heart,Mind,Soul
+;
