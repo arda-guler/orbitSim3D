@@ -55,8 +55,8 @@ Now, you can use whichever one of these options you like, but I suggest that you
 
 A new window should appear, and the simulation should pause. On the window, you will see three text fields, titled "Simulation Items", "Simulation Variables" and "Command Buffer". Let's go through each one of them:
 - Simulation Items: Everything that exists in the simulated universe can be seen here. The format is \<TYPE\>: \<name\>
--Simulation Variables: Some important and common simulation variables such as time step length (Delta T) can be seen here.
--Command Buffer: All commands scheduled for execution by the command panel once the simulation resumes can be seen here.
+- Simulation Variables: Some important and common simulation variables such as time step length (Delta T) can be seen here.
+- Command Buffer: All commands scheduled for execution by the command panel once the simulation resumes can be seen here.
 
 [![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)
 
