@@ -162,7 +162,7 @@ Feel free to roam around the 3D scene as the maneuver happens. While performing 
 
 After a while, you will see "Yin" being flung outwards to a higher altitude, and eventually it will come back to its starting point, completing one orbit, having drawn an ellipse around Earth.
 
-With that, the introductory tutorial is complete. ***Now, you are free to set your own challenges. Here are two suggestions***:
+With that, the introductory tutorial is complete. ***Now, you are free to set your own challenges. Here are three suggestions***:
 
 - If you are a newbie, figure out how to "circularize" Yin's orbit (turn the elliptic orbit into a circle) when it reaches the highest altitude it can in its orbit. *Hint: The maneuver you are about to execute will complete what is known as a "Hohmann transfer"! https://en.wikipedia.org/wiki/Hohmann_transfer_orbit*
 
