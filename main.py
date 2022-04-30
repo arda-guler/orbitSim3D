@@ -667,7 +667,7 @@ def main(scn_filename=None, start_time=0):
 
     sim_time = start_time
 
-    while True:
+    while not glfw.window_should_close(window):
 
         sim_time += delta_t
 
@@ -1437,7 +1437,7 @@ def main(scn_filename=None, start_time=0):
                 elif element[1] == "note":
                     print(element[0], element[2])
                 
-                print("\n")
+                print("")
                     
             # clear stuff from last frame
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
@@ -1454,6 +1454,10 @@ def main(scn_filename=None, start_time=0):
         elif warn_cycle_time and cycle_time*2 <= cycle_dt:
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
+
+    # destroy OpenGL window and return to menu
+    glfw.destroy_window(window)
+    init_sim()
 
 def init_sim():
     global initial_run
