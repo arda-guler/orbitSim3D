@@ -130,26 +130,27 @@ def drawTrajectories(vessels):
         vertices = v.get_draw_traj_history()
 
         if len(vertices) > 3:
+            glBegin(GL_LINE_STRIP)
             for i in range(1, len(vertices)):
-                glBegin(GL_LINES)
                 glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
-                glEnd()
+            glEnd()
 
 def drawManeuvers(maneuvers):
 
-    for m in maneuvers:
-        # change color to maneuver color
-        glColor(1.0, 1.0, 0.0)
+    # change color to maneuver color
+    glColor(1.0, 1.0, 0.0)
 
+    for m in maneuvers:
+        
         vertices = m.get_draw_vertices()
 
         if len(vertices) > 3:
+            glBegin(GL_LINE_STRIP)
             for i in range(1, len(vertices)):
-                glBegin(GL_LINES)
                 glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
-                glEnd()
+            glEnd()
 
 def drawProjections(projections):
     
