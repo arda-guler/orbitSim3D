@@ -2,8 +2,7 @@
 
 N-body orbit and mission simulation in 3D space.
 
-
-![intro4](https://user-images.githubusercontent.com/80536083/178114089-42369e87-1212-408d-9c3b-03ad01fd593e.PNG)
+![introB](https://user-images.githubusercontent.com/80536083/178114746-7824188d-e437-4438-ad3a-dd32e9ef6eba.png)
 
 Place bodies and spacecraft, calculate and simulate trajectories, perform orbital maneuvers, apply perturbations, display or plot variables with as much customization as you want.
 Create scenario or batch files to share your simulations or get rid of repetitive tasks.
