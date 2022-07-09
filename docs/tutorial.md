@@ -31,7 +31,7 @@ The program will quickly load the scenario, and a second window will appear. The
 
 ### A First Look at the Simulated Universe
 
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or2.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or2.PNG?raw=true)
+![pict1](https://user-images.githubusercontent.com/80536083/178112594-01590b9e-3a9a-45fc-a5f5-3963555ecc53.PNG)
 
 If you look at the OpenGL window, you will see a blue orb and two objects next to it leaving trails as they move around. The beautiful blue orb is planet Earth, and the two objects (one magenta and one cyan) are two imaginary satellites orbiting Earth.
 
@@ -154,11 +154,11 @@ The command panel should disappear and the simulation should continue. (If the s
 
 You will now see some output on the output display. When the simulation time hits the maneuver start time, the maneuver will begin. The maneuver state will change from "Pending" to "Performing" for 70 simulation seconds, and finally report "Completed" once the maneuver is finished.
 
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or6.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or6.PNG?raw=true)
+![tutogif3](https://user-images.githubusercontent.com/80536083/178112732-74b1c235-8f05-46d7-84d6-5d82a6772a72.gif)
 
 Feel free to roam around the 3D scene as the maneuver happens. While performing the maneuver, you can see that the satellite "Yin" will leave a yellow trail instead of a trail of its own color (which is cyan).
 
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or7.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or7.PNG?raw=true)
+![Imag3](https://user-images.githubusercontent.com/80536083/178112812-bf0b1102-e386-4fbf-8644-3335d4af0add.png)
 
 After a while, you will see "Yin" being flung outwards to a higher altitude, and eventually it will come back to its starting point, completing one orbit, having drawn an ellipse around Earth.
 
