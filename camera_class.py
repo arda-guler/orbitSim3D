@@ -41,6 +41,8 @@ class camera():
                            self.offset[1] + (movement[0] * self.orient[0][1]) + (movement[1] * self.orient[1][1]) + (movement[2] * self.orient[2][1]),
                            self.offset[2] + (movement[0] * self.orient[0][2]) + (movement[1] * self.orient[1][2]) + (movement[2] * self.orient[2][2])]
 
+    def get_orient(self):
+        return self.orient
     
     def get_active(self):
         return self.active
@@ -50,6 +52,9 @@ class camera():
 
     def deactivate(self):
         self.active = False
+
+    def get_lock(self):
+        return self.lock
 
     def rotate(self, rotation):
         if not self.lock:

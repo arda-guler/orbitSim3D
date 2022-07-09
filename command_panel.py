@@ -214,6 +214,11 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 show_s4_button.grid(row=9, column=0)
                 show_s4_button.config(width=20,height=1)
 
+                # option 6
+                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
+                show_labels_button.grid(row=10, column=0)
+                show_labels_button.config(width=20,height=1)
+
             elif cmd_a == "hide":
                 hide_help = tk.Label(entry_panel, text="'hide' command removes an output element from the command prompt/terminal.")
                 hide_help.grid(row=0, column=0, columnspan=10)
@@ -236,6 +241,10 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 hide_s2_button = tk.Button(entry_panel, text="Hide Output", command=generate_s2)
                 hide_s2_button.grid(row=3, column=0)
                 hide_s2_button.config(width=20,height=1)
+
+                hide_s3_button = tk.Button(entry_panel, text="Hide Labels", command=lambda:add_to_buffer("hide labels"))
+                hide_s3_button.grid(row=4, column=0)
+                hide_s3_button.config(width=20,height=1)
 
             elif cmd_a == "clear":
                 clear_help = tk.Label(entry_panel, text="'clear' command can remove all output element from the command prompt/terminal,\nremove all objects from the simulation, or clear trajectory trails up to current simulation time.")

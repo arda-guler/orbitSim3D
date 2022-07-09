@@ -4,6 +4,7 @@ from OpenGL.GLU import *
 import math
 
 from math_utils import *
+from ui import *
 
 def drawOrigin():
     glBegin(GL_LINES)
@@ -132,7 +133,7 @@ def drawTrajectories(vessels):
         if len(vertices) > 3:
             glBegin(GL_LINE_STRIP)
             for i in range(1, len(vertices)):
-                glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
+                #glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
             glEnd()
 
@@ -148,7 +149,7 @@ def drawManeuvers(maneuvers):
         if len(vertices) > 3:
             glBegin(GL_LINE_STRIP)
             for i in range(1, len(vertices)):
-                glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
+                #glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
             glEnd()
 
@@ -254,9 +255,98 @@ def drawBarycenters(barycenters, active_cam):
 
         glEnd()
         glPopMatrix()
-        
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1):
+def drawBarycenterLabels(bcs, cam, offset=0.05):
+
+    for bc in bcs:
+
+        if world2cam(bc.get_pos(), cam):
+            label_render_start = world2cam(bc.get_pos(), cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN(bc.get_name(), vector_scale(bc.get_color(), 2), label_render_start, cam)
+
+def drawBodyLabels(bs, cam, offset=0.05):
+
+    for b in bs:
+
+        if world2cam(b.get_pos(), cam):
+            label_render_start = world2cam(b.get_pos(), cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN(b.get_name(), vector_scale(b.get_color(), 2), label_render_start, cam)
+
+def drawSurfacePointLabels(sps, cam, offset=0.05):
+
+    for sp in sps:
+
+        if world2cam(sp.get_pos(), cam):
+            
+            b = sp.get_body()
+            
+            camera_distance = mag([-b.get_draw_pos()[0] - cam.get_pos()[0],
+                                   -b.get_draw_pos()[1] - cam.get_pos()[1],
+                                   -b.get_draw_pos()[2] - cam.get_pos()[2]])
+
+            camera_physical_distance = camera_distance * (1/visual_scaling_factor)
+
+            # only draw if the parent body does not appear too small on the screen
+
+            if not math.degrees(math.atan(b.get_radius()*2/camera_physical_distance)) < 1.5:
+                label_render_start = world2cam(sp.get_pos(), cam)
+                label_render_start[0] += offset
+                label_render_start[1] -= offset
+                render_AN(sp.get_name(), vector_scale(sp.get_color(), 2), label_render_start, cam)
+
+def drawVesselLabels(vs, cam, offset=0.05):
+
+    for v in vs:
+
+        if world2cam(v.get_pos(), cam):
+            label_render_start = world2cam(v.get_pos(), cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN(v.get_name(), vector_scale(v.get_color(), 2), label_render_start, cam)
+
+def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
+
+    for p in ps:
+        center = p.body.get_draw_pos()
+        pe_adjusted = vector_add_safe(p.draw_pe, p.get_body().get_draw_pos())
+        ap_adjusted = vector_add_safe(p.draw_ap, p.get_body().get_draw_pos())
+        an_adjusted = vector_add_safe(p.draw_an, p.get_body().get_draw_pos())
+        dn_adjusted = vector_add_safe(p.draw_dn, p.get_body().get_draw_pos())
+
+        pe_adjusted = vector_scale(pe_adjusted, 1/visual_scaling_factor)
+        ap_adjusted = vector_scale(ap_adjusted, 1/visual_scaling_factor)
+        an_adjusted = vector_scale(an_adjusted, 1/visual_scaling_factor)
+        dn_adjusted = vector_scale(dn_adjusted, 1/visual_scaling_factor)
+
+        if world2cam(pe_adjusted, cam):
+            label_render_start = world2cam(pe_adjusted, cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN(("PERI: " + str(p.get_periapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+
+        if world2cam(ap_adjusted, cam):
+            label_render_start = world2cam(ap_adjusted, cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN(("APO: " + str(p.get_apoapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+
+        if world2cam(an_adjusted, cam):
+            label_render_start = world2cam(an_adjusted, cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN("ASCN", p.vessel.get_color(), label_render_start, cam, size)
+
+        if world2cam(dn_adjusted, cam):
+            label_render_start = world2cam(dn_adjusted, cam)
+            label_render_start[0] += offset
+            label_render_start[1] -= offset
+            render_AN("DSCN", p.vessel.get_color(), label_render_start, cam, size)
+
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -272,8 +362,19 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)
 
+    if not active_cam.get_lock() and labels_visible:
+        drawBarycenterLabels(barycenters, active_cam)
+        drawBodyLabels(bodies, active_cam)
+        drawSurfacePointLabels(surface_points, active_cam)
+        drawVesselLabels(vessels, active_cam)
+
     # draw trajectory and predictions
     if show_trajectories:
+        
         drawProjections(projections)
+        if not active_cam.get_lock() and labels_visible:
+            drawProjectionLabels(projections, active_cam)
+            
         drawTrajectories(vessels)
         drawManeuvers(maneuvers)
+        

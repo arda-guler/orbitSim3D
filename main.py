@@ -641,7 +641,7 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible = read_current_config()
 
     # initializing glfw
     glfw.init()
@@ -783,6 +783,8 @@ def main(scn_filename=None, start_time=0):
                 elif len(command) == 2:
                     if command[1] == "traj":
                         show_trajectories = True
+                    elif command[1] == "labels":
+                        labels_visible = 1
 
                 else:
                     print("Wrong number of arguments for command 'show'.")
@@ -792,6 +794,8 @@ def main(scn_filename=None, start_time=0):
             elif command[0] == "hide":
                 if command[1] == "traj":
                     show_trajectories = False
+                elif command[1] == "labels":
+                    labels_visible = 0
                 else:
                     for i in range(len(output_buffer)):
                         if output_buffer[i][0] == command[1]:
@@ -1445,7 +1449,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible)
             glfw.swap_buffers(window)
 
         cycle_dt = time.perf_counter() - cycle_start

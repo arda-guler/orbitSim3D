@@ -114,3 +114,26 @@ def abs2frame_coords(abs_coords, body):
     return [((abs_coords[0] - body.pos[0]) * body.orient[0][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[0][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[0][2]),
             ((abs_coords[0] - body.pos[0]) * body.orient[1][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[1][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[1][2]),
             ((abs_coords[0] - body.pos[0]) * body.orient[2][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[2][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[2][2])]
+
+def world2cam(w_coords, cam, factor=10):
+    w_coords = vector_scale(w_coords, -visual_scaling_factor)
+    cam_orient = cam.get_orient()
+    rel_pos = vector_add_safe(w_coords, vector_scale(cam.get_pos(), -1))
+    cam_x = cam_orient[0]
+    cam_y = cam_orient[1]
+    cam_z = cam_orient[2]
+
+    z_dist = dot(rel_pos, cam_z)
+
+    # object is behind camera, assign no position
+    if z_dist < 0:
+        return None
+    
+    x_dist = dot(rel_pos, cam_x)
+    y_dist = dot(rel_pos, cam_y)
+
+    x_skew = -(x_dist/z_dist) * factor
+    y_skew = -(y_dist/z_dist) * factor
+
+    return [x_skew, y_skew]
+    
