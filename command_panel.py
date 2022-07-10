@@ -3,7 +3,7 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed):
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed):
     command_buffer = []
 
     def on_panel_close():
@@ -64,6 +64,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         vars_text += "Cycle Time: " + str(cycle_time) + "\n"
         vars_text += "Output Rate: " + str(output_rate) + "\n"
         vars_text += "\nCam. Strafe Speed: " + str(cam_strafe_speed) + "\n"
+        vars_text += "Cam. Rotate Speed: " + str(cam_rotate_speed) + "\n"
         sim_variables_field.delete(1.0, "end")
         sim_variables_field.insert(1.0, vars_text)
         sim_variables_field.config(state="disabled")
@@ -693,6 +694,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 css_s1_button = tk.Button(entry_panel, text="Set Speed", command=generate_s1)
                 css_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "cam_rotate_speed":
+                crs_help = tk.Label(entry_panel, text="'cam_rotate_speed' command sets the speed of camera rotation.")
+                crs_help.grid(row=0, column =0, columnspan=10)
+
+                crs_s1t1_label = tk.Label(entry_panel, text="Speed")
+                crs_s1t1_label.grid(row=1, column=1)
+
+                crs_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if crs_s1t1.get("1.0","end-1c"):
+                        command = "cam_rotate_speed " + crs_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                crs_s1_button = tk.Button(entry_panel, text="Set Speed", command=generate_s1)
+                crs_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "lock_cam":
                 loc_help = tk.Label(entry_panel, text="'lock_cam' command locks the active camera to an object (if it exists).")
                 loc_help.grid(row=0, column=0, columnspan=10)
@@ -1023,36 +1042,39 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         unlock_cam_button = tk.Button(cmd_window, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
         unlock_cam_button.config(width=15,height=1)
         unlock_cam_button.grid(row=15, column=2)
+        cam_rotate_speed_button = tk.Button(cmd_window, text="Cam. Rotate Speed", command=lambda:enter_cmd("cam_rotate_speed"))
+        cam_rotate_speed_button.config(width=15,height=1)
+        cam_rotate_speed_button.grid(row=16, column=0)
 
         time_commands_label = tk.Label(cmd_window, text="Time Controls")
-        time_commands_label.grid(row=16, column=0, columnspan=3)
+        time_commands_label.grid(row=17, column=0, columnspan=3)
         delta_t_button = tk.Button(cmd_window, text="Delta T", command=lambda:enter_cmd("delta_t"))
         delta_t_button.config(width=15,height=1)
-        delta_t_button.grid(row=17, column=0)
+        delta_t_button.grid(row=18, column=0)
         cycle_time_button = tk.Button(cmd_window, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
         cycle_time_button.config(width=15, height=1)
-        cycle_time_button.grid(row=17, column=1)
+        cycle_time_button.grid(row=18, column=1)
         output_rate_button = tk.Button(cmd_window, text="Output Rate", command=lambda:enter_cmd("output_rate"))
         output_rate_button.config(width=15, height=1)
-        output_rate_button.grid(row=17, column=2)
+        output_rate_button.grid(row=18, column=2)
         autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
         autodt_button.config(width=15, height=1)
-        autodt_button.grid(row=18, column=1)
+        autodt_button.grid(row=19, column=1)
 
         misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
-        misc_commands_label.grid(row=19, column=0, columnspan=3)
+        misc_commands_label.grid(row=20, column=0, columnspan=3)
         note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
-        note_button.grid(row=20, column=0)
+        note_button.grid(row=21, column=0)
 
         graphics_commands_label = tk.Label(cmd_window, text="Graphics")
-        graphics_commands_label.grid(row=21, column=0, columnspan=3)
+        graphics_commands_label.grid(row=22, column=0, columnspan=3)
         draw_mode_button = tk.Button(cmd_window, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
         draw_mode_button.config(width=15, height=1)
-        draw_mode_button.grid(row=22, column=0)
+        draw_mode_button.grid(row=23, column=0)
         point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
-        point_size_button.grid(row=22, column=1)
+        point_size_button.grid(row=23, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)

@@ -638,7 +638,7 @@ def main(scn_filename=None, start_time=0):
            plots, cameras, barycenters
 
     # read config to get start values
-    sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
+    sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
     maneuver_auto_dt, draw_mode, point_size, labels_visible = read_current_config()
@@ -676,9 +676,9 @@ def main(scn_filename=None, start_time=0):
         frame_command = False
 
         # get input and move the "camera" around
-        get_active_cam().rotate([keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up),
-                                 keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right),
-                                 keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)])
+        get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed,
+                                 (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed,
+                                 (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed])
 
         get_active_cam().move([(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed,
                                (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed,
@@ -688,7 +688,8 @@ def main(scn_filename=None, start_time=0):
             frame_command = True
 
         elif keyboard.is_pressed("p"):
-            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed)
+            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots,
+                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed)
             if panel_commands:
                 for panel_command in panel_commands:
                     panel_command = panel_command.split(" ")
@@ -1034,6 +1035,10 @@ def main(scn_filename=None, start_time=0):
             elif command[0] == "cam_strafe_speed":
                 cam_strafe_speed = float(command[1])
 
+            # CAM_ROTATE_SPEED command
+            elif command[0] == "cam_rotate_speed":
+                cam_rotate_speed = float(command[1])
+
             # DELTA_T command
             elif command[0] == "delta_t":
                 delta_t = float(command[1])
@@ -1110,7 +1115,7 @@ def main(scn_filename=None, start_time=0):
             # HELP command
             elif command[0] == "help":
                 if len(command) == 1:
-                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, delta_t, cycle_time,")
+                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, cam_rotate_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                     print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
                     print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
@@ -1218,6 +1223,10 @@ def main(scn_filename=None, start_time=0):
                     elif command[1] == "cam_strafe_speed":
                         print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
                         print("Syntax: cam_strafe_speed <speed>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "cam_rotate_speed":
+                        print("\n'cam_rotate_speed' command sets the speed of camera rotation.\n")
+                        print("Syntax: cam_rotate_speed <speed> \n")
                         input("Press Enter to continue...")
                     elif command[1] == "delta_t":
                         print("\n'delta_t' command sets time step length of each physics frame.")

@@ -115,6 +115,7 @@ def read_current_config():
     cam_pos_y = 0
     cam_pos_z = -5000
     cam_strafe_speed = 100
+    cam_rotate_speed = 3
 
     window_x = 800
     window_y = 600
@@ -171,6 +172,8 @@ def read_current_config():
             cam_pos_z = get_float_in_line(line[:-1])
         elif line[:-1].startswith("cam_strafe_speed"):
             cam_strafe_speed = get_float_in_line(line[:-1])
+        elif line[:-1].startswith("cam_rotate_speed"):
+            cam_rotate_speed = get_float_in_line(line[:-1])
 
         elif line[:-1].startswith("window_x"):
             window_x = get_float_in_line(line[:-1])
@@ -220,7 +223,7 @@ def read_current_config():
         elif line[:-1].startswith("labels_visible"):
             labels_visible = int(get_float_in_line(line[:-1]))
 
-    return sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed,\
+    return sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
            window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
            cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
            maneuver_auto_dt, draw_mode, point_size, labels_visible
