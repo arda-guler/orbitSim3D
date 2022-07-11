@@ -429,7 +429,7 @@ def render_AN(render_string, color, start_pt, cam, font_size=0.1):
 
         elif char == ".":
             x = draw_start_x
-            y = start_pt[1]
+            y = start_pt[1] - font_size * 4
             drawPoint2D(x, y, color, cam)
 
         else:
