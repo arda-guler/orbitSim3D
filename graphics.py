@@ -326,25 +326,25 @@ def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
             label_render_start = world2cam(pe_adjusted, cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("PERI: " + str(p.get_periapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("PERI " + str(p.get_periapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
 
         if world2cam(ap_adjusted, cam):
             label_render_start = world2cam(ap_adjusted, cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("APO: " + str(p.get_apoapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("APO " + str(p.get_apoapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
 
         if world2cam(an_adjusted, cam):
             label_render_start = world2cam(an_adjusted, cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN("ASCN", p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("ASCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size)
 
         if world2cam(dn_adjusted, cam):
             label_render_start = world2cam(dn_adjusted, cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN("DSCN", p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("DSCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size)
 
 def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True):
     

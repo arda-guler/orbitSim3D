@@ -491,6 +491,21 @@ def delete_keplerian_proj(name):
     projections.remove(proj_tbd)
     del proj_tbd
 
+def update_keplerian_proj(name, update_time):
+    global projections
+    proj_tbu = find_proj_by_name(name)
+
+    if not proj_tbu:
+        print("Projection not found!")
+        time.sleep(2)
+        return
+
+    proj_vessel = proj_tbu.get_vessel()
+    proj_body = proj_tbu.get_body()
+    
+    delete_keplerian_proj(name)
+    create_keplerian_proj(name, proj_vessel, proj_body, update_time)
+
 def find_plot_by_name(name):
     global plots
 
@@ -945,6 +960,14 @@ def main(scn_filename=None, start_time=0):
                     print("Wrong number of arguments for command 'delete_projection'.\n")
                     time.sleep(2)
 
+            # UPDATE_PROJECTION command
+            elif command[0] == "update_projection":
+                if len(command) == 2:
+                    update_keplerian_proj(command[1], sim_time)
+                else:
+                    print("Wrong number of arguments for command 'delete_projection'.\n")
+                    time.sleep(2)
+
             # CREATE_PLOT command
             elif command[0] == "create_plot":
                 if len(command) == 5:
@@ -1117,8 +1140,8 @@ def main(scn_filename=None, start_time=0):
                 if len(command) == 1:
                     print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, cam_rotate_speed, delta_t, cycle_time,")
                     print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
-                    print("batch, note, create_projection, delete_projection, get_projections, create_plot, delete_plot,")
-                    print("display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
+                    print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
+                    print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
                     print("export\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
@@ -1182,6 +1205,10 @@ def main(scn_filename=None, start_time=0):
                     elif command[1] == "delete_projection":
                         print("\n'delete_projection' command removes a 2-body Keplerian orbit projection from the simulation.\n")
                         print("Syntax: delete_projection <name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "update_projection":
+                        print("\n'update_projection' command recalculates a 2-body Keplerian orbit projection at current simulation time.\n")
+                        print("Syntax: update_projection <name>")
                         input("Press Enter to continue...")
                     elif command[1] == "create_plot":
                         print("\n'create_plot' command adds a plotter to the simulation to plot some value against simulation time")

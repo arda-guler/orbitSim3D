@@ -557,6 +557,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 dp_s1_button = tk.Button(entry_panel, text="Delete Projection", command=generate_s1)
                 dp_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "update_projection":
+                up_help = tk.Label(entry_panel, text="'update_projection' command recalculates a 2-body Keplerian orbit projection at current simulation time.")
+                up_help.grid(row=0, column=0, columnspan=10)
+
+                up_s1t1_label = tk.Label(entry_panel, text="Projection Name")
+                up_s1t1_label.grid(row=1, column=1)
+
+                up_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                up_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if up_s1t1.get("1.0", "end-1c"):
+                        command = "update_projection " + up_s1t1.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                up_s1_button = tk.Button(entry_panel, text="Update Projection", command=generate_s1)
+                up_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "create_plot":
                 cpl_help = tk.Label(entry_panel, text="'create_plot' command adds a plotter to the simulation to plot some value against simulation time.")
                 cpl_help.grid(row=0, column=0, columnspan=10)
@@ -1003,6 +1021,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         delete_projection_button = tk.Button(cmd_window, text="Delete Projection", command=lambda:enter_cmd("delete_projection"))
         delete_projection_button.config(width=15,height=1)
         delete_projection_button.grid(row=7, column=1)
+        update_projection_button = tk.Button(cmd_window, text="Update Projection", command=lambda:enter_cmd("update_projection"))
+        update_projection_button.config(width=15,height=1)
+        update_projection_button.grid(row=7, column=2)
 
         plot_commands_label = tk.Label(cmd_window, text="Plotting")
         plot_commands_label.grid(row=8, column=0, columnspan=3)
