@@ -3,7 +3,8 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed):
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots, auto_dt_buffer,
+                      sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer):
     command_buffer = []
 
     def on_panel_close():
@@ -877,7 +878,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
 
                 def generate_s2():
                     if auto_dt_s2t1.get("1.0","end-1c"):
-                        command = "auto_dt " + auto_dt_s2t1.get("1.0","end-1c")
+                        command = "auto_dt_remove " + auto_dt_s2t1.get("1.0","end-1c")
                         add_to_buffer(command)
 
                 auto_dt_s2_button = tk.Button(entry_panel, text="Remove Auto-Dt", command=generate_s2)
@@ -886,6 +887,69 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 # auto_dt_clear
                 auto_dt_s3_button = tk.Button(entry_panel, text="Clear Auto-Dt", command=lambda:add_to_buffer("auto_dt_clear"))
                 auto_dt_s3_button.grid(row=5, column=1)
+
+            elif cmd_a == "rapid_compute":
+                rapid_compute_help = tk.Label(entry_panel, text="'Rapid compute' is a simulation mode in which very little user output is provided in order to allocate more resources\nfor trajectory calculations, increasing simulation progression rate dramatically without sacrificing physical accuracy.")
+                rapid_compute_help.grid(row=0, column=0, columnspan=10)
+
+                rc_buffer_field_label = tk.Label(entry_panel, text="Rapid Compute Buffer at T = " + str(sim_time))
+                rc_buffer_field_label.grid(row=1, column=0)
+                rc_buffer_field = tk.Text(entry_panel, width=21, height=15)
+                rc_buffer_field.grid(row=2, column=0, rowspan=5)
+                rc_buffer_field.config(state="disabled")
+
+                def set_rc_field():
+                    field_text = "Start Time - End Time\n"
+                    
+                    n = 0
+                    for setting in rapid_compute_buffer:
+                        field_text += str(n) + ": " + str(setting[0]) + " - " + str(setting[1]) + "\n"
+                        n += 1
+
+                    rc_buffer_field.config(state="normal")
+                    rc_buffer_field.delete(1.0, "end")
+                    rc_buffer_field.insert(1.0, field_text)
+                    rc_buffer_field.config(state="disabled")
+
+                set_rc_field()
+
+                # rapid compute
+                rc_s1t1_label = tk.Label(entry_panel, text="Start Time")
+                rc_s1t2_label = tk.Label(entry_panel, text="End Time")
+                rc_s1t1_label.grid(row=1, column=2)
+                rc_s1t2_label.grid(row=1, column=3)
+
+                rc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                rc_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                rc_s1t1.grid(row=2, column=2)
+                rc_s1t2.grid(row=2, column=3)
+
+                def generate_s1():
+                    if rc_s1t1.get("1.0","end-1c") and rc_s1t2.get("1.0","end-1c"):
+                        command = "rapid_compute " + rc_s1t1.get("1.0","end-1c") + " " + rc_s1t2.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                rc_s1_button = tk.Button(entry_panel, text="Add Rapid Compute", command=generate_s1)
+                rc_s1_button.grid(row=2, column=1)
+
+                # cancel
+                rc_s2t1_label = tk.Label(entry_panel, text="Rapid Compute Index")
+                rc_s2t1_label.grid(row=3, column=2)
+
+                rc_s2t1 = tk.Text(entry_panel, width=20, height=1)
+                rc_s2t1.grid(row=4, column=2)
+
+                def generate_s2():
+                    if rc_s2t1.get("1.0","end-1c"):
+                        command = "cancel_rapid_compute " + rc_s2t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                rc_s2_button = tk.Button(entry_panel, text="Cancel Rapid Compute", command=generate_s2)
+                rc_s2_button.grid(row=4, column=1)
+
+                # clear
+                rc_s3_button = tk.Button(entry_panel, text="Clear RC Buffer", command=lambda:add_to_buffer("rapid_compute_clear"))
+                rc_s3_button.grid(row=5, column=1)
 
             elif cmd_a == "create_barycenter":
                 cbc_help = tk.Label(entry_panel, text="'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
@@ -1081,6 +1145,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
         autodt_button.config(width=15, height=1)
         autodt_button.grid(row=19, column=1)
+        rapid_compute_button = tk.Button(cmd_window, text="Rapid Compute", command=lambda:enter_cmd("rapid_compute"))
+        rapid_compute_button.config(width=15, height=1)
+        rapid_compute_button.grid(row=19, column=2)
 
         misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
         misc_commands_label.grid(row=20, column=0, columnspan=3)

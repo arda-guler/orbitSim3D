@@ -677,6 +677,8 @@ def main(scn_filename=None, start_time=0):
 
     output_buffer = []
     auto_dt_buffer = []
+    rapid_compute_buffer = []
+    rapid_compute_flag = False
 
     show_trajectories = True
 
@@ -704,7 +706,7 @@ def main(scn_filename=None, start_time=0):
 
         elif keyboard.is_pressed("p"):
             panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots,
-                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed)
+                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer)
             if panel_commands:
                 for panel_command in panel_commands:
                     panel_command = panel_command.split(" ")
@@ -1090,6 +1092,34 @@ def main(scn_filename=None, start_time=0):
             elif command[0] == "auto_dt_clear":
                 auto_dt_buffer = []
 
+            # RAPID_COMPUTE command
+            elif command[0] == "rapid_compute":
+                if len(command) == 2:
+                    rapid_compute_buffer.append([sim_time, float(command[1])])
+                elif len(command) == 3:
+                    rapid_compute_buffer.append([float(command[1]), float(command[2])])
+                else:
+                    print("Wrong number of arguments for command 'rapid_compute'.")
+                    time.sleep(2)
+
+                rapid_compute_buffer = sorted(rapid_compute_buffer)
+
+            # CANCEL_RAPID_COMPUTE command
+            elif command[0] == "cancel_rapid_compute":
+                try:
+                    del rapid_compute_buffer[int(command[1])]
+                except IndexError:
+                    print("Given index does not exist in the rapid compute buffer.")
+                    time.sleep(2)
+
+            # GET_RAPID_COMUTE_BUFFER command
+            elif command[0] == "get_rapid_compute_buffer":
+                print(rapid_compute_buffer)
+
+            # RAPID_COMPUTE_CLEAR command
+            elif command[0] == "rapid_compute_clear":
+                rapid_compute_buffer = []
+
             # OUTPUT_RATE command
             elif command[0] == "output_rate":
                 output_rate = int(command[1])
@@ -1143,7 +1173,7 @@ def main(scn_filename=None, start_time=0):
                     print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
                     print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
-                    print("export\n")
+                    print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1279,7 +1309,26 @@ def main(scn_filename=None, start_time=0):
                         print("\n'get_auto_dt_buffer' command displays the current state of the auto_dt buffer.")
                         print("The commands are displayed in format [[<time>, <delta_t>],[<time>, <delta_t>],[<time>, <delta_t>]...]")
                         print("Syntax: get_auto_dt_buffer\n")
-                        input("Press Enter to continue...")     
+                        input("Press Enter to continue...")
+                    elif command[1] == "rapid_compute":
+                        print("\n'rapid_compute' command sets a time interval for the simulation to enter rapid computation mode.")
+                        print("In this mode, the simulation proceeds much faster without losing sacrificing physical accuracy, but")
+                        print("provides no meaningful user output in the meanwhile.")
+                        print("Syntax Option 1: rapid_compute <end_time>")
+                        print("Syntax Option 2: rapid_compute <start_time> <end_time>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "cancel_rapid_compute":
+                        print("\n'cancel_rapid_compute' command removes a rapid computation iterval from the buffer.")
+                        print("Syntax: cancel_rapid_compute <buffer_index>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "get_rapid_compute_buffer":
+                        print("\n'get_rapid_compute_buffer' command prints out the rapid compute buffer.")
+                        print("Syntax: get_rapid_compute_buffer")
+                        input("Press Enter to continue...")
+                    elif command[1] == "rapid_compute_clear":
+                        print("\n'rapid_compute_clear' command clears the rapid compute buffer.")
+                        print("Syntax: clear_rapid_compute")
+                        input("Press Enter to continue...")
                     elif command[1] == "output_rate":
                         print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
                         print("Must be a positive integer.\n")
@@ -1337,6 +1386,29 @@ def main(scn_filename=None, start_time=0):
             delta_t = auto_dt_buffer[0][1]
             auto_dt_buffer.remove(auto_dt_buffer[0])
 
+        # set rapid compute flag according to rapid_compute_buffer
+        if rapid_compute_buffer and rapid_compute_buffer[0][0] <= sim_time < rapid_compute_buffer[0][1] and not rapid_compute_flag:
+            rapid_compute_flag = True
+            old_cycle_time = cycle_time
+            cycle_time = 0
+            clear_cmd_terminal()
+            print("OrbitSim3D Command Interpreter & Output Display\n")
+            print("Simulation is in rapid computation mode from T=" + str(rapid_compute_buffer[0][0]) + " to T=" + str(rapid_compute_buffer[0][1]) + ".")
+            print("Minimal user output will be provided to allocate more resources for mathematical operations.")
+            print("Please wait until the calculations are complete.")
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            drawRapidCompute(get_active_cam())
+            glfw.swap_buffers(window)
+
+        # this prevents 'jumps' in trajectory trails during rapid compute
+        if rapid_compute_buffer and rapid_compute_buffer[0][0] <= sim_time < rapid_compute_buffer[0][1] and rapid_compute_flag:
+            v.update_draw_pos()
+                
+        if rapid_compute_flag and sim_time > rapid_compute_buffer[0][1]:
+            rapid_compute_flag = False
+            cycle_time = old_cycle_time
+            rapid_compute_buffer.remove(rapid_compute_buffer[0])
+
         # update physics
         for v in vessels:
             accel = [0,0,0]
@@ -1390,7 +1462,7 @@ def main(scn_filename=None, start_time=0):
         for cam in cameras:
             cam.move_with_lock()
 
-        if int(sim_time) % int(output_rate) < delta_t:
+        if (int(sim_time) % int(output_rate) < delta_t) and not rapid_compute_flag:
 
             # update output
             if os.name == "nt":
@@ -1487,7 +1559,7 @@ def main(scn_filename=None, start_time=0):
             # drawOrigin() -- maybe it'll be useful for debugging one day
             drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible)
             glfw.swap_buffers(window)
-
+            
         cycle_dt = time.perf_counter() - cycle_start
         if cycle_dt < cycle_time:
             time.sleep(cycle_time - cycle_dt)

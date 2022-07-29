@@ -346,6 +346,10 @@ def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
             label_render_start[1] -= offset
             render_AN(("DSCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size)
 
+def drawRapidCompute(cam, size=0.2):
+    render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
+    render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
+
 def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
