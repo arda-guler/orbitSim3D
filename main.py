@@ -1491,7 +1491,7 @@ def main(scn_filename=None, start_time=0):
         cycle_dt = time.perf_counter() - cycle_start
         if cycle_dt < cycle_time:
             time.sleep(cycle_time - cycle_dt)
-        elif warn_cycle_time and cycle_time*2 <= cycle_dt:
+        elif warn_cycle_time and cycle_time*2 <= cycle_dt and not cycle_time == 0:
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
