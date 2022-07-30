@@ -502,9 +502,14 @@ def update_keplerian_proj(name, update_time):
 
     proj_vessel = proj_tbu.get_vessel()
     proj_body = proj_tbu.get_body()
-    
-    delete_keplerian_proj(name)
-    create_keplerian_proj(name, proj_vessel, proj_body, update_time)
+
+    try:
+        delete_keplerian_proj(name)
+        create_keplerian_proj(name, proj_vessel, proj_body, update_time)
+    except:
+        print("Can not update projection!")
+        time.sleep(2)
+        return
 
 def find_plot_by_name(name):
     global plots
@@ -609,6 +614,57 @@ def delete_barycenter(name):
     barycenters.remove(bc_tbd)
     del bc_tbd
 
+def find_surface_point_by_name(name):
+    global surface_points
+
+    for sp in surface_points:
+        if sp.name == name:
+            return sp
+
+    return None
+
+def create_surface_point(name, b, color, coords):
+    global surface_points
+    
+    if find_surface_point_by_name(name):
+        print("A barycenter with this name already exists. Please pick another name for the new barycenter.\n")
+        input("Press Enter to continue...")
+        return
+
+    try:
+        new_sp = surface_point(name, b, color, coords)
+        surface_points.append(new_sp)
+    except:
+        print("Could not create new surface point:", name)
+
+def vessel_body_crash(v, b):
+    # a vessel has crashed into a celestial body. We will convert the vessel object
+    # into a surface point on the body (a crash site) and remove all references to
+    # the vessel object
+    global maneuvers, surface_points, plots, batch_commands
+
+    for m in maneuvers:
+        if m.vessel == v or m.frame_body == v:
+            delete_maneuver(m.name)
+
+    for p in plots:
+        if p.obj1 == v or p.obj2 == v:
+            p.display()
+            delete_plot(p.name)
+
+    # orbit projections can stay since their calculation time is known
+
+    bcc = v.get_body_centered_coords(b)
+    crash_site_gpos = impact_gpos(bcc)
+    crash_site_color = v.get_color()
+    crash_site_name = v.get_name() + "_impact_site"
+    create_surface_point(crash_site_name, b, crash_site_color, crash_site_gpos)
+
+    note_name = v.name.upper() + "_IMPACT"
+    batch_commands.append(["note", note_name, v.name + " has impacted " + b.name + "."])
+
+    delete_vessel(v.name)
+
 def lock_active_cam_by_obj_name(name):
     target = find_obj_by_name(name)
 
@@ -656,12 +712,12 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision = read_current_config()
 
     # initializing glfw
     glfw.init()
 
-    # creating a window with 800 width and 600 height
+    # creating a window
     window = glfw.create_window(int(window_x),int(window_y),"OrbitSim3D", None, None)
     glfw.set_window_pos(window,200,200)
     glfw.make_context_current(window)
@@ -1120,6 +1176,10 @@ def main(scn_filename=None, start_time=0):
             elif command[0] == "rapid_compute_clear":
                 rapid_compute_buffer = []
 
+            # VESSEL_BODY_COLLISION command
+            elif command[0] == "vessel_body_collision":
+                vessel_body_collision = int(command[1])
+
             # OUTPUT_RATE command
             elif command[0] == "output_rate":
                 output_rate = int(command[1])
@@ -1173,7 +1233,8 @@ def main(scn_filename=None, start_time=0):
                     print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
                     print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
-                    print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear\n")
+                    print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
+                    print("vessel_body_collision\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1329,6 +1390,10 @@ def main(scn_filename=None, start_time=0):
                         print("\n'rapid_compute_clear' command clears the rapid compute buffer.")
                         print("Syntax: clear_rapid_compute")
                         input("Press Enter to continue...")
+                    elif command[1] == "vessel_body_collision":
+                        print("\n'vessel_body_collision' commands activates or deactivates vessel-body collision checks.")
+                        print("Syntax: vessel_body_collision <{0, 1}>")
+                        input("Press Enter to continue...")
                     elif command[1] == "output_rate":
                         print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
                         print("Must be a positive integer.\n")
@@ -1372,11 +1437,11 @@ def main(scn_filename=None, start_time=0):
                         print("\nUnknown command.")
                         input("Press Enter to continue...")
 
-            elif command[0] == "":
+            elif command[0] == "" or not command[0]:
                 # user probably changed their mind
                 pass
             else:
-                print("\nUnrecognized command.")
+                print("\nUnrecognized command: " + str(command[0]))
                 input("Press Enter to continue...")
 
         cycle_start = time.perf_counter()
@@ -1413,6 +1478,10 @@ def main(scn_filename=None, start_time=0):
         for v in vessels:
             accel = [0,0,0]
             for b in bodies:
+
+                if vessel_body_collision and v.get_alt_above(b) <= 0:
+                    vessel_body_crash(v, b)
+                    
                 accel[0] += v.get_gravity_by(b)[0]
                 accel[1] += v.get_gravity_by(b)[1]
                 accel[2] += v.get_gravity_by(b)[2]

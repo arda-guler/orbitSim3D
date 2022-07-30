@@ -21,7 +21,10 @@ def cartesian2spherical(cart):
     z = cart[2]
     
     rho = (x**2 + y**2 + z**2)**0.5
-    theta = math.degrees(math.atan(((x**2 + y**2)**0.5)/z))
+    try:
+        theta = math.degrees(math.atan(((x**2 + y**2)**0.5)/z))
+    except ZeroDivisionError:
+        theta = 90
     phi = math.degrees(math.atan(y/x))
     
     return [rho, theta, phi]
@@ -39,6 +42,47 @@ def spherical2cartesian(sph):
     z = math.cos(phi) * rho
     
     return [x, y, z]
+
+# takes body centered coords
+# gives latitude, longitude
+def impact_gpos(bcc):
+    x = abs(bcc[0])
+    y = abs(bcc[1])
+    z = abs(bcc[2])
+
+    try:
+        lat = math.atan(y / ((x**2 + z**2)**(0.5)))
+    except ZeroDivisionError:
+        lat = math.radians(90)
+    
+    try:
+        lon = math.atan(x/z)
+    except ZeroDivisionError:
+        lon = math.radians(90)
+
+    lat = math.degrees(lat)
+    lon = math.degrees(lon)
+    alt = 0
+
+    x = bcc[0]
+    y = bcc[1]
+    z = bcc[2]
+
+    # which hemisphere, north or south?
+    if y < 0:
+        lat *= -1
+
+    # which quarter?
+    if x >= 0 and z >= 0:
+        tlon = 270 + lon
+    elif x >= 0 and z < 0:
+        tlon = 90 - lon
+    elif x < 0 and z >= 0:
+        tlon = 90 + lon
+    else:
+        tlon = 270 - lon
+
+    return [lat, tlon, alt]
 
 # cross product
 def cross(a, b):

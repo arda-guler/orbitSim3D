@@ -825,6 +825,18 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
                 nte_s1_button = tk.Button(entry_panel, text="Take Note", command=generate_s1)
                 nte_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "vessel_body_collision":
+                vbc_help = tk.Label(entry_panel, text="'vessel_body_collision' commands activates or deactivates vessel-body collision checks.")
+                vbc_help.grid(row=0, column=0, columnspan=10)
+
+                vbc_s1_button = tk.Button(entry_panel, text="Activate", command=lambda:add_to_buffer("vessel_body_collision 1"))
+                vbc_s1_button.config(width=15, height=1)
+                vbc_s1_button.grid(row=1, column=0)
+
+                vbc_s2_button = tk.Button(entry_panel, text="Deactivate", command=lambda:add_to_buffer("vessel_body_collision 0"))
+                vbc_s2_button.config(width=15, height=1)
+                vbc_s2_button.grid(row=1, column=1)
+
             elif cmd_a == "auto_dt":
                 auto_dt_help = tk.Label(entry_panel, text="'auto_dt' is a system that automatically adjusts delta_t at user-set moments in simulation.\nUsually helpful for high-precision playbacks of scenarios.")
                 auto_dt_help.grid(row=0, column=0, columnspan=10)
@@ -1154,6 +1166,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, p
         note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
         note_button.grid(row=21, column=0)
+        vessel_body_collision_button = tk.Button(cmd_window, text="Vessel-Body Colsn.", command=lambda:enter_cmd("vessel_body_collision"))
+        vessel_body_collision_button.config(width=15, height=1)
+        vessel_body_collision_button.grid(row=21, column=1)
 
         graphics_commands_label = tk.Label(cmd_window, text="Graphics")
         graphics_commands_label.grid(row=22, column=0, columnspan=3)
