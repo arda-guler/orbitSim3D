@@ -1,24 +1,3 @@
-;.osf -- orbitSim3D scenario format
-;
-;An arbitrary file extension/format to
-;distinguish scenario files from
-;regular text files for human reading.
-;
-;Lines starting in B are for bodies,
-;lines starting in V are for vessels,
-;lines starting in M are for maneuvers,
-;lines starting in S are for surface points,
-;lines starting in C are for barycenters.
-;
-;All other lines will be ignored and
-;can be used for comments.
-;
-;(For redundancy, you can use an
-;arbitrary non-letter character to
-;denote comments.)
-;
-;= = = = = = = = = =
-;
 ;  TWO_MIRRORS.OSF
 ;  Author: arda-guler
 ;

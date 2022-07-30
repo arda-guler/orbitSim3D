@@ -757,10 +757,10 @@ def main(scn_filename=None, start_time=0):
                                (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed,
                                (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed])
 
-        if keyboard.is_pressed("c"):
+        if keyboard.is_pressed("c") and not rapid_compute_flag:
             frame_command = True
 
-        elif keyboard.is_pressed("p"):
+        elif keyboard.is_pressed("p") and not rapid_compute_flag:
             panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots,
                                                auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer)
             if panel_commands:
@@ -1455,6 +1455,10 @@ def main(scn_filename=None, start_time=0):
         if rapid_compute_buffer and rapid_compute_buffer[0][0] <= sim_time < rapid_compute_buffer[0][1] and not rapid_compute_flag:
             rapid_compute_flag = True
             old_cycle_time = cycle_time
+            old_cam_strafe_speed = cam_strafe_speed
+            old_cam_rotate_speed = cam_rotate_speed
+            cam_strafe_speed = 0
+            cam_rotate_speed = 0
             cycle_time = 0
             clear_cmd_terminal()
             print("OrbitSim3D Command Interpreter & Output Display\n")
@@ -1472,6 +1476,8 @@ def main(scn_filename=None, start_time=0):
         if rapid_compute_flag and sim_time > rapid_compute_buffer[0][1]:
             rapid_compute_flag = False
             cycle_time = old_cycle_time
+            cam_strafe_speed = old_cam_strafe_speed
+            cam_rotate_speed = old_cam_rotate_speed
             rapid_compute_buffer.remove(rapid_compute_buffer[0])
 
         # update physics

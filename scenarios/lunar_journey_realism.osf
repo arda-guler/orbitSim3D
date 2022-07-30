@@ -1,34 +1,21 @@
-;  LUNAR_JOURNEY.OSF
+;  LUNAR_JOURNEY_REALISM.OSF
 ;  Author: arda-guler
 ;
 ;This scenario demonstrates a spacecraft
 ;performing a trans-lunar injection at
 ;low Earth orbit, and performing a second
-;maneuver near perilune for Lunar orbit
+;maneuver near Luna for Lunar orbit
 ;insertion.
-;
-;In contrast to lunar_journey_realism.osf,
-;this version is computed quicker and is
-;more fun to watch with all the visual feedback,
-;but the computed trajectory can diverge from
-;the more realistic version as it is sacrificed
-;for computing speed.
-;
-;You can enter the following command to
-;better follow the mission:
-;
-; 'batch scenarios\lunar_journey.obf'
-;
-;When entered, the above command (without
-;the quotation marks, of course) will 
-;configure the output buffer to provide 
-;more info about the mission.
 ;
 ;If you feel up to the task, you can set
 ;mid-course correction maneuvers or delete
 ;the original lunar orbit injection and
 ;create a new, better one.
 ;
+;In contrast to lunar_journey.osf, this
+;scenario is a closer computation of a 
+;real-world trajectory, but it takes longer
+;to compute and is less fun to watch.
 
 ;Celestial bodies
 B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0
@@ -39,7 +26,7 @@ V|lunar-orbiter|data\models\miniprobe.obj|[0.0,0.8,0.7]|[-590131,-10,6745234]|[7
 
 ;Maneuvers
 M|mnv_tli|const_accel|lunar-orbiter|Earth|prograde|10|50|315
-M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|399300|50
+M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|398500|75
 
 ;Surface points
 S|science-target|Luna|[1,0,0]|[10,50,0]
