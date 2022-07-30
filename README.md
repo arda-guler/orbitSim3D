@@ -9,7 +9,7 @@ Create scenario or batch files to share your simulations or get rid of repetitiv
 
 Do all of this in Python, the beloved programming language of science and engineering.
 
-To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL.txt).
+To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL.md).
 
 Having trouble finding your way around? Have a look at the [introductory tutorial](https://github.com/arda-guler/orbitSim3D/blob/master/docs/tutorial.md) for the basics!
 
