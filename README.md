@@ -13,5 +13,5 @@ To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/ma
 
 Having trouble finding your way around? Have a look at the [introductory tutorial](https://github.com/arda-guler/orbitSim3D/blob/master/docs/tutorial.md) for the basics!
 
-(If you want to launch a real-world mission, try [GMAT](https://opensource.gsfc.nasa.gov/projects/GMAT/index.php).)
+(Take a look at [GMAT](https://opensource.gsfc.nasa.gov/projects/GMAT/index.php) also, if you are looking for something more professional.)
 
