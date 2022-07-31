@@ -14,7 +14,7 @@ Although you could load scenario files to OS3D from any path, the 'scenarios' di
 Any scenarios you export using OS3D will also appear there, in the 'scenarios' directory.
 
 ## Scenarios & Batch Files
-Although scenarios can keep all the data for the accurate replay of a space mission, batch files can be used to set up a nice user output screen. Demo space mission scenarios usually come with batch files with the same name as the scenario file, such as `lunar_journey.osf` and `lunar journey.obf`. In such cases, for the best experience, load in batch file when the scenario starts playing on OS3D.
+Although scenarios can keep all the data for the accurate replay of a space mission, batch files can be used to set up a nice user output screen and set Rapid Compute intervals. Demo space mission scenarios usually come with batch files with the same name as the scenario file, such as `lunar_journey.osf` and `lunar journey.obf`. In such cases, by default, OS3D also loads in the commands from the batch file. This auto-load behaviour can be changed by editing the configuration file at startup via 'Configure OrbitSim3D' option.
 
 ## Syntax Guide & Creating Scenarios
 The best way to create scenarios is to design them in OS3D using the command panel and export them via the 'export' command, leaving the hassle of using the somewhat harsh syntax to the software, since OSF files are formatted in a very specific way for OS3D to parse and understand. An example is shown below, taken from `lunar_journey.osf`;
