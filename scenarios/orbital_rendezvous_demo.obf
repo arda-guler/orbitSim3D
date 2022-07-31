@@ -1,0 +1,46 @@
+;.obf -- orbitSim3D batch format
+;
+; This obf is a full solution to the two_mirrors scenario.
+;
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+;
+rapid_compute 100 2650
+rapid_compute 2950 3990
+rapid_compute 4130 7630
+rapid_compute 7665 11370
+rapid_compute 11450 11910
+rapid_compute 11930 12050
+rapid_compute 12070 13900
+rapid_compute 13930 16100
+rapid_compute 16190 16800
+rapid_compute 16830 17130
+rapid_compute 17180 24530
+;
+;	NOTES
+;
+clear output
+;
+;	SETTING UP OUTPUT
+;
+show Yang dist Yin TARGET_DIST
+show Yang vel_mag Yin REL_VEL
+;
+show mnv_align1 state MNV_ALIGN1
+show mnv_align2 state MNV_ALIGN2
+;
+show mnv_sync1 state MNV_SYNC1
+show mnv_sync2 state MNV_SYNC2
+show mnv_sync3 state MNV_SYNC3
+show mnv_sync4 state MNV_SYNC4
+show mnv_sync5 state MNV_SYNC5
+show mnv_sync6 state MNV_SYNC6
+show mnv_sync7 state MNV_SYNC7
+show mnv_sync8 state MNV_SYNC8
+show mnv_sync9 state MNV_SYNC9
+;
+show mnv_align3 state MNV_ALIGN3
+;
+show mnv_appr1 state MNV_APPR1
+show mnv_appr2 state MNV_APPR2
+show mnv_appr3 state MNV_APPR3
+;
