@@ -712,7 +712,7 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload = read_current_config()
 
     # initializing glfw
     glfw.init()
@@ -731,6 +731,7 @@ def main(scn_filename=None, start_time=0):
     # put "camera" in starting position
     glTranslate(main_cam.get_pos()[0], main_cam.get_pos()[1], main_cam.get_pos()[2])
 
+    batch_commands = []
     output_buffer = []
     auto_dt_buffer = []
     rapid_compute_buffer = []
@@ -739,6 +740,31 @@ def main(scn_filename=None, start_time=0):
     show_trajectories = True
 
     sim_time = start_time
+
+    # look if there is a batch file associated so we can autoload it
+    if batch_autoload and scn_filename:
+        
+        if "/" in scn_filename:
+            complete_path = scn_filename
+            scn_filename = scn_filename.split("/")[-1]
+        elif "\\" in scn_filename:
+            complete_path = scn_filename
+            scn_filename = scn_filename.split("\\")[-1]
+
+        if scn_filename.endswith(".osf"):
+            scn_filename = scn_filename[:-4]
+            
+        if os.path.exists("scenarios/" + scn_filename + ".obf"):
+            batch_commands.append(["batch", scn_filename])
+            print("Autoloading associated batch file...")
+        elif os.path.exists(scn_filename + ".obf"):
+            batch_commands.append(["batch", scn_filename + ".obf"])
+            print("Autoloading associated batch file...")
+        elif os.path.exists(complete_path[:-4] + ".obf"):
+            batch_commands.append(["batch", complete_path[:-4] + ".obf"])
+            print("Autoloading associated batch file...")
+        else:
+            pass
 
     while not glfw.window_should_close(window):
 
