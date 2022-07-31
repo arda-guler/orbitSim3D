@@ -743,6 +743,8 @@ def main(scn_filename=None, start_time=0):
 
     # look if there is a batch file associated so we can autoload it
     if batch_autoload and scn_filename:
+
+        complete_path = None
         
         if "/" in scn_filename:
             complete_path = scn_filename
@@ -760,7 +762,7 @@ def main(scn_filename=None, start_time=0):
         elif os.path.exists(scn_filename + ".obf"):
             batch_commands.append(["batch", scn_filename + ".obf"])
             print("Autoloading associated batch file...")
-        elif os.path.exists(complete_path[:-4] + ".obf"):
+        elif complete_path and os.path.exists(complete_path[:-4] + ".obf"):
             batch_commands.append(["batch", complete_path[:-4] + ".obf"])
             print("Autoloading associated batch file...")
         else:
