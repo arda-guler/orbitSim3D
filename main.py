@@ -1471,7 +1471,8 @@ def main(scn_filename=None, start_time=0):
 
         # this prevents 'jumps' in trajectory trails during rapid compute
         if rapid_compute_buffer and rapid_compute_buffer[0][0] <= sim_time < rapid_compute_buffer[0][1] and rapid_compute_flag:
-            v.update_draw_pos()
+            for v in vessels:
+                v.update_draw_pos()
                 
         if rapid_compute_flag and sim_time > rapid_compute_buffer[0][1]:
             rapid_compute_flag = False
