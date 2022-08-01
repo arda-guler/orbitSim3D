@@ -1,0 +1,20 @@
+auto_dt 10 1000
+auto_dt 47000 100
+auto_dt 47700 10
+rapid_compute 47750
+auto_dt 50710 1000
+auto_dt 95020 100
+auto_dt 100220 10
+auto_dt 104490 100
+auto_dt 108300 10
+auto_dt 110610 100
+auto_dt 114020 10
+auto_dt 115500 1000
+auto_dt 165210 100
+auto_dt 172610 10
+auto_dt 173790 1000
+auto_dt 270400 100
+auto_dt 274800 10
+auto_dt 276190 1000
+auto_dt 864200 100
+auto_dt 869400 10

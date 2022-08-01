@@ -1,0 +1,41 @@
+;  NORTHERN_TERROR.OSF
+;  Author: arda-guler
+;
+; Asteroids! One of the Near Earth asteroids have
+; changed course after a deep space collision and
+; our civilization was too late to detect the change
+; in the object's orbit - we falsely believed that once
+; the orbit of an asteroid was known, we could be sure
+; that it wouldn't impact our planet in the future few
+; decades, by calculating its trajectory into the future.
+; 
+; Apparently, another object which was small enough to go undetected
+; had impacted this asteroid and sent fragments towards our
+; direction, in addition to the asteroid's main body itself. Now, we
+; have no time to perform a successful asteroid redirect mission,
+; the best we can do is to hope for the best.
+;
+
+; Our home planet and its moon
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0
+B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[346410000,10,-200000000]|[-483,0,-836.5]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0
+
+; Asteroids!
+V|Ultimum_Horologium|data\models\fragment.obj|[0.0,0.8,0.7]|[-446410000,2000,350000000]|[-120,15,45]
+V|UH_Frag_A|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-330926132.0969711, 62853134.10793828, 236599503.92296124]|[590.5794796450454, 30.109115637991675, -479.3088456485529]
+V|UH_Frag_B|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-247650415.90328708, 26613046.38021753, 204676214.47168303]|[799.7174942405321, -0.2028230830914257, -634.8135500887561]
+V|UH_Frag_C|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-212205453.688955, 7861965.019207337, 139414643.99468246]|[1009.8654427025077, -5.680628119117478, -784.1264171938844]
+V|UH_Frag_D|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-195802855.53733468, 30917222.518362828, 146987230.77221933]|[1027.2968117473417, -25.61693997107372, -812.0697022572002]
+V|UH_Frag_E|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-163939391.13122094, 10627483.623528754, 172538923.09858942]|[1032.530059131559, -10.191442624306795, -863.7369552612303]
+V|UH_Frag_F|data\models\fragment.obj|[0.0, 0.8, 0.7]|[-135141819.6943164, 21642324.32109783, 56375334.79964338]|[1553.9502494994704, -81.86618103124363, -1058.3611969587064]
+
+; Some major cities
+S|Istanbul|Earth|[1,0.1,0]|[41,28.9,0]
+S|London|Earth|[0.5,0.7,0]|[51,7,0]
+S|Moscow|Earth|[0.5,0.37,0.5]|[55.7,37.6,0]
+S|NY|Earth|[0,0.2,0.8]|[40,-73,0]
+S|Tokyo|Earth|[1,0.2,0.2]|[35.6,139.8,0]
+S|Sydney|Earth|[0.3,0.9,0]|[-33.8,151.0,0]
+S|LA|Earth|[0,0.2,0.8]|[34.05,-118.24,0]
+S|Cape_Town|Earth|[0.7,0.8,0.2]|[-33.92,18.42,0]
+S|Rio|Earth|[0,0.7,0.3]|[-22.9,-43.2,0]
