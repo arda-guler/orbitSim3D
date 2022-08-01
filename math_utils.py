@@ -1,6 +1,5 @@
 import math
 import numpy
-import time
 from pyquaternion import Quaternion
 
 # constants
