@@ -1,5 +1,6 @@
 import math
 import numpy
+import time
 from pyquaternion import Quaternion
 
 # constants
@@ -78,9 +79,9 @@ def impact_gpos(bcc):
     elif x >= 0 and z < 0:
         tlon = 90 - lon
     elif x < 0 and z >= 0:
-        tlon = 90 + lon
+        tlon = -90 - lon
     else:
-        tlon = 270 - lon
+        tlon = -270 + lon
 
     return [lat, tlon, alt]
 
