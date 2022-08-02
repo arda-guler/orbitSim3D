@@ -1,0 +1,92 @@
+;  DEFCON.OSF
+;  Author: arda-guler
+;
+; A scenario about a fictional all-out nuclear war between the USA and USSR.
+; The oblateness of Earth is accounted for in trajectory calculations, 
+; but the perturbations due to Luna are not. Also, the nuclear attack doctrines
+; of cold-war USA and USSR are probably not like what I have done here.
+;
+; Also, as of the making of this scenario, atmosphere is also not accounted for,
+; which can make great differences on surface/atmosphere-skimming trajectories.
+;
+
+; Our home planet
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.6,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0.00108262668
+
+; USSR Cities
+S|Moscow|Earth|[1,0,0]|[55.7,37.6,0]
+S|Yakutsk|Earth|[1,0,0]|[62.09,129.74,0]
+S|Kiev|Earth|[1,0,0]|[50.45,30.52,0]
+S|Minsk|Earth|[1,0,0]|[53.9,27.57,0]
+
+; USA Cities
+S|NY|Earth|[0,0,1]|[40,-73,0]
+S|LA|Earth|[0,0,1]|[34.05,-118.24,0]
+S|DC|Earth|[0,0,1]|[38.89,-77.04,0]
+S|Chicago|Earth|[0,0,1]|[41.83,-87.68,0]
+
+; USSR Nukes
+V|RDSX-1|data\models\minirocket.obj|[1,0,0]|[-225638.8682071955, 5967632.184920466, -2219767.649249705]|[-161.42352506257785, 0.0, 16.40866399212875]
+V|RDSX-2|data\models\minirocket.obj|[1,0,0]|[-2149779.4444130906, 5599031.706480647, -2149466.7943942184]|[-156.3111828723846, 0.0, 156.33391906649678]
+V|RDSX-3|data\models\minirocket.obj|[1,0,0]|[1089358.6574298504, 5167368.697162899, -3564058.5956271314]|[-259.1815869693276, 0.0, -79.21915367998149]
+V|RDSX-4|data\models\minirocket.obj|[1,0,0]|[2318075.029231998, 5651234.719261768, -1811350.191614375]|[-131.72303558527818, 0.0, -168.57252726637694]
+V|RDSX-5|data\models\minirocket.obj|[1,0,0]|[772968.1435721793, 5054533.466329488, -3800674.531813767]|[-276.38851334206703, 0.0, -56.21094736589783]
+V|RDSX-6|data\models\minirocket.obj|[1,0,0]|[-1007520.5785932926, 5218899.589369596, -3512677.6922725076]|[-255.44512088324572, 0.0, 73.26781405458799]
+
+; USA Nukes
+V|TNRV-1|data\models\minirocket.obj|[0,0,1]|[-1796083.2522729542, 4505048.013617613, 4131530.2922651577]|[300.44864556238093, 0.0, 130.61280985230937]
+V|TNRV-2|data\models\minirocket.obj|[0,0,1]|[333.2841419382724, 4425737.944031318, 4582985.789819028]|[333.2789004985938, 0.0, -0.02423672633363999]
+V|TNRV-3|data\models\minirocket.obj|[0,0,1]|[-1784612.1401449882, 3654312.8336361493, 4904291.226382184]|[356.6445244679882, 0.0, 129.77862013127702]
+V|TNRV-4|data\models\minirocket.obj|[0,0,1]|[-548076.7829005666, 4137698.460716433, 4813520.385147468]|[350.04358622566536, 0.0, 39.856642802534246]
+V|TNRV-5|data\models\minirocket.obj|[0,0,1]|[-775111.5385842023, 3088770.571551438, 5518116.858953917]|[401.2824834980639, 0.0, 56.36681700322644]
+V|TNRV-6|data\models\minirocket.obj|[0,0,1]|[880402.2605257177, 2991050.273665189, 5556026.037562155]|[404.03927349148375, 0.0, -64.02365419423967]
+
+; USSR Maneuvers
+M|S1M1|const_accel|RDSX-1|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S1M2|const_accel|RDSX-1|Earth|[0.132973,0.443242,0.886484]|30.0|70.0|200.0
+M|S1M2|const_accel|RDSX-1|Earth|prograde_dynamic|17.0|270.0|59.0
+
+M|S2M1|const_accel|RDSX-2|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S2M2|const_accel|RDSX-2|Earth|[-0.218218,0.436436,0.872872]|30.0|70.0|200.0
+M|S2M2|const_accel|RDSX-2|Earth|prograde_dynamic|17.0|270.0|30.0
+
+M|S3M1|const_accel|RDSX-3|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S3M2|const_accel|RDSX-3|Earth|[0.0,0.707,0.707]|30.0|70.0|200.0
+M|S3M2|const_accel|RDSX-3|Earth|prograde_dynamic|17.0|270.0|59.0
+
+M|S4M1|const_accel|RDSX-4|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S4M2|const_accel|RDSX-4|Earth|[0.197291,0.438424,0.876847]|30.0|70.0|200.0
+M|S4M2|const_accel|RDSX-4|Earth|prograde_dynamic|17.0|270.0|35.0
+
+M|S5M1|const_accel|RDSX-5|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S5M2|const_accel|RDSX-5|Earth|[0.207514,0.691714,0.691714]|30.0|70.0|200.0
+M|S5M2|const_accel|RDSX-5|Earth|prograde_dynamic|17.0|270.0|69.0
+
+M|S6M1|const_accel|RDSX-6|Earth|radial_out_dynamic|30.0|0.0|70.0
+M|S6M2|const_accel|RDSX-6|Earth|[0,0.707,0.707]|30.0|70.0|200.0
+M|S6M2|const_accel|RDSX-6|Earth|prograde_dynamic|17.0|270.0|59.0
+
+; USA Maneuvers
+M|A1M1|const_accel|TNRV-1|Earth|radial_out_dynamic|30|0|100
+M|A1M2|const_accel|TNRV-1|Earth|[0.390567,0.650945,-0.650495]|30|100|81
+M|A1M3|const_accel|TNRV-1|Earth|prograde_dynamic|30|200|140
+
+M|A2M1|const_accel|TNRV-2|Earth|radial_out_dynamic|30|0|100
+M|A2M2|const_accel|TNRV-2|Earth|[0.390567,0.650945,-0.650495]|30|100|81
+M|A2M3|const_accel|TNRV-2|Earth|prograde_dynamic|30|200|130
+
+M|A3M1|const_accel|TNRV-3|Earth|radial_out_dynamic|30|0|150
+M|A3M2|const_accel|TNRV-3|Earth|[-0.426401,0.639602,-0.639602]|30|100|81
+M|A3M3|const_accel|TNRV-3|Earth|prograde_dynamic|30|200|110
+
+M|A4M1|const_accel|TNRV-4|Earth|radial_out_dynamic|30|0|100
+M|A4M2|const_accel|TNRV-4|Earth|[0.390567,0.650945,-0.650495]|30|100|81
+M|A4M3|const_accel|TNRV-4|Earth|prograde_dynamic|30|200|141
+
+M|A5M1|const_accel|TNRV-5|Earth|radial_out_dynamic|30|0|150
+M|A5M2|const_accel|TNRV-5|Earth|[0,0.650945,-0.650495]|30|100|81
+M|A5M3|const_accel|TNRV-5|Earth|prograde_dynamic|30|200|145
+
+M|A6M1|const_accel|TNRV-6|Earth|radial_out_dynamic|30|0|150
+M|A6M2|const_accel|TNRV-6|Earth|[0,0.650945,-0.650495]|30|100|81
+M|A6M3|const_accel|TNRV-6|Earth|prograde_dynamic|30|200|145
