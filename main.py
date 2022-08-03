@@ -1695,7 +1695,7 @@ def init_sim():
     # display icon because it's cool
     icon_stages = []
     for i in range(10):
-        icon_stages.append(open("data\\images\\anim_icon\\" + str(i) + ".txt").readlines())
+        icon_stages.append(open("./data/images/anim_icon/" + str(i) + ".txt").readlines())
 
     # do it slowly the first time
     if initial_run:
