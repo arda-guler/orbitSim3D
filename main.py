@@ -56,13 +56,13 @@ def read_batch(batch_path):
         batch_file = open(batch_path, "r")
     except FileNotFoundError:
         try:
-            batch_file = open("scenarios\\" + batch_path, "r")
+            batch_file = open("scenarios/" + batch_path, "r")
         except FileNotFoundError:
             try:
                 batch_file = open(batch_path + ".obf", "r")
             except FileNotFoundError:
                 try:
-                    batch_file = open("scenarios\\" + batch_path + ".obf", "r")
+                    batch_file = open("scenarios/" + batch_path + ".obf", "r")
                 except FileNotFoundError:
                     print("\nError reading batch file.\n")
                     time.sleep(2)
@@ -100,13 +100,13 @@ def import_scenario(scn_filename):
         scn_file = open(scn_filename, "r")
     except FileNotFoundError:
         try:
-            scn_file = open("scenarios\\" + scn_filename, "r")
+            scn_file = open("scenarios/" + scn_filename, "r")
         except FileNotFoundError:
             try:
                 scn_file = open(scn_filename + ".osf", "r")
             except FileNotFoundError:
                 try:
-                    scn_file = open("scenarios\\" + scn_filename + ".osf", "r")
+                    scn_file = open("scenarios/" + scn_filename + ".osf", "r")
                 except FileNotFoundError:
                     print("Scenario file not found.")
                     time.sleep(2)
@@ -371,7 +371,7 @@ def create_vessel(name, model_name, color, pos, vel):
         return
 
     try:
-        model_path = "data\\models\\" + model_name + ".obj"
+        model_path = "data/models/" + model_name + ".obj"
         model = pywavefront.Wavefront(model_path, collect_faces=True)
     except:
         print("Could not load model:", model_path)
@@ -388,8 +388,8 @@ def create_vessel(name, model_name, color, pos, vel):
 
 def fragment(vessel_name, num_of_frags, vel_of_frags):
 
-    if num_of_frags <= 1:
-        print("Cannot fragment vessel into less than 2 parts!")
+    if num_of_frags < 1:
+        print("Cannot fragment vessel into less than 1 parts! (Duh.)")
         input("Press Enter to continue...")
         return
     
@@ -1734,7 +1734,7 @@ def init_sim():
 
     if menu_select == "1" or menu_select.lower() == "l":
         print("\nEnter scenario file path to load scenario (or leave blank to cancel).")
-        print("(for example 'scenarios\\lunar_journey.osf' or just 'lunar_journey')\n")
+        print("(for example 'scenarios/lunar_journey.osf' or just 'lunar_journey')\n")
         scn_path = input("Scenario path: ")
         if scn_path:
             import_scenario(scn_path)
