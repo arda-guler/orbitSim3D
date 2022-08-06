@@ -10,6 +10,7 @@ import re
 import shutil
 import sys
 import random
+import glob
 
 from graphics import *
 from vessel_class import *
@@ -1675,6 +1676,40 @@ def main(scn_filename=None, start_time=0):
     glfw.destroy_window(window)
     init_sim()
 
+def pick_scenario():
+    clear_cmd_terminal()
+
+    scenarios_list = glob.glob("scenarios/*.osf")
+    scn_max_name_length = 0
+    
+    for scn in scenarios_list:
+        if len(scn) > scn_max_name_length:
+            scn_max_name_length = len(scn)
+            
+    loader_frame_width = max(60, (scn_max_name_length + 6))
+    loader_lines = []
+    
+    num_of_dashes = int(loader_frame_width / 2)
+    header_line = "= " * int((num_of_dashes - 5)/2) + " SCENARIOS" + " =" * int((num_of_dashes - 5)/2)
+    loader_lines.append(header_line)
+
+    i = 0
+    for scn in scenarios_list:
+        i += 1
+        current_line = "|| " + str(i) + ") " + scn
+        loader_lines.append(current_line)
+
+    bottom_line = "= " * int(num_of_dashes)
+    loader_lines.append(bottom_line)
+
+    for line in loader_lines:
+        print(line)
+        time.sleep(0.015)
+
+    print("\nPlease type in the name of the scenario you wish to load.")
+    scn_filename = input(" > ")
+    return scn_filename
+    
 def init_sim():
     global initial_run
 
@@ -1733,9 +1768,8 @@ def init_sim():
     menu_select = input("\n > ")
 
     if menu_select == "1" or menu_select.lower() == "l":
-        print("\nEnter scenario file path to load scenario (or leave blank to cancel).")
-        print("(for example 'scenarios/lunar_journey.osf' or just 'lunar_journey')\n")
-        scn_path = input("Scenario path: ")
+        scn_path = pick_scenario()
+        
         if scn_path:
             import_scenario(scn_path)
         else:
