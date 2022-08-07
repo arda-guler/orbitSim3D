@@ -1,6 +1,6 @@
 ---
 name: Blank template
-about: Blank issure template
+about: Blank issue template
 title: ''
 labels: ''
 assignees: ''
