@@ -7,12 +7,12 @@
 
 ;Celestial bodies
 
-B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0.00108262668
+B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0.00108262668
 
 ;Vessels
 
-V|Hacivat|data\models\minisat.obj|[0.0,1.0,0.0]|[42164000,0,0]|[0,0,-3075]
-V|Karagoz|data\models\minisat.obj|[1.0,0.1,0.1]|[-42164000,0,0]|[0,0,3075]
+V|Hacivat|data/models/minisat.obj|[0.0,1.0,0.0]|[42164000,0,0]|[0,0,-3075]
+V|Karagoz|data/models/minisat.obj|[1.0,0.1,0.1]|[-42164000,0,0]|[0,0,3075]
 
 ;
 S|Eq1|Earth|[0,1,0]|[0,0,0]
