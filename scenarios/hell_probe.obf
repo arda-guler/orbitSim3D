@@ -1,20 +1,29 @@
 ;.obf -- orbitSim3D batch format
 ;
-create_projection akaito Venus Sol
+cam_strafe_speed 1000000
+;
+create_projection venus-orbit Venus Sol
 create_projection earth-orbit Earth Sol
 ;
-auto_dt 10 2.5
-auto_dt 4700 5
-auto_dt 6500 10
-auto_dt 9000 25
-auto_dt 10000 100
-auto_dt 20000 500
-auto_dt 50000 2000
+rapid_compute 4800
+rapid_compute 5100 10000
+auto_dt 10000 10
+auto_dt 50000 20
+auto_dt 100000 50
+auto_dt 150000 100
+auto_dt 250000 500
+rapid_compute 15000 2500000
 auto_dt 2500000 10000
 ;
-lock_cam akaito
-cam_strafe_speed 10000
 ;
 show mnv_escape state ESC
 show mnv_escape params ESC_PARAMS
+;
+show mnv_align state ALIGN
+show mnv_align params ALIGN_PARAMS
+auto_dt 6090000 1000
+auto_dt 6099000 100
+auto_dt 6100200 10000
+;
+show akaito dist Venus DIST_TO_VENUS
 ;
