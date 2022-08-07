@@ -2,7 +2,7 @@
 name: Bug report
 about: Report bugs, glitches & any faulty operations by the software
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
