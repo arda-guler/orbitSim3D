@@ -80,6 +80,8 @@ There are only two configuration files;
 
 - maneuver.py: the 'maneuver' classes used for various types of maneuvers that can be performed by spacecraft.
 
+- radiation_pressure.py: the 'radiation_pressure' class used to simulate the effects of radiation pressure on spacecraft.
+
 - math_utils.py: general mathematical functions  that are not provided by the math library.
 
 - orbit.py: 2-body Keplerian orbit class that is used for making quick trajectory projections into the future.
