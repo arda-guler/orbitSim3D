@@ -24,6 +24,7 @@ from orbit import *
 from plot import *
 from command_panel import *
 from config_utils import *
+from radiation_pressure import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -43,6 +44,8 @@ plots = []
 cameras = []
 
 maneuvers = []
+radiation_pressures = []
+
 batch_commands = []
 
 preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
@@ -159,7 +162,10 @@ def import_scenario(scn_filename):
 
                             float(line[9]),
                             
-                            float(line[10]))
+                            float(line[10]),
+
+                            float(line[11]))
+            
             bodies.append(new_body)
             objs.append(new_body)
             print("Loading body:", new_body.get_name())
@@ -228,6 +234,21 @@ def import_scenario(scn_filename):
             objs.append(new_bc)
             print("Loading barycenter:", new_bc.get_name())
 
+        # import radiation pressure data
+        elif line[0] == "R":
+            if line[5] in preset_orientations:
+                new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
+                                            float(line[4]), line[5], float(line[6]), int(line[7]))
+            else:
+                line[5] = line[5][1:-1].split(",")
+                new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
+                                            float(line[4]),
+                                            [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                                            float(line[6]), int(line[7]))
+
+            radiation_pressures.append(new_rp)
+            print("Loading radiation pressure:", new_rp.get_name())
+            
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename):
@@ -711,7 +732,7 @@ def get_active_cam():
 
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
-           plots, cameras, barycenters
+           plots, cameras, barycenters, radiation_pressures
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
@@ -1516,8 +1537,22 @@ def main(scn_filename=None, start_time=0):
             rapid_compute_buffer.remove(rapid_compute_buffer[0])
 
         # update physics
+        for rp in radiation_pressures:
+            accel = rp.calc_accel()
+            rp.vessel.update_vel(accel, delta_t)
+            # do not update vessel position in this 'for' loop, we did not apply all accelerations!
+
+        for m in maneuvers:
+            # lower delta_t if a maneuver is in progress
+            if maneuver_auto_dt and ((delta_t > maneuver_auto_dt and (m.get_state(sim_time) == "Performing" or
+               (m.get_state(sim_time) == "Pending" and not m.get_state(sim_time+delta_t) == "Pending")))):
+                delta_t = maneuver_auto_dt
+                
+            m.perform_maneuver(sim_time, delta_t)
+        
         for v in vessels:
             accel = [0,0,0]
+
             for b in bodies:
 
                 if vessel_body_collision and v.get_alt_above(b) <= 0:
@@ -1545,14 +1580,6 @@ def main(scn_filename=None, start_time=0):
 
             # planets rotate!
             x.update_orient(delta_t)
-
-        for m in maneuvers:
-            # lower delta_t if a maneuver is in progress
-            if maneuver_auto_dt and ((delta_t > maneuver_auto_dt and (m.get_state(sim_time) == "Performing" or
-               (m.get_state(sim_time) == "Pending" and not m.get_state(sim_time+delta_t) == "Pending")))):
-                delta_t = maneuver_auto_dt
-                
-            m.perform_maneuver(sim_time, delta_t)
 
         # update surface point positions
         for sp in surface_points:

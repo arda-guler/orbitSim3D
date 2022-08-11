@@ -2,7 +2,7 @@ from math_utils import *
 import math
 
 class body():
-    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient, day_length, J2):
+    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient, day_length, J2, luminosity):
         self.name = name
         self.model = model
         self.model_path = model_path
@@ -15,6 +15,7 @@ class body():
         self.day_length = day_length
         self.traj_history = []
         self.J2 = J2
+        self.luminosity = luminosity # used for calculating radiation pressure due to Sun etc. (Watts)
 
         self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
 
@@ -44,6 +45,19 @@ class body():
 
     def set_color(self, color):
         self.color = color
+
+    def get_luminosity(self):
+        return self.luminosity
+
+    def set_luminosity(self, luminosity):
+        self.luminosity = luminosity
+
+    def get_flux_density_at_dist(self, dist):
+        if not self.luminosity:
+            return 0
+        else:
+            # clamp to surface radiation just in case collision check is disabled and some spacecraft goes into the Sun
+            return self.luminosity/(4*math.pi*(dist**2)) # W m-2
 
     def get_pos(self):
         return self.pos

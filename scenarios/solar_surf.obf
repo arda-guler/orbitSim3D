@@ -1,0 +1,6 @@
+cam_strafe_speed 500000
+show Sail vel SAIL_VEL
+show Reference vel REFERENCE_VEL
+create_projection ref Reference Sol
+delta_t 100
+;
