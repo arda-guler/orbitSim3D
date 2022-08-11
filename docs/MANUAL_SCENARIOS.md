@@ -21,8 +21,8 @@ The best way to create scenarios is to design them in OS3D using the command pan
 
 ```
 ;Celestial bodies
-B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0
-B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[346410000,10,-200000000]|[-483,0,-836.5]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0
+B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0
+B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[346410000,10,-200000000]|[-483,0,-836.5]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0|0
 
 ;Vessels
 V|lunar-orbiter|data\models\miniprobe.obj|[0.0,0.8,0.7]|[-590131,-10,6745234]|[7622,0,667]
@@ -46,19 +46,18 @@ The list of special characters is given below;
 - Lines starting in V are for vessels,
 - Lines starting in M are for maneuvers,
 - Lines starting in S are for surface points,
-- Lines starting in C are for barycenters.
+- Lines starting in C are for barycenters,
+- Lines starting in R are for radiation pressure effects.
 
 Although exporting scenarios through OS3D is usually convenient, sometimes, you might want to make quick little changes to a scenario or engineer all the little details of your digital universe; for which you might want to modify scenario files by hand. For this, the necessary information is given below.
-
-
 
 ### Celestial Bodies
 The syntax for denoting celestial bodies is as follows;
 ```
-B|body_name|body_model|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_J2
+B|body_name|body_model|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_J2|body_luminosity
 ```
 
-If J2 and day length are unknown, they should be set to 0. If orientation is not known or irrelevant to the simulation, the best option is to set it as a 3x3 identity matrix, i.e. [[1,0,0],[0,1,0],[0,0,1]]
+If J2, day length or luminosity are unknown, they should be set to 0. If orientation is not known or irrelevant to the simulation, the best option is to set it as a 3x3 identity matrix, i.e. [[1,0,0],[0,1,0],[0,0,1]]
 
 ### Vessels
 The syntax for denoting vessels is as follows;
@@ -94,3 +93,10 @@ C|barycenter_name|body1,body2,body3,body4...
 ```
 
 2+ bodies should be entered to the last parameter, separated by commas.
+
+### Radiation Pressure
+The syntax for denoting the effects of radiation pressure is as follows;
+```
+R|effect_name|vessel|body|illuminated_area(m2)|reaction_force_orientation|vessel_mass(kg)|mass_auto_update_option
+```
+The mass auto-update option automatically reduces vessel mass in case of a constant thrust maneuver, since propellant will be spent.
