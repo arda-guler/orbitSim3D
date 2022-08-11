@@ -12,6 +12,3 @@ Do all of this in Python, the beloved programming language of science and engine
 To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL.md).
 
 Having trouble finding your way around? Have a look at the [introductory tutorial](https://github.com/arda-guler/orbitSim3D/blob/master/docs/tutorial.md) for the basics!
-
-(Take a look at [GMAT](https://opensource.gsfc.nasa.gov/projects/GMAT/index.php) also, if you are looking for something more professional.)
-
