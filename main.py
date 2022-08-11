@@ -51,6 +51,10 @@ preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde
 
 sim_time = 0
 
+def window_resize(window, width, height):
+    glfw.get_framebuffer_size(window)
+    glViewport(0, 0, width, height)
+
 def read_batch(batch_path):
 
     try:
@@ -720,8 +724,9 @@ def main(scn_filename=None, start_time=0):
 
     # creating a window
     window = glfw.create_window(int(window_x),int(window_y),"OrbitSim3D", None, None)
-    glfw.set_window_pos(window,200,200)
+    glfw.set_window_pos(window,100,100)
     glfw.make_context_current(window)
+    glfw.set_window_size_callback(window, window_resize)
     
     gluPerspective(fov, int(window_x)/int(window_y), near_clip, far_clip)
     glEnable(GL_CULL_FACE)
