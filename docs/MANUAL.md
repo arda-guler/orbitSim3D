@@ -39,6 +39,8 @@ This way, no movement happens "on rails", and perturbations from distant bodies 
 
 Given a J2 value on scenario setup, the simulation can also account for the oblateness of celestial bodies and apply J2 perturbations.
 
+Given the required parameters, the simulation can account for radiation pressure. This can be used to calculate the drift in interplanetary trajectories that accumulate over time, or can be used as a main propulsion method in the case of solar sails.
+
 OS3D is quite configurable and extendable, so much so that it will let the user make mistakes. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
 Relativistic effects are not taken into account whatsoever.
