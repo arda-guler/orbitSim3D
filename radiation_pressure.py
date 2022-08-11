@@ -4,11 +4,12 @@ from math_utils import *
 c = 299792458 # m s-1, speed of light
 
 class radiation_pressure:
-    def __init__(self, name, vessel, body, area, direction, mass, mass_auto_update):
+    def __init__(self, name, vessel, body, area, orientation_frame, direction, mass, mass_auto_update):
         self.name = name
         self.vessel = vessel
         self.body = body
         self.area = area
+        self.orientation_frame = orientation_frame
         self.direction = direction
         self.direction_input = direction
         self.mass = mass
@@ -16,7 +17,7 @@ class radiation_pressure:
 
     def set_direction(self):
         if not type(self.direction) == list or self.direction_input[-8:] == "_dynamic":
-            self.direction = self.vessel.get_orientation_rel_to(self.body, self.direction_input)
+            self.direction = self.vessel.get_orientation_rel_to(self.orientation_frame, self.direction_input)
 
     def get_name(self):
         return self.name
@@ -114,4 +115,20 @@ class radiation_pressure:
 
         return vector_scale(self.direction, accel)
         
+    def get_params_str(self):
+        output = "Vessel: " + self.vessel.get_name() + "\n"
+        output = "Body: " + self.body.get_name() + "\n"
         
+        if not type(self.orientation_input) == list:
+            if self.orientation_input[-8:] == "_dynamic":
+                output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.orientation_frame.get_name()
+            else:
+                output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.orientation_frame.get_name()
+        else:
+            output += "Orientation: " + str(self.orientation) + " rel to global frame"
+            
+        output += "\nIlluminated Area: " + str(self.area) + " m2\n"
+        output += "Vessel Mass: " + str(self.mass) + " kg\n"
+        output += "Vessel Mass Auto-Update?: " + str(self.mass_auto_update)
+
+        return output

@@ -22,5 +22,5 @@ V|Sail|data/models/minisat.obj|[0,1,1]|[14959787070,0,0]|[0,0,-94000]
 V|Reference|data/models/minisat.obj|[1,0,0]|[14959787070,0,0]|[0,0,-94000]
 ;
 ; area and mass are taken from Japan's IKAROS spacecraft
-R|Tpress|Sail|Sol|196|radial_out_dynamic|2|0
+R|Tpress|Sail|Sol|196|Sol|radial_out_dynamic|2|0
 ;

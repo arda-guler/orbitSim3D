@@ -236,15 +236,15 @@ def import_scenario(scn_filename):
 
         # import radiation pressure data
         elif line[0] == "R":
-            if line[5] in preset_orientations:
+            if line[6] in preset_orientations:
                 new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
-                                            float(line[4]), line[5], float(line[6]), int(line[7]))
+                                            float(line[4]), find_obj_by_name(line[5]), line[6], float(line[7]), int(line[8]))
             else:
-                line[5] = line[5][1:-1].split(",")
+                line[6] = line[6][1:-1].split(",")
                 new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
-                                            float(line[4]),
-                                            [float(line[5][0]), float(line[5][1]), float(line[5][2])],
-                                            float(line[6]), int(line[7]))
+                                            float(line[4]), find_obj_by_name(line[5]),
+                                            [float(line[6][0]), float(line[6][1]), float(line[6][2])],
+                                            float(line[7]), int(line[8]))
 
             radiation_pressures.append(new_rp)
             print("Loading radiation pressure:", new_rp.get_name())
@@ -384,6 +384,42 @@ def find_maneuver_by_name(mnv_name):
     for m in maneuvers:
         if m.name == mnv_name:
             result = m
+            break
+
+    return result
+
+def apply_radiation_pressure(rp_name, rp_vessel, rp_body, rp_area, rp_orient_frame, rp_direction, rp_mass, rp_mass_auto_update):
+    global radiation_pressures
+
+    if find_radiation_pressure_by_name(rp_name):
+        print("A radiation pressure effect with this name already exists. Please pick another name for the new effect.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_rp = radiation_pressure(rp_name, rp_vessel, rp_body, rp_area, rp_orient_frame, rp_direction, rp_mass, rp_mass_auto_update)
+    radiation_pressures.append(new_rp)
+
+def remove_radiation_pressure(rp_name):
+    global radiation_pressures
+
+    rp = find_radiation_pressure_by_name(rp_name)
+
+    if not rp:
+        print("Radiation pressure effect not found!")
+        time.sleep(2)
+        return
+
+    radiation_pressures.remove(rp)
+    del rp
+
+def find_radiation_pressure_by_name(rp_name):
+    global radiation_pressures
+
+    result = None
+
+    for rp in radiation_pressures:
+        if rp.name == rp_name:
+            result = rp
             break
 
     return result
@@ -816,7 +852,7 @@ def main(scn_filename=None, start_time=0):
             frame_command = True
 
         elif keyboard.is_pressed("p") and not rapid_compute_flag:
-            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, projections, plots,
+            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, projections, plots,
                                                auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer)
             if panel_commands:
                 for panel_command in panel_commands:
@@ -1057,6 +1093,31 @@ def main(scn_filename=None, start_time=0):
                     print("Wrong number of arguments for command 'delete_maneuver'.\n")
                     time.sleep(2)
 
+            # APPLY_RADIATION_PRESSURE command
+            elif command[0] == "apply_radiation_pressure":
+                if len(command) == 9:
+                    if command[6] in preset_orientations:
+                        apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                                 float(command[4]), find_obj_by_name(command[5]), command[6], float(command[7]), int(command[8]))
+                    else:
+                        apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                                 float(command[4]), find_obj_by_name(command[5]),
+                                                 [float(command[6][1:-1].split(",")[0]),
+                                                  float(command[6][1:-1].split(",")[1]),
+                                                  float(command[6][1:-1].split(",")[2])],
+                                                 float(command[7]), int(command[8]))
+                else:
+                    print("Wrong number of arguments for command 'apply_radiation_pressure'.\n")
+                    time.sleep(2)
+
+            # REMOVE_RADIATION_PRESSURE command
+            elif command[0] == "remove_radiation_pressure":
+                if len(command) == 2:
+                    remove_radiation_pressure(command[1])
+                else:
+                    print("Wrong number of arguments for command 'remove_radiation_pressure'.\n")
+                    time.sleep(2)
+
             # CREATE_PROJECTION command
             elif command[0] == "create_projection":
                 if len(command) == 4:
@@ -1289,7 +1350,7 @@ def main(scn_filename=None, start_time=0):
                     print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
                     print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
-                    print("vessel_body_collision\n")
+                    print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1343,6 +1404,14 @@ def main(scn_filename=None, start_time=0):
                     elif command[1] == "delete_maneuver":
                         print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
                         print("Syntax: delete_maneuver <name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "apply_radiation_pressure":
+                        print("\n'apply_radiation_pressure' command sets up a radiation pressure effect on a vessel.\n")
+                        print("Syntax: apply_radiation_pressure <name> <vessel> <radiation_source_body> <illuminated_area> <frame_of_reference> <orientation> <vessel_mass> <mass_auto_update>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "remove_radiation_pressure":
+                        print("\n'remove_radiation_pressure' command removes a radiation pressure effect from the simulation.\n")
+                        print("Syntax: remove_radiation_pressure <name>")
                         input("Press Enter to continue...")
                     elif command[1] == "create_projection":
                         print("\n'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.\n")
@@ -1538,6 +1607,7 @@ def main(scn_filename=None, start_time=0):
 
         # update physics
         for rp in radiation_pressures:
+            rp.update_mass(maneuvers, sim_time, delta_t)
             accel = rp.calc_accel()
             rp.vessel.update_vel(accel, delta_t)
             # do not update vessel position in this 'for' loop, we did not apply all accelerations!
