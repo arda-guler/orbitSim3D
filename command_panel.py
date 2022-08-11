@@ -1209,7 +1209,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         cam_commands_label.grid(row=16, column=0, columnspan=3)
         cam_strafe_speed_button = tk.Button(cmd_window, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
         cam_strafe_speed_button.config(width=15,height=1)
-        cam_strafe_speed_button.grid(row=1, column=0)
+        cam_strafe_speed_button.grid(row=17, column=0)
         lock_cam_button = tk.Button(cmd_window, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
         lock_cam_button.config(width=15,height=1)
         lock_cam_button.grid(row=17, column=1)
