@@ -930,6 +930,14 @@ def main(scn_filename=None, start_time=0):
                             print("Illegal parameter!\n")
                             time.sleep(2)
 
+                    elif find_radiation_pressure_by_name(command[1]):
+                        rad_press = find_radiation_pressure_by_name(command[1])
+                        if command[2] == "params":
+                            output_buffer.append([command[3], command[2], rad_press, "rp"])
+                        else:
+                            print("Illegal parameter!\n")
+                            time.sleep(2)
+
                     elif find_proj_by_name(command[1]):
                         proj = find_proj_by_name(command[1])
                         if (command[2] == "apoapsis" or command[2] == "periapsis" or command[2] == "params" or
@@ -1361,8 +1369,9 @@ def main(scn_filename=None, start_time=0):
                         print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
                         print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
-                        print("Syntax Option 4: show <projection_name> <(attrib_name/params)> <display_label>\n")
-                        print("Syntax Option 5: show traj (enables trajectory trails)\n")
+                        print("Syntax Option 4: show <radiation_pressure_name> params <display_label>\n")
+                        print("Syntax Option 5: show <projection_name> <(attrib_name/params)> <display_label>\n")
+                        print("Syntax Option 6: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
@@ -1726,6 +1735,10 @@ def main(scn_filename=None, start_time=0):
                 elif element[1] == "state":
                     print(element[0], element[2].get_state(sim_time))
                 elif element[1] == "params" and element[3] == "m":
+                    print(element[0], "\n" + element[2].get_params_str())
+
+                # radiation pressure params
+                elif element[1] == "params" and element[3] == "rp":
                     print(element[0], "\n" + element[2].get_params_str())
 
                 # orbit projection parameters

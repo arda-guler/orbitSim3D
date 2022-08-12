@@ -195,9 +195,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_s3_button.grid(row=7, column=0)
                 show_s3_button.config(width=20,height=1)
 
-                # option 5
-                show_s4t1_label = tk.Label(entry_panel, text="Projection")
-                show_s4t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
+                # option 6
+                show_s4t1_label = tk.Label(entry_panel, text="Radiation Press.")
+                show_s4t2_label = tk.Label(entry_panel, text="Data ('params')")
                 show_s4t3_label = tk.Label(entry_panel, text="Display Label")
                 show_s4t1_label.grid(row=8, column=1)
                 show_s4t2_label.grid(row=8, column=2)
@@ -215,13 +215,37 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         command = "show " + show_s4t1.get("1.0","end-1c") + " " + show_s4t2.get("1.0","end-1c") + " " + show_s4t3.get("1.0","end-1c")
                         add_to_buffer(command)
 
-                show_s4_button = tk.Button(entry_panel, text="Show Projection Data", command=generate_s4)
+                show_s4_button = tk.Button(entry_panel, text="Show Rad. Press. Data", command=generate_s4)
                 show_s4_button.grid(row=9, column=0)
                 show_s4_button.config(width=20,height=1)
 
                 # option 6
+                show_s5t1_label = tk.Label(entry_panel, text="Projection")
+                show_s5t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
+                show_s5t3_label = tk.Label(entry_panel, text="Display Label")
+                show_s5t1_label.grid(row=10, column=1)
+                show_s5t2_label.grid(row=10, column=2)
+                show_s5t3_label.grid(row=10, column=3)
+
+                show_s5t1 = tk.Text(entry_panel, width=20, height=1)
+                show_s5t2 = tk.Text(entry_panel, width=20, height=1)
+                show_s5t3 = tk.Text(entry_panel, width=20, height=1)
+                show_s5t1.grid(row=11, column=1)
+                show_s5t2.grid(row=11, column=2)
+                show_s5t3.grid(row=11, column=3)
+
+                def generate_s5():
+                    if show_s5t1.get("1.0","end-1c") and show_s5t2.get("1.0","end-1c") and show_s5t3.get("1.0","end-1c"):
+                        command = "show " + show_s5t1.get("1.0","end-1c") + " " + show_s5t2.get("1.0","end-1c") + " " + show_s5t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                show_s5_button = tk.Button(entry_panel, text="Show Projection Data", command=generate_s5)
+                show_s5_button.grid(row=11, column=0)
+                show_s5_button.config(width=20,height=1)
+
+                # option 7
                 show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
-                show_labels_button.grid(row=10, column=0)
+                show_labels_button.grid(row=12, column=0)
                 show_labels_button.config(width=20,height=1)
 
             elif cmd_a == "hide":
