@@ -47,7 +47,8 @@ The list of special characters is given below;
 - Lines starting in M are for maneuvers,
 - Lines starting in S are for surface points,
 - Lines starting in C are for barycenters,
-- Lines starting in R are for radiation pressure effects.
+- Lines starting in R are for radiation pressure effects,
+- Lines starting in A are for atmospheric drag effects.
 
 Although exporting scenarios through OS3D is usually convenient, sometimes, you might want to make quick little changes to a scenario or engineer all the little details of your digital universe; for which you might want to modify scenario files by hand. For this, the necessary information is given below.
 
@@ -98,5 +99,12 @@ C|barycenter_name|body1,body2,body3,body4...
 The syntax for denoting the effects of radiation pressure is as follows;
 ```
 R|effect_name|vessel|body|illuminated_area(m2)|reaction_force_orientation|vessel_mass(kg)|mass_auto_update_option
+```
+The mass auto-update option automatically reduces vessel mass in case of a constant thrust maneuver, since propellant will be spent.
+
+### Atmospheric Drag
+The syntax for denoting the effects of atmospheric drag is as follows;
+```
+A|effect_name|vessel|body|drag_area(m2)|drag_coeff|vessel_mass(kg)|mass_auto_update_option
 ```
 The mass auto-update option automatically reduces vessel mass in case of a constant thrust maneuver, since propellant will be spent.
