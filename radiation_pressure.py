@@ -40,6 +40,9 @@ class radiation_pressure:
     def set_mass(self, m):
         self.mass = m
 
+    def get_orientation_frame(self):
+        return self.orientation_frame
+
     def check_occlusion_simple(self, bodies):
         # checks if the light from the source body is blocked by another body
         # e.g. if satellite is on the night side on Low Earth Orbit
@@ -119,13 +122,13 @@ class radiation_pressure:
         output = "Vessel: " + self.vessel.get_name() + "\n"
         output = "Body: " + self.body.get_name() + "\n"
         
-        if not type(self.orientation_input) == list:
-            if self.orientation_input[-8:] == "_dynamic":
-                output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.orientation_frame.get_name()
+        if not type(self.direction_input) == list:
+            if self.direction_input[-8:] == "_dynamic":
+                output += "Orientation: " + self.direction_input[0:-8] + " (dynamic) rel to " + self.orientation_frame.get_name()
             else:
-                output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.orientation_frame.get_name()
+                output += "Orientation: " + self.direction_input[-8:] + " rel to " + self.orientation_frame.get_name()
         else:
-            output += "Orientation: " + str(self.orientation) + " rel to global frame"
+            output += "Orientation: " + str(self.direction) + " rel to global frame"
             
         output += "\nIlluminated Area: " + str(self.area) + " m2\n"
         output += "Vessel Mass: " + str(self.mass) + " kg\n"

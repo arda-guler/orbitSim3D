@@ -1,0 +1,5 @@
+show Terk alt Earth ALT
+show Terk vel_mag Earth VEL
+show decay params DRAG
+create_projection initial-orbit Terk Earth
+;

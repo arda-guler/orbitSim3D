@@ -2,7 +2,8 @@ from math_utils import *
 import math
 
 class body():
-    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient, day_length, J2, luminosity):
+    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient,
+                 day_length, J2, luminosity, atmos_sea_level_density, atmos_scale_height):
         self.name = name
         self.model = model
         self.model_path = model_path
@@ -16,6 +17,8 @@ class body():
         self.traj_history = []
         self.J2 = J2
         self.luminosity = luminosity # used for calculating radiation pressure due to Sun etc. (Watts)
+        self.atmos_sea_level_density = atmos_sea_level_density
+        self.atmos_scale_height = atmos_scale_height
 
         self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
 
@@ -155,3 +158,13 @@ class body():
 
     def get_day_length(self):
         return self.day_length
+
+    def get_atmospheric_density_at_alt(self, alt):
+        if self.atmos_sea_level_density and self.atmos_scale_height:
+            r = alt + self.radius
+            R = self.radius
+            H = self.atmos_scale_height
+
+            return self.atmos_sea_level_density * math.e**((R-r)/H)
+        else:
+            return 0

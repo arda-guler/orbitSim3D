@@ -1,0 +1,33 @@
+https://nssdc.gsfc.nasa.gov/planetary/factsheet/
+
+VENUS
+Scale height: 15.9 km
+Sea level density: 65 kg m-3
+
+EARTH
+Scale height: 8.5 km
+Sea level density: 1.3 kg m-3
+
+MARS
+Scale height: 11.1 km
+Sea level density: 0.02 kg m-3
+
+JUPITER
+Scale height: 27 km
+Density at 1 bar 0.16 kg m-3
+
+SATURN
+Scale height: 59.5 km
+Sea level density: 0.19 kg m-3
+
+TITAN
+Scale height: 21 km
+Sea level density: papers about Titan's atmosphere don't give a number????
+
+URANUS
+Scale height: 27.7 km
+Sea level density: 0.42 kg m-3
+
+NEPTUNE
+Scale height: around 20 km
+Sea level density: 0.45 kg m-3

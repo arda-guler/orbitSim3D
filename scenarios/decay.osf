@@ -1,0 +1,16 @@
+;  DECAY.OSF
+;  Author: arda-guler
+;
+;Watch a LEO space station's orbit decay due
+;to atmospheric drag. It will take a while.
+
+;Celestial bodies
+
+B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|1.3|8.5E3
+
+;Vessels
+
+V|Terk|data/models/ministation.obj|[0.0,1.0,1.0]|[0,0,7000000]|[6181.32,4328.21,0]
+
+;Perturbations
+A|decay|Terk|Earth|1000|5.2|400000|1

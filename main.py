@@ -25,6 +25,7 @@ from plot import *
 from command_panel import *
 from config_utils import *
 from radiation_pressure import *
+from atmospheric_drag import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -45,6 +46,7 @@ cameras = []
 
 maneuvers = []
 radiation_pressures = []
+atmospheric_drags = []
 
 batch_commands = []
 
@@ -87,7 +89,7 @@ def read_batch(batch_path):
     return commands
 
 def clear_scene():
-    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, plots, sim_time
+    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, plots, radiation_pressures, atmospheric_drags, sim_time
 
     objs = []
     vessels = []
@@ -97,10 +99,12 @@ def clear_scene():
     surface_points = []
     barycenters = []
     plots = []
+    radiation_pressures = []
+    atmospheric_drags = []
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, sim_time
 
     clear_scene()
 
@@ -164,7 +168,9 @@ def import_scenario(scn_filename):
                             
                             float(line[10]),
 
-                            float(line[11]))
+                            float(line[11]),
+
+                            float(line[12]), float(line[13]))
             
             bodies.append(new_body)
             objs.append(new_body)
@@ -248,11 +254,19 @@ def import_scenario(scn_filename):
 
             radiation_pressures.append(new_rp)
             print("Loading radiation pressure:", new_rp.get_name())
+
+        # import atmospheric drag data
+        elif line[0] == "A":
+            new_ad = atmospheric_drag(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
+                                      float(line[4]), float(line[5]), float(line[6]), int(line[7]))
+
+            atmospheric_drags.append(new_ad)
+            print("Loading atmospheric drag:", new_ad.get_name())
             
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, sim_time
     
     scn_filename = "scenarios/" + scn_filename
     if not scn_filename.endswith(".osf"):
@@ -274,7 +288,9 @@ def export_scenario(scn_filename):
 ;lines starting in V are for vessels,
 ;lines starting in M are for maneuvers,
 ;lines starting in S are for surface points,
-;lines starting in C are for barycenters.
+;lines starting in C are for barycenters,
+;lines starting in R are for radiation pressure effects,
+;lines starting in A are for atmoshperic drag effects.
 ;
 ;All other lines will be ignored and
 ;can be used for comments.
@@ -330,6 +346,18 @@ def export_scenario(scn_filename):
                 bc_save_string += b.get_name() + ","
             bc_save_string = bc_save_string[:-1]+"\n"
             scn_file.write(bc_save_string)
+
+        print("Writing radiation pressures...")
+        for rp in radiation_pressures:
+            rp_save_string = "R|" + rp.get_name() + "|" + rp.vessel.get_name() + "|" + rp.body.get_name() + "|" + str(rp.get_area()) +\
+                             "|" + rp.orientation_frame.get_name() + "|" + str(rp.direction_input) + "|" + str(rp.mass) + "|" + str(rp.mass_auto_update) + "\n"
+            scn_file.write(rp_save_string)
+
+        print("Writing atmospheric drags...")
+        for ad in atmospheric_drags:
+            ad_save_string = "A|" + ad.get_name() + "|" + ad.vessel.get_name() + "|" + ad.body.get_name() + "|" + str(ad.get_area()) +\
+                             "|" + str(ad.get_drag_coeff()) + "|" + str(ad.get_mass()) + "|" + str(ad.mass_auto_update) + "\n"
+            scn_file.write(ad_save_string)
 
         print("Scenario export complete!")
         time.sleep(2)
@@ -420,6 +448,41 @@ def find_radiation_pressure_by_name(rp_name):
     for rp in radiation_pressures:
         if rp.name == rp_name:
             result = rp
+            break
+
+    return result
+
+def apply_atmospheric_drag(ad_name, ad_vessel, ad_body, ad_area, ad_drag_coeff, ad_mass, ad_mass_auto_update):
+    global atmospheric_drags
+
+    if find_atmospheric_drag_by_name(ad_name):
+        print("An atmospheric drag effect with this name already exists. Please pick another name for the new effect.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_ad = atmospheric_drag(ad_name, ad_vessel, ad_body, ad_area, ad_drag_coeff, ad_mass, ad_mass_auto_update)
+    atmospheric_drags.append(new_ad)
+
+def remove_atmospheric_drag(ad_name):
+    global atmospheric_drags
+
+    ad = find_atmospheric_drag_by_name(ad_name)
+    if not ad:
+        print("Atmospheric drag effect not found!")
+        time.sleep(2)
+        return
+
+    atmospheric_drags.remove(ad)
+    del ad
+
+def find_atmospheric_drag_by_name(ad_name):
+    global atmospheric_drags
+
+    result = None
+
+    for ad in atmospheric_drags:
+        if ad.name == ad_name:
+            result = ad
             break
 
     return result
@@ -768,7 +831,7 @@ def get_active_cam():
 
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
-           plots, cameras, barycenters, radiation_pressures
+           plots, cameras, barycenters, radiation_pressures, atmospheric_drags
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
@@ -852,7 +915,7 @@ def main(scn_filename=None, start_time=0):
             frame_command = True
 
         elif keyboard.is_pressed("p") and not rapid_compute_flag:
-            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, projections, plots,
+            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
                                                auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer)
             if panel_commands:
                 for panel_command in panel_commands:
@@ -934,6 +997,14 @@ def main(scn_filename=None, start_time=0):
                         rad_press = find_radiation_pressure_by_name(command[1])
                         if command[2] == "params":
                             output_buffer.append([command[3], command[2], rad_press, "rp"])
+                        else:
+                            print("Illegal parameter!\n")
+                            time.sleep(2)
+
+                    elif find_atmospheric_drag_by_name(command[1]):
+                        atmo_drag = find_atmospheric_drag_by_name(command[1])
+                        if command[2] == "params":
+                            output_buffer.append([command[3], command[2], atmo_drag, "ad"])
                         else:
                             print("Illegal parameter!\n")
                             time.sleep(2)
@@ -1124,6 +1195,23 @@ def main(scn_filename=None, start_time=0):
                     remove_radiation_pressure(command[1])
                 else:
                     print("Wrong number of arguments for command 'remove_radiation_pressure'.\n")
+                    time.sleep(2)
+
+            # APPLY_ATMOSPHERIC_DRAG command
+            elif command[0] == "apply_atmospheric_drag":
+                if len(command) == 8:
+                    apply_atmospheric_drag(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                           float(command[4]), float(command[5]), float(command[6]), int(command[7]))
+                else:
+                    print("Wrong number of arguments for command 'apply_atmospheric_drag'.\n")
+                    time.sleep(2)
+
+            # REMOVE_ATMOSPHERIC_DRAG command
+            elif command[0] == "remove_atmospheric_drag":
+                if len(command) == 2:
+                    remove_atmospheric_drag(command[1])
+                else:
+                    print("Wrong number of arguments for command 'remove_atmospheric_drag'.\n")
                     time.sleep(2)
 
             # CREATE_PROJECTION command
@@ -1358,7 +1446,8 @@ def main(scn_filename=None, start_time=0):
                     print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
                     print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
-                    print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure\n")
+                    print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
+                    print("apply_atmospheric_drag, remove_atmospheric_drag\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1370,8 +1459,9 @@ def main(scn_filename=None, start_time=0):
                         print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
                         print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
                         print("Syntax Option 4: show <radiation_pressure_name> params <display_label>\n")
-                        print("Syntax Option 5: show <projection_name> <(attrib_name/params)> <display_label>\n")
-                        print("Syntax Option 6: show traj (enables trajectory trails)\n")
+                        print("Syntax Option 5: show <atmospheric_drag_name> params <display_label>\n")
+                        print("Syntax Option 6: show <projection_name> <(attrib_name/params)> <display_label>\n")
+                        print("Syntax Option 7: show traj (enables trajectory trails)\n")
                         input("Press Enter to continue...")
                     elif command[1] == "hide":
                         print("\n'hide' command removes an output element from the command prompt/terminal.\n")
@@ -1421,6 +1511,14 @@ def main(scn_filename=None, start_time=0):
                     elif command[1] == "remove_radiation_pressure":
                         print("\n'remove_radiation_pressure' command removes a radiation pressure effect from the simulation.\n")
                         print("Syntax: remove_radiation_pressure <name>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "apply_atmospheric_drag":
+                        print("\n'apply_atmospheric_drag' command sets up an atmospheric drag effect on a vessel.\n")
+                        print("Syntax: apply_atmospheric_drag <name> <vessel> <body> <drag_area> <drag_coeff> <vessel_mass> <mass_auto_update>")
+                        input("Press Enter to continue...")
+                    elif command[1] == "remove_atmospheric_drag":
+                        print("\n'remove_atmospheric_drag' command removes an atmospheric drag effect from the simulation.\n")
+                        print("Syntax: remove_atmospheric_drag <name>")
                         input("Press Enter to continue...")
                     elif command[1] == "create_projection":
                         print("\n'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.\n")
@@ -1621,6 +1719,12 @@ def main(scn_filename=None, start_time=0):
             rp.vessel.update_vel(accel, delta_t)
             # do not update vessel position in this 'for' loop, we did not apply all accelerations!
 
+        for ad in atmospheric_drags:
+            ad.update_mass(maneuvers, sim_time, delta_t)
+            accel = ad.calc_accel()
+            ad.vessel.update_vel(accel, delta_t)
+            # do not update vessel position in this 'for' loop, we did not apply all accelerations!
+
         for m in maneuvers:
             # lower delta_t if a maneuver is in progress
             if maneuver_auto_dt and ((delta_t > maneuver_auto_dt and (m.get_state(sim_time) == "Performing" or
@@ -1739,6 +1843,10 @@ def main(scn_filename=None, start_time=0):
 
                 # radiation pressure params
                 elif element[1] == "params" and element[3] == "rp":
+                    print(element[0], "\n" + element[2].get_params_str())
+
+                # atmospheric drag params
+                elif element[1] == "params" and element[3] == "ad":
                     print(element[0], "\n" + element[2].get_params_str())
 
                 # orbit projection parameters

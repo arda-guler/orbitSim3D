@@ -3,7 +3,7 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, projections, plots, auto_dt_buffer,
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots, auto_dt_buffer,
                       sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer):
     command_buffer = []
 
@@ -35,6 +35,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
         for rp in radiation_pressures:
             objects_text += "RADIATION PRESSURE: " + rp.get_name() + "\n"
+
+        for ad in atmospheric_drags:
+            objects_text += "ATMOSPHERIC DRAG: " + ad.get_name() + "\n"
             
         for p in projections:
             objects_text += "PROJECTION: " + p.get_name() + "\n"
@@ -195,7 +198,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_s3_button.grid(row=7, column=0)
                 show_s3_button.config(width=20,height=1)
 
-                # option 6
+                # option 5
                 show_s4t1_label = tk.Label(entry_panel, text="Radiation Press.")
                 show_s4t2_label = tk.Label(entry_panel, text="Data ('params')")
                 show_s4t3_label = tk.Label(entry_panel, text="Display Label")
@@ -220,8 +223,8 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_s4_button.config(width=20,height=1)
 
                 # option 6
-                show_s5t1_label = tk.Label(entry_panel, text="Projection")
-                show_s5t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
+                show_s5t1_label = tk.Label(entry_panel, text="Atmo. Drag")
+                show_s5t2_label = tk.Label(entry_panel, text="Data ('params')")
                 show_s5t3_label = tk.Label(entry_panel, text="Display Label")
                 show_s5t1_label.grid(row=10, column=1)
                 show_s5t2_label.grid(row=10, column=2)
@@ -239,13 +242,37 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         command = "show " + show_s5t1.get("1.0","end-1c") + " " + show_s5t2.get("1.0","end-1c") + " " + show_s5t3.get("1.0","end-1c")
                         add_to_buffer(command)
 
-                show_s5_button = tk.Button(entry_panel, text="Show Projection Data", command=generate_s5)
+                show_s5_button = tk.Button(entry_panel, text="Show Atmo. Drag Data", command=generate_s5)
                 show_s5_button.grid(row=11, column=0)
                 show_s5_button.config(width=20,height=1)
 
                 # option 7
+                show_s6t1_label = tk.Label(entry_panel, text="Projection")
+                show_s6t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
+                show_s6t3_label = tk.Label(entry_panel, text="Display Label")
+                show_s6t1_label.grid(row=12, column=1)
+                show_s6t2_label.grid(row=12, column=2)
+                show_s6t3_label.grid(row=12, column=3)
+
+                show_s6t1 = tk.Text(entry_panel, width=20, height=1)
+                show_s6t2 = tk.Text(entry_panel, width=20, height=1)
+                show_s6t3 = tk.Text(entry_panel, width=20, height=1)
+                show_s6t1.grid(row=13, column=1)
+                show_s6t2.grid(row=13, column=2)
+                show_s6t3.grid(row=13, column=3)
+
+                def generate_s6():
+                    if show_s6t1.get("1.0","end-1c") and show_s6t2.get("1.0","end-1c") and show_s6t3.get("1.0","end-1c"):
+                        command = "show " + show_s6t1.get("1.0","end-1c") + " " + show_s6t2.get("1.0","end-1c") + " " + show_s6t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                show_s6_button = tk.Button(entry_panel, text="Show Projection Data", command=generate_s6)
+                show_s6_button.grid(row=13, column=0)
+                show_s6_button.config(width=20,height=1)
+
+                # option 7
                 show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
-                show_labels_button.grid(row=12, column=0)
+                show_labels_button.grid(row=14, column=0)
                 show_labels_button.config(width=20,height=1)
 
             elif cmd_a == "hide":
@@ -605,6 +632,67 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 rrp_s1_button = tk.Button(entry_panel, text="Remove Rad. Press.", command=generate_s1)
                 rrp_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "apply_atmospheric_drag":
+                aad_help = tk.Label(entry_panel, text="'apply_atmospheric_drag' command sets up an atmospheric drag effect on a vessel.")
+                aad_help.grid(row=0, column=0, columnspan=10)
+
+                aad_s1t1_label = tk.Label(entry_panel, text="Atmo. Drag Name")
+                aad_s1t2_label = tk.Label(entry_panel, text="Vessel Name")
+                aad_s1t3_label = tk.Label(entry_panel, text="Body Name")
+                aad_s1t4_label = tk.Label(entry_panel, text="Drag Area")
+                aad_s1t5_label = tk.Label(entry_panel, text="Drag Coeff.")
+                aad_s1t6_label = tk.Label(entry_panel, text="Vessel Mass")
+                aad_s1t7_label = tk.Label(entry_panel, text="Mass AutoUpdate(0/1)")
+                aad_s1t1_label.grid(row=1, column=1)
+                aad_s1t2_label.grid(row=1, column=2)
+                aad_s1t3_label.grid(row=1, column=3)
+                aad_s1t4_label.grid(row=1, column=4)
+                aad_s1t5_label.grid(row=1, column=5)
+                aad_s1t6_label.grid(row=1, column=6)
+                aad_s1t7_label.grid(row=1, column=7)
+
+                aad_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t4 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t5 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t6 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t7 = tk.Text(entry_panel, width=20, height=1)
+                aad_s1t1.grid(row=2, column=1)
+                aad_s1t2.grid(row=2, column=2)
+                aad_s1t3.grid(row=2, column=3)
+                aad_s1t4.grid(row=2, column=4)
+                aad_s1t5.grid(row=2, column=5)
+                aad_s1t6.grid(row=2, column=6)
+                aad_s1t7.grid(row=2, column=7)
+                
+                def generate_s1():
+                    if (aad_s1t1.get("1.0", "end-1c") and aad_s1t2.get("1.0", "end-1c") and aad_s1t3.get("1.0", "end-1c") and aad_s1t4.get("1.0", "end-1c") and
+                        aad_s1t5.get("1.0", "end-1c") and aad_s1t6.get("1.0", "end-1c") and aad_s1t7.get("1.0", "end-1c")):
+                        command = "apply_atmospheric_drag " + aad_s1t1.get("1.0", "end-1c") + " " + aad_s1t2.get("1.0", "end-1c") + " " + aad_s1t3.get("1.0", "end-1c") + " " + aad_s1t4.get("1.0", "end-1c") + " " + aad_s1t5.get("1.0", "end-1c") + " " + aad_s1t6.get("1.0", "end-1c") + " " + aad_s1t7.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                aad_s1_button = tk.Button(entry_panel, text="Apply Atmo. Drag", command=generate_s1)
+                aad_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "remove_atmospheric_drag":
+                rad_help = tk.Label(entry_panel, text="'remove_atmospheric_drag' command removes an atmospheric drag effect from the simulation.")
+                rad_help.grid(row=0, column=0, columnspan=10)
+                
+                rad_s1t1_label = tk.Label(entry_panel, text="Atmo. Drag Name")
+                rad_s1t1_label.grid(row=1, column=1)
+
+                rad_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                rad_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if rad_s1t1.get("1.0","end-1c"):
+                        command = "remove_atmospheric_drag " + rad_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                rad_s1_button = tk.Button(entry_panel, text="Remove Atmo. Drag", command=generate_s1)
+                rad_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "create_projection":
                 cp_help = tk.Label(entry_panel, text="'create_projection' command creates a 2-body Keplerian orbit projection of an object around a body.")
@@ -1181,7 +1269,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         delete_maneuver_button.config(width=15,height=1)
         delete_maneuver_button.grid(row=5, column=1)
 
-        rad_press_commands_label = tk.Label(cmd_window, text="Radiation Pressure")
+        rad_press_commands_label = tk.Label(cmd_window, text="Non-gravitational Perturbations")
         rad_press_commands_label.grid(row=6, column=0, columnspan=3)
         apply_rad_press_button = tk.Button(cmd_window, text="Apply Rad. Press.", command=lambda:enter_cmd("apply_radiation_pressure"))
         apply_rad_press_button.config(width=15,height=1)
@@ -1190,95 +1278,102 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         remove_rad_press_button.config(width=15,height=1)
         remove_rad_press_button.grid(row=7, column=1)
 
+        apply_atmo_drag_button = tk.Button(cmd_window, text="Apply Atmo. Drag", command=lambda:enter_cmd("apply_atmospheric_drag"))
+        apply_atmo_drag_button.config(width=15,height=1)
+        apply_atmo_drag_button.grid(row=8, column=0)
+        remove_atmo_drag_button = tk.Button(cmd_window, text="Remove Atmo. Drag", command=lambda:enter_cmd("remove_atmospheric_drag"))
+        remove_atmo_drag_button.config(width=15,height=1)
+        remove_atmo_drag_button.grid(row=8, column=1)
+
         proj_commands_label = tk.Label(cmd_window, text="Orbit Projection")
-        proj_commands_label.grid(row=8, column=0, columnspan=3)
+        proj_commands_label.grid(row=9, column=0, columnspan=3)
         create_projection_button = tk.Button(cmd_window, text="Create Projection", command=lambda:enter_cmd("create_projection"))
         create_projection_button.config(width=15,height=1)
-        create_projection_button.grid(row=9, column=0)
+        create_projection_button.grid(row=10, column=0)
         delete_projection_button = tk.Button(cmd_window, text="Delete Projection", command=lambda:enter_cmd("delete_projection"))
         delete_projection_button.config(width=15,height=1)
-        delete_projection_button.grid(row=9, column=1)
+        delete_projection_button.grid(row=10, column=1)
         update_projection_button = tk.Button(cmd_window, text="Update Projection", command=lambda:enter_cmd("update_projection"))
         update_projection_button.config(width=15,height=1)
-        update_projection_button.grid(row=9, column=2)
+        update_projection_button.grid(row=10, column=2)
 
         plot_commands_label = tk.Label(cmd_window, text="Plotting")
-        plot_commands_label.grid(row=10, column=0, columnspan=3)
+        plot_commands_label.grid(row=11, column=0, columnspan=3)
         create_plot_button = tk.Button(cmd_window, text="Create Plot", command=lambda:enter_cmd("create_plot"))
         create_plot_button.config(width=15,height=1)
-        create_plot_button.grid(row=11, column=0)
+        create_plot_button.grid(row=12, column=0)
         delete_plot_button = tk.Button(cmd_window, text="Delete Plot", command=lambda:enter_cmd("delete_plot"))
         delete_plot_button.config(width=15,height=1)
-        delete_plot_button.grid(row=11, column=1)
+        delete_plot_button.grid(row=12, column=1)
 
         barycenter_commands_label = tk.Label(cmd_window, text="Barycenters")
-        barycenter_commands_label.grid(row=12, column=0, columnspan=3)
+        barycenter_commands_label.grid(row=13, column=0, columnspan=3)
         create_barycenter_button = tk.Button(cmd_window, text="Create Barycenter", command=lambda:enter_cmd("create_barycenter"))
-        create_barycenter_button.grid(row=13, column=0)
+        create_barycenter_button.grid(row=14, column=0)
         create_barycenter_button.config(width=15, height=1)
         delete_barycenter_button = tk.Button(cmd_window, text="Delete Barycenter", command=lambda:enter_cmd("delete_barycenter"))
-        delete_barycenter_button.grid(row=13, column=1)
+        delete_barycenter_button.grid(row=14, column=1)
         delete_barycenter_button.config(width=15, height=1)
 
         batch_commands_label = tk.Label(cmd_window, text="File Operations")
-        batch_commands_label.grid(row=14, column=0, columnspan=3)
+        batch_commands_label.grid(row=15, column=0, columnspan=3)
         read_batch_button = tk.Button(cmd_window, text="Read Batch", command=lambda:enter_cmd("batch"))
         read_batch_button.config(width=15,height=1)
-        read_batch_button.grid(row=15, column=0)
+        read_batch_button.grid(row=16, column=0)
         export_button = tk.Button(cmd_window, text="Export Scenario", command=lambda:enter_cmd("export"))
         export_button.config(width=15,height=1)
-        export_button.grid(row=15, column=1)
+        export_button.grid(row=16, column=1)
 
         cam_commands_label = tk.Label(cmd_window, text="Camera Controls")
-        cam_commands_label.grid(row=16, column=0, columnspan=3)
+        cam_commands_label.grid(row=17, column=0, columnspan=3)
         cam_strafe_speed_button = tk.Button(cmd_window, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
         cam_strafe_speed_button.config(width=15,height=1)
-        cam_strafe_speed_button.grid(row=17, column=0)
+        cam_strafe_speed_button.grid(row=18, column=0)
         lock_cam_button = tk.Button(cmd_window, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
         lock_cam_button.config(width=15,height=1)
-        lock_cam_button.grid(row=17, column=1)
+        lock_cam_button.grid(row=18, column=1)
         unlock_cam_button = tk.Button(cmd_window, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
         unlock_cam_button.config(width=15,height=1)
-        unlock_cam_button.grid(row=17, column=2)
+        unlock_cam_button.grid(row=18, column=2)
         cam_rotate_speed_button = tk.Button(cmd_window, text="Cam. Rotate Speed", command=lambda:enter_cmd("cam_rotate_speed"))
         cam_rotate_speed_button.config(width=15,height=1)
-        cam_rotate_speed_button.grid(row=18, column=0)
+        cam_rotate_speed_button.grid(row=19, column=0)
 
         time_commands_label = tk.Label(cmd_window, text="Time Controls")
-        time_commands_label.grid(row=19, column=0, columnspan=3)
+        time_commands_label.grid(row=20, column=0, columnspan=3)
         delta_t_button = tk.Button(cmd_window, text="Delta T", command=lambda:enter_cmd("delta_t"))
         delta_t_button.config(width=15,height=1)
-        delta_t_button.grid(row=20, column=0)
+        delta_t_button.grid(row=21, column=0)
         cycle_time_button = tk.Button(cmd_window, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
         cycle_time_button.config(width=15, height=1)
-        cycle_time_button.grid(row=20, column=1)
+        cycle_time_button.grid(row=21, column=1)
         output_rate_button = tk.Button(cmd_window, text="Output Rate", command=lambda:enter_cmd("output_rate"))
         output_rate_button.config(width=15, height=1)
-        output_rate_button.grid(row=20, column=2)
+        output_rate_button.grid(row=21, column=2)
         autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
         autodt_button.config(width=15, height=1)
-        autodt_button.grid(row=21, column=1)
+        autodt_button.grid(row=22, column=1)
         rapid_compute_button = tk.Button(cmd_window, text="Rapid Compute", command=lambda:enter_cmd("rapid_compute"))
         rapid_compute_button.config(width=15, height=1)
-        rapid_compute_button.grid(row=21, column=2)
+        rapid_compute_button.grid(row=22, column=2)
 
         misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
-        misc_commands_label.grid(row=22, column=0, columnspan=3)
+        misc_commands_label.grid(row=23, column=0, columnspan=3)
         note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
-        note_button.grid(row=23, column=0)
+        note_button.grid(row=24, column=0)
         vessel_body_collision_button = tk.Button(cmd_window, text="Vessel-Body Colsn.", command=lambda:enter_cmd("vessel_body_collision"))
         vessel_body_collision_button.config(width=15, height=1)
-        vessel_body_collision_button.grid(row=23, column=1)
+        vessel_body_collision_button.grid(row=24, column=1)
 
         graphics_commands_label = tk.Label(cmd_window, text="Graphics")
-        graphics_commands_label.grid(row=24, column=0, columnspan=3)
+        graphics_commands_label.grid(row=25, column=0, columnspan=3)
         draw_mode_button = tk.Button(cmd_window, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
         draw_mode_button.config(width=15, height=1)
-        draw_mode_button.grid(row=25, column=0)
+        draw_mode_button.grid(row=26, column=0)
         point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
-        point_size_button.grid(row=25, column=1)
+        point_size_button.grid(row=26, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)
