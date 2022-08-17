@@ -39,7 +39,9 @@ This way, no movement happens "on rails", and perturbations from distant bodies 
 
 Given a J2 value on scenario setup, the simulation can also account for the oblateness of celestial bodies and apply J2 perturbations.
 
-Given the required parameters, the simulation can account for radiation pressure. This can be used to calculate the drift in interplanetary trajectories that accumulate over time, or can be used as a main propulsion method in the case of solar sails. To learn more, see the [manual on radiation pressure effects.](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL_RADIATION_PRESSURE.md)
+Given the required parameters, the simulation can account for atmospheric drag. The orbital decay due to atmospheric drag can be estimated for the planning of station-keeping boost burns or to decide on the best altitude for an acceptable decay rate while staying in close enough proximity of a planet.
+
+Given the required parameters, the simulation can also account for radiation pressure. This can be used to calculate the drift in interplanetary trajectories that accumulate over time, or can be used as a main propulsion method in the case of solar sails. To learn more, see the [manual on radiation pressure effects.](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL_RADIATION_PRESSURE.md)
 
 OS3D is quite configurable and extendable, so much so that it will let the user make mistakes. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
@@ -81,6 +83,8 @@ There are only two configuration files;
 - maneuver.py: the 'maneuver' classes used for various types of maneuvers that can be performed by spacecraft.
 
 - radiation_pressure.py: the 'radiation_pressure' class used to simulate the effects of radiation pressure on spacecraft.
+
+- atmospheric_drag.py: the 'atmospheric_drag' class used to simulate the effects of atmospheric drag on spacecraft.
 
 - math_utils.py: general mathematical functions  that are not provided by the math library.
 
