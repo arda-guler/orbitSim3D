@@ -6,8 +6,8 @@
 ; but the perturbations due to Luna are not. Also, the nuclear attack doctrines
 ; of cold-war USA and USSR are probably not like what I have done here.
 ;
-; Also, as of the making of this scenario, atmosphere is also not accounted for,
-; which can make great differences on surface/atmosphere-skimming trajectories.
+; If you set-up atmospheric drag for the missiles, you can get a more realistic
+; flight trajectory for the missiles.
 ;
 
 ; Our home planet
