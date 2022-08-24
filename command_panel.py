@@ -4,7 +4,7 @@ import tkinter as tk
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots, auto_dt_buffer,
-                      sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer):
+                      sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer, scene_lock):
     command_buffer = []
 
     def on_panel_close():
@@ -72,6 +72,10 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         vars_text += "Output Rate: " + str(output_rate) + "\n"
         vars_text += "\nCam. Strafe Speed: " + str(cam_strafe_speed) + "\n"
         vars_text += "Cam. Rotate Speed: " + str(cam_rotate_speed) + "\n"
+        if scene_lock:
+            vars_text += "Scene Lock: " + str(scene_lock.get_name()) + "\n"
+        else:
+            vars_text += "Scene Lock: None\n"
         sim_variables_field.delete(1.0, "end")
         sim_variables_field.insert(1.0, vars_text)
         sim_variables_field.config(state="disabled")
@@ -1227,6 +1231,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 psize_s1_button = tk.Button(entry_panel, text="Set Point Size", command=generate_s1)
                 psize_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "lock_origin":
+                lock_origin_help = tk.Label(entry_panel, text="'lock_origin' command locks the global coordinate system origin to a body or vessel for optimizing precision for that particular object.")
+                lock_origin_help.grid(row=0, column=0, columnspan=10)
+
+                lo_s1t1_label = tk.Label(entry_panel, text="Object")
+                lo_s1t1_label.grid(row=1, column=1)
+
+                lo_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                lo_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if lo_s1t1.get("1.0","end-1c"):
+                        command = "lock_origin " + lo_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                lo_s1_button = tk.Button(entry_panel, text="Lock Origin", command=generate_s1)
+                lo_s1_button.grid(row=2, column=0)
                 
         cmd_window = tk.Tk()
         cmd_window.protocol("WM_DELETE_WINDOW", on_command_window_close)
@@ -1374,6 +1396,15 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
         point_size_button.grid(row=26, column=1)
+
+        selective_precision_commands_label = tk.Label(cmd_window, text="Selective Precision")
+        selective_precision_commands_label.grid(row=27, column=0, columnspan=3)
+        lock_origin_button = tk.Button(cmd_window, text="Lock Origin", command=lambda:enter_cmd("lock_origin"))
+        lock_origin_button.config(width=15, height=1)
+        lock_origin_button.grid(row=28, column=0)
+        unlock_origin_button = tk.Button(cmd_window, text="Unlock Origin", command=lambda:add_to_buffer("unlock_origin"))
+        unlock_origin_button.config(width=15, height=1)
+        unlock_origin_button.grid(row=28, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)

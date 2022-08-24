@@ -1,3 +1,5 @@
+lock_origin lunar-orbiter
+clear traj_visuals
 create_projection luna-orbit Luna Earth
 ;
 show lunar-orbiter alt Earth ALT_EARTH_M

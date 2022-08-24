@@ -866,6 +866,8 @@ def main(scn_filename=None, start_time=0):
 
     show_trajectories = True
 
+    scene_lock = None
+
     sim_time = start_time
 
     # look if there is a batch file associated so we can autoload it
@@ -917,7 +919,8 @@ def main(scn_filename=None, start_time=0):
 
         elif keyboard.is_pressed("p") and not rapid_compute_flag:
             panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
-                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer)
+                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
+                                               scene_lock)
             if panel_commands:
                 for panel_command in panel_commands:
                     panel_command = panel_command.split(" ")
@@ -1062,6 +1065,14 @@ def main(scn_filename=None, start_time=0):
                 else:
                     print("Wrong number of arguments for command 'clear'.")
                     time.sleep(2)
+
+            # LOCK_ORIGIN command
+            elif command[0] == "lock_origin":
+                scene_lock = find_obj_by_name(command[1])
+
+            # UNLOCK_ORIGIN command
+            elif command[0] == "unlock_origin":
+                scene_lock = None
 
             # CREATE_VESSEL command
             elif command[0] == "create_vessel":
@@ -1448,7 +1459,7 @@ def main(scn_filename=None, start_time=0):
                     print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
                     print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                     print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
-                    print("apply_atmospheric_drag, remove_atmospheric_drag\n")
+                    print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin\n")
                     print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                     print("Simulation is paused while typing a command or using the command panel interface.\n")
                     print("Type help <command> to learn more about a certain command.\n")
@@ -1478,6 +1489,14 @@ def main(scn_filename=None, start_time=0):
                     elif command[1] == "batch":
                         print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
                         print("Syntax: batch <file_path>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "lock_origin":
+                        print("\n'lock_origin' command locks the global coordinate system origin to a body or vessel for optimizing precision for that particular object.\n")
+                        print("Syntax: lock_origin <object_name>\n")
+                        input("Press Enter to continue...")
+                    elif command[1] == "unlock_origin":
+                        print("\n'unlock_origin' command releases coordinate system origin from the object it was locked to.\n")
+                        print("Syntax: unlock_origin\n")
                         input("Press Enter to continue...")
                     elif command[1] == "create_vessel":
                         print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
@@ -1784,6 +1803,12 @@ def main(scn_filename=None, start_time=0):
         for cam in cameras:
             cam.move_with_lock()
 
+        # lock coordinate system to specified object
+        if scene_lock:
+            delta_pos = [-scene_lock.pos[0], -scene_lock.pos[1], -scene_lock.pos[2]]
+            for o in objs:
+                o.pos = vector_add_safe(o.get_pos(), delta_pos)
+
         if (int(sim_time) % int(output_rate) < delta_t) and not rapid_compute_flag:
 
             # update output
@@ -1887,7 +1912,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

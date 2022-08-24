@@ -122,20 +122,21 @@ def drawVessels(vessels, active_cam, draw_mode):
         # now get out
         glPopMatrix()
 
-def drawTrajectories(vessels):
+def drawTrajectories(vessels, scene_lock):
     
     for v in vessels:
-        # change color we render with
-        glColor(v.get_color()[0], v.get_color()[1], v.get_color()[2])
+        if not v == scene_lock:
+            # change color we render with
+            glColor(v.get_color()[0], v.get_color()[1], v.get_color()[2])
 
-        vertices = v.get_draw_traj_history()
+            vertices = v.get_draw_traj_history()
 
-        if len(vertices) > 3:
-            glBegin(GL_LINE_STRIP)
-            for i in range(1, len(vertices)):
-                #glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
-                glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
-            glEnd()
+            if len(vertices) > 3:
+                glBegin(GL_LINE_STRIP)
+                for i in range(1, len(vertices)):
+                    #glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
+                    glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
+                glEnd()
 
 def drawManeuvers(maneuvers):
 
@@ -350,7 +351,7 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True):
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -379,6 +380,6 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
         if not active_cam.get_lock() and labels_visible:
             drawProjectionLabels(projections, active_cam)
             
-        drawTrajectories(vessels)
+        drawTrajectories(vessels, scene_lock)
         drawManeuvers(maneuvers)
         

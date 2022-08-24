@@ -170,7 +170,7 @@ def world2cam(w_coords, cam, factor=10):
     z_dist = dot(rel_pos, cam_z)
 
     # object is behind camera, assign no position
-    if z_dist < 0:
+    if z_dist <= 0:
         return None
     
     x_dist = dot(rel_pos, cam_x)

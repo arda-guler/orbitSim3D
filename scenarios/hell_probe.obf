@@ -1,6 +1,7 @@
 ;.obf -- orbitSim3D batch format
 ;
-cam_strafe_speed 1000000
+lock_origin akaito
+clear traj_visuals
 ;
 create_projection venus-orbit Venus Sol
 create_projection earth-orbit Earth Sol

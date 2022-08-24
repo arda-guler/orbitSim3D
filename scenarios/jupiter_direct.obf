@@ -3,8 +3,8 @@
 create_projection jupiter-orbit Jupiter Sol
 create_projection earth-orbit Earth Sol
 ;
-lock_cam Kesif-IV
-cam_strafe_speed 10000
+lock_origin Kesif-IV
+cam_strafe_speed 10
 ;
 auto_dt 1000 5
 auto_dt 5000 10

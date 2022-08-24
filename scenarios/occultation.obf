@@ -1,3 +1,4 @@
-lock_cam Earth
+lock_origin Earth
+clear traj_visuals
 show rad_press_1 params RAD_PRESS
 ;
