@@ -313,7 +313,8 @@ def export_scenario(scn_filename):
             body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
                                str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos()) + "|" +\
                                str(b.get_vel()) + "|" + str(b.get_orient()) + "|" + str(b.get_day_length()) + "|" +\
-                               str(b.get_J2()) + "\n"
+                               str(b.get_J2()) + "|" + str(b.luminosity) + "|" + str(b.atmos_sea_level_density) + "|" +\
+                               str(b.atmos_scale_height) + "\n"
             scn_file.write(body_save_string)
 
         print("Writing vessels...")
@@ -1714,6 +1715,7 @@ def main(scn_filename=None, start_time=0):
 
         # update physics
         for rp in radiation_pressures:
+            rp.update_occultation(bodies)
             rp.update_mass(maneuvers, sim_time, delta_t)
             accel = rp.calc_accel()
             rp.vessel.update_vel(accel, delta_t)

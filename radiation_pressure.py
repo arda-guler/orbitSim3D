@@ -14,6 +14,7 @@ class radiation_pressure:
         self.direction_input = direction
         self.mass = mass
         self.mass_auto_update = mass_auto_update
+        self.occultation = 0
 
     def set_direction(self):
         if not type(self.direction) == list or self.direction_input[-8:] == "_dynamic":
@@ -43,48 +44,60 @@ class radiation_pressure:
     def get_orientation_frame(self):
         return self.orientation_frame
 
-    def check_occlusion_simple(self, bodies):
-        # checks if the light from the source body is blocked by another body
-        # e.g. if satellite is on the night side on Low Earth Orbit
-        
-        occlusion = 0 # ratio of total light blocked, initialized at 0 (no occlusion)
+    def update_occultation(self, bodies):
+        # checks how much of the illuminating body's disk is occulted
+        # returns 1 if the illuminating body is not visible, 0 if it is completely visible
+        a = self.body.get_angular_radius_from(self.vessel)
+        s = 0
 
-        v = self.vessel
-        b1 = self.body
-        
-        v_b1 = b1.get_unit_vector_towards(v)
-        v_dist = v.get_dist_to(b1)
-        
-        for b2 in bodies:
-            if not b2 == b1:
-                
-                if b2.get_dist_to(b1) > v_dist:
-                    # body is more distant to light source than vessel is, no occlusion
-                    pass
+        for occulting_body in bodies:
+            if not occulting_body == self.body and self.vessel.get_dist_to(self.body) > occulting_body.get_dist_to(self.body):
+                b = occulting_body.get_angular_radius_from(self.vessel)
 
-                # vessel is more distant to source than the body, there may be blocking
+                vec_to_illum_body = self.vessel.get_unit_vector_towards(self.body)
+                vec_to_occult_body = self.vessel.get_unit_vector_towards(occulting_body)
+                # the angular separation of the centers of both bodies
+                c_numerator = dot(vec_to_illum_body, vec_to_occult_body)
+                c_denominator = mag(vec_to_illum_body) * mag(vec_to_occult_body)
+                c = math.acos(c_numerator / c_denominator)
+
+                if b > a + c:
+                    s_c = 1
+                    
+                elif c < a + b:
+                    try:
+                        A = 2 * math.acos((b**2 - a**2 - c**2)/(-2*a*c))
+                    except ValueError:
+                        print((b**2 - a**2 - c**2)/(-2*a*c))
+                        time.sleep(5)
+                        A = 2 * math.pi
+                        
+                    ratio_est = A / (2*math.pi)
+                    s_c = ratio_est
+                    
                 else:
-                    b2_dist = b1.get_dist_to(b2)
-                    b1_b2 = b1.get_unit_vector_towards(b2)
+                    s_c = 0
 
-                    # get point - planet separation angle
-                    cos_point_separation_angle = dot(v_b1, b1_b2)/(mag(v_b1)*mag(b1_b2))
-                    point_separation_angle = math.acos(cos_point_separation_angle)
+##                print("a", a)
+##                print("b", b)
+##                print("c", c)
+##
+##                # now use the formulas
+##                x = (c**2 + a**2 - b**2)/(2*c)
+##                y = (a**2 - x**2)**(0.5)
+##                try:
+##                    A = a**2 * math.acos(x/a) + b**2 * math.acos((c-x)/b) - c * y
+##                except ValueError:
+##                    print("FF")
+##                    A = 0
+##
+##                s_c = A/(math.pi * a**2)
 
-                    # get angular size of planet
-                    triangle_side_a = (b2_dist**2 - b2.radius**2)**(0.5)
-                    triangle_side_b = b2_dist
-                    triangle_side_c = b2.radius
-                    
-                    b2_half_angular_size = math.atan(triangle_side_c, triangle_side_a)
-
-                    if b2_half_angular_size < point_separation_angle:
-                        # point is not occluded at all
-                        pass
-                    
-                    else:
-                        # point is in shadow of the planet, but is it in umbra, penumbra, antumbra?
-                        pass
+                # multiple bodies may occlude the source. use the largest occlusion.
+                if s_c > s:
+                    s = s_c
+        
+        self.occultation = s
 
     def update_mass(self, maneuvers, sim_time, dt):
         # if a vessel makes a maneuver and spends propellant, its mass will change
@@ -115,6 +128,7 @@ class radiation_pressure:
         scaled_area = self.area * cos_diverge_angle**2
         force = pressure * scaled_area # N
         accel = force/self.mass
+        accel *= (1 - self.occultation)
 
         return vector_scale(self.direction, accel)
         
@@ -132,6 +146,7 @@ class radiation_pressure:
             
         output += "\nIlluminated Area: " + str(self.area) + " m2\n"
         output += "Vessel Mass: " + str(self.mass) + " kg\n"
-        output += "Vessel Mass Auto-Update?: " + str(self.mass_auto_update)
+        output += "Vessel Mass Auto-Update?: " + str(self.mass_auto_update) + "\n"
+        output += "Illumination Source Occultation: " + str(self.occultation * 100) + "%\n"
 
         return output

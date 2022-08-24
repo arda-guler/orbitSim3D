@@ -168,3 +168,14 @@ class body():
             return self.atmos_sea_level_density * math.e**((R-r)/H)
         else:
             return 0
+
+    def get_angular_radius_at_dist(self, dist):
+        return math.atan(self.radius/dist)
+
+    def get_angular_radius_from(self, point):
+        if type(point) == list:
+            dist = ((self.pos[0] - point[0])**2 + (self.pos[1] - point[1])**2 + (self.pos[2] - point[2])**2)**0.5
+        else:
+            dist = self.get_dist_to(point)
+
+        return self.get_angular_radius_at_dist(dist)
