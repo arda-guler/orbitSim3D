@@ -134,7 +134,7 @@ class radiation_pressure:
         
     def get_params_str(self):
         output = "Vessel: " + self.vessel.get_name() + "\n"
-        output = "Body: " + self.body.get_name() + "\n"
+        output += "Body: " + self.body.get_name() + "\n"
         
         if not type(self.direction_input) == list:
             if self.direction_input[-8:] == "_dynamic":
