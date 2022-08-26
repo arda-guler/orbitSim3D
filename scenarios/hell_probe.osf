@@ -19,16 +19,12 @@
 ;reasons to probe that planet.
 ;
 ;In this scenario, a probe in a parking orbit
-;around Earth performs an escape maneuver, placing
-;itself into a trajectory which will take it to
-;a Venus encounter. However, the trajectory is not
-;perfect and requires a couple of MCC maneuvers for
-;a decently close fly-by.
-;
-;You can make a normal maneuver close to the ascending
-;node of Venus, however it should be more fuel efficient
-;instead to just time your encounter on the other side 
-;of Venus' orbit.
+;around Earth is sent on an interplanetary mission
+;to Venus, where it will orbit the planet and gather
+;data. If you wish, you can delete the planned maneuvers
+;and create a more optimized trajectory with less Delta-V
+;requirements. If you feel like it, you can try a gravity
+;assist to Mars!
 ;
 ;Bodies
 ;
@@ -50,5 +46,7 @@ V|akaito|data/models/miniprobe.obj|[1,0,0]|[25855116656.51324,21599789.2998755,1
 ;
 ;Maneuvers
 M|mnv_escape|const_accel|akaito|Earth|prograde|30|4920|117
-M|mnv_align|const_accel|akaito|Sol|normal|10|6100000|177
+M|mnv_align|const_accel|akaito|Sol|normal|10|5930000|177
+M|mnv_sync|const_accel|akaito|Sol|retrograde_dynamic|10|5930200|5
+M|mnv_inject|const_accel|akaito|Venus|retrograde_dynamic|10|14302170|230
 ;
