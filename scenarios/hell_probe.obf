@@ -17,23 +17,18 @@ rapid_compute 15000 2500000
 auto_dt 2500000 10000
 ;
 ;
+show akaito dist Venus DIST_TO_VENUS
+show akaito vel_mag Venus VEL_WRT_VENUS
+;
 show mnv_escape state ESC
-show mnv_escape params ESC_PARAMS
-;
 show mnv_align state ALIGN
-show mnv_align params ALIGN_PARAMS
-;
 show mnv_sync state SYNC
-show mnv_sync params SYNC_PARAMS
-;
 show mnv_inject state INJECT
-show mnv_inject params INJECT_PARAMS
 ;
 auto_dt 5920000 1000
 auto_dt 5929000 100
 auto_dt 5930250 10000
-auto_dt 14289250 1000
-auto_dt 14298250 100
-;
-show akaito dist Venus DIST_TO_VENUS
+auto_dt 14291250 2500
+auto_dt 14301250 1000
+auto_dt 14310250 100
 ;
