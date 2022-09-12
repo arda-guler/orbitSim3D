@@ -45,59 +45,80 @@ class radiation_pressure:
         return self.orientation_frame
 
     def update_occultation(self, bodies):
-        # checks how much of the illuminating body's disk is occulted
-        # returns 1 if the illuminating body is not visible, 0 if it is completely visible
-        a = self.body.get_angular_radius_from(self.vessel)
         s = 0
+        a = self.body.get_angular_radius_from(self.vessel)
 
         for occulting_body in bodies:
-            if not occulting_body == self.body and self.vessel.get_dist_to(self.body) > occulting_body.get_dist_to(self.body):
+            if (not occulting_body == self.body) and self.vessel.get_dist_to(self.body) > occulting_body.get_dist_to(self.body):
+
                 b = occulting_body.get_angular_radius_from(self.vessel)
 
                 vec_to_illum_body = self.vessel.get_unit_vector_towards(self.body)
                 vec_to_occult_body = self.vessel.get_unit_vector_towards(occulting_body)
-                # the angular separation of the centers of both bodies
                 c_numerator = dot(vec_to_illum_body, vec_to_occult_body)
                 c_denominator = mag(vec_to_illum_body) * mag(vec_to_occult_body)
-                c = math.acos(c_numerator / c_denominator)
+                eq_c = math.acos(c_numerator / c_denominator)
 
-                if b > a + c:
-                    s_c = 1
-                    
-                elif c < a + b:
-                    try:
-                        A = 2 * math.acos((b**2 - a**2 - c**2)/(-2*a*c))
-                    except ValueError:
-                        print((b**2 - a**2 - c**2)/(-2*a*c))
-                        time.sleep(5)
-                        A = 2 * math.pi
-                        
-                    ratio_est = A / (2*math.pi)
-                    s_c = ratio_est
-                    
+                # body is covering the star entirely
+                if b - eq_c > a:
+                    c_s = 1
+
+                # the body-star separation is too large, no shadow
+                elif eq_c > b + a:
+                    c_s = 0
+
                 else:
-                    s_c = 0
+                    eq_x = (eq_c**2 + a**2 - b**2)/(2*eq_c)
+                    eq_y = (a**2 - eq_x**2)**(0.5)
 
-##                print("a", a)
-##                print("b", b)
-##                print("c", c)
-##
-##                # now use the formulas
-##                x = (c**2 + a**2 - b**2)/(2*c)
-##                y = (a**2 - x**2)**(0.5)
-##                try:
-##                    A = a**2 * math.acos(x/a) + b**2 * math.acos((c-x)/b) - c * y
-##                except ValueError:
-##                    print("FF")
-##                    A = 0
-##
-##                s_c = A/(math.pi * a**2)
+                    A = a**2 * math.acos(eq_x/a) + b**2 * math.acos((eq_c-eq_x)/b) - eq_c * eq_y
 
-                # multiple bodies may occlude the source. use the largest occlusion.
-                if s_c > s:
-                    s = s_c
-        
+                    c_s = A/(math.pi * a**2)
+
+                if c_s > s:
+                    s = c_s
+
         self.occultation = s
+
+##    def update_occultation_old(self, bodies):
+##        # checks how much of the illuminating body's disk is occulted
+##        # returns 1 if the illuminating body is not visible, 0 if it is completely visible
+##        a = self.body.get_angular_radius_from(self.vessel)
+##        s = 0
+##
+##        for occulting_body in bodies:
+##            if not occulting_body == self.body and self.vessel.get_dist_to(self.body) > occulting_body.get_dist_to(self.body):
+##                b = occulting_body.get_angular_radius_from(self.vessel)
+##
+##                vec_to_illum_body = self.vessel.get_unit_vector_towards(self.body)
+##                vec_to_occult_body = self.vessel.get_unit_vector_towards(occulting_body)
+##                # the angular separation of the centers of both bodies
+##                c_numerator = dot(vec_to_illum_body, vec_to_occult_body)
+##                c_denominator = mag(vec_to_illum_body) * mag(vec_to_occult_body)
+##                c = math.acos(c_numerator / c_denominator)
+##
+##                if b > a + c:
+##                    s_c = 1
+##                    
+##                elif c < a + b:
+##                    try:
+##                        A = 2 * math.acos((b**2 - a**2 - c**2)/(-2*a*c))
+##                    except ValueError:
+##                        print((b**2 - a**2 - c**2)/(-2*a*c))
+##                        time.sleep(5)
+##                        A = 2 * math.pi
+##                        
+##                    ratio_est = A / (2*math.pi)
+##                    s_c = ratio_est
+##                    
+##                else:
+##                    s_c = 0
+##
+##                # multiple bodies may occlude the source. use the largest occlusion.
+##                if s_c > s:
+##                    s = s_c
+##        
+##        self.occultation = s
 
     def update_mass(self, maneuvers, sim_time, dt):
         # if a vessel makes a maneuver and spends propellant, its mass will change
