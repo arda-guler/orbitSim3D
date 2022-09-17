@@ -37,7 +37,7 @@ If you look at the OpenGL window, you will see a blue orb and two objects next t
 
 ***Try moving the camera around the scene, rotate and translate your viewpoint.***
 
-If you get close enough to either one of the satellites, you will be able to see their 3D models. Note that there are no collision checks for any objects, and your camera might pass through the Earth, creating weird graphical effects. In that case, just translate your camera backwards until you are out of the planet.
+If you get close enough to either one of the satellites, you will be able to see their 3D models. Note that there are no collision checks for the camera, and it might pass through the Earth, creating weird graphical effects. In that case, just translate your camera backwards until you are out of the planet.
 
 Once you are done playing with the camera and pretending you are a WWII fighter in space, let's get to business. How about we start off by maneuvering one of these satellites into an elliptical orbit that takes it much higher above Earth? (In case you didn't notice, you have no choice but to agree since this is a non-interactive text tutorial.)
 
