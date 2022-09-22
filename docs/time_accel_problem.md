@@ -1,7 +1,7 @@
 # Time Acceleration Problem
 There are many ways to accelerate simulated time in OS3D. The questions are; which one is the best, and in what situations should you use them, and how?
 
- - Decreasing delta_t
+ - Increasing delta_t
  - Decreasing cycle_time
  - Increasing output_rate
  - Using 'Rapid Compute'

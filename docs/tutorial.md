@@ -16,7 +16,7 @@ Let's get started. I will **type in bold letters like this** if I want you to do
 
 You should be seeing three options - one for loading a scenario, one for starting an empty scene and the last one for configuring OS3D. ***You can configure your keyboard controls the way you like, but please don't touch any other configuration variables if you don't know what you are doing. Close the config editor window when you are done, and return to initialization menu.***
 
-In order to simulate a system, OS3D first needs to know about the initial states of the celestial bodies and spacecraft you want to simulate. Such data is kept in .osf files (usually in the `scenarios/` folder) in plain text format, but creating a scenario from scratch can sometimes be a bit too much work due to the strict formatting requirements (I should so something about that sometime). I know you are eager to fly spaceships, so let's skip the boring part now and load one of the scenarios I prepared beforehand.
+In order to simulate a system, OS3D first needs to know about the initial states of the celestial bodies and spacecraft you want to simulate. Such data is kept in .osf files (usually in the `scenarios/` folder) in plain text format, but creating a scenario from scratch can sometimes be a bit too much work due to the strict formatting requirements (I should do something about that sometime). I know you are eager to fly spaceships, so let's skip the boring part now and load one of the scenarios I prepared beforehand.
 
 **Choose the first option in the initialization menu by either typing '1' or 'L' and pressing Enter, which will let you choose the scenario to load.**
 
@@ -60,7 +60,7 @@ A new window should appear, and the simulation should pause. On the window, you 
 
 [![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)
 
-Your `Command Buffer` window should be clear, and you should be able to see 3 items in the `Simulation Items` box - the planet Earth, and the vessels Yin ang Yang. This window makes it easier to keep track of things, especially in large scenarios, so even if you won't enter a command, you could refer to the command panel for reference.
+Your `Command Buffer` window should be clear, and you should be able to see 3 items in the `Simulation Items` box - the planet Earth, and the vessels Yin and Yang. This window makes it easier to keep track of things, especially in large scenarios, so even if you won't enter a command, you could refer to the command panel for reference.
 
 ### Creating a Maneuver
 
