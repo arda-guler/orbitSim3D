@@ -1,0 +1,10 @@
+;.obf -- orbitSim3D batch format
+;
+lock_origin queen
+clear traj_visuals
+fragment queen 10 150
+output_rate 50
+delta_t 1e3
+cam_strafe_speed 1e4
+create_projection earth-orbit Earth Sol
+;
