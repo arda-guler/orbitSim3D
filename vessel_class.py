@@ -173,3 +173,25 @@ class vessel():
                               -cross_vec[1]/cross_vec_mag,
                               -cross_vec[2]/cross_vec_mag]
             return antinormal_vec
+        elif orientation == "prograde_tangential" or orientation == "prograde_tangential_dynamic":
+            prograde = [self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
+                        self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
+                        self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            radial = self.get_unit_vector_towards(frame)
+            radial_dot = dot(prograde, radial)
+            unvec = vector_add_safe(prograde, vector_scale(radial, -radial_dot))
+            vec = [unvec[0]/mag(unvec),
+                   unvec[1]/mag(unvec),
+                   unvec[2]/mag(unvec)]
+            return vec
+        elif orientation == "retrograde_tangential" or orientation == "retrograde_tangential_dynamic":
+            retrograde = [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
+                        -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
+                        -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            radial = self.get_unit_vector_towards(frame)
+            radial_dot = dot(retrograde, radial)
+            unvec = vector_add_safe(retrograde, vector_scale(radial, -radial_dot))
+            vec = [unvec[0]/mag(unvec),
+                   unvec[1]/mag(unvec),
+                   unvec[2]/mag(unvec)]
+            return vec

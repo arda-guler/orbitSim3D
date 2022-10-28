@@ -49,15 +49,44 @@ class atmospheric_drag:
             # mass flow rate will vary according to some complex engineering variables
             # that are highly propulsion-system-design-specific
 
+    def get_atmo_vel_at_pos(self, gpos):
+        # velocity can be determined analytically here
+        if self.get_body().get_day_length():
+            tangent_vel_mag = 2 * math.pi * (self.get_body().get_radius() + gpos[2]) * math.cos(math.radians(gpos[0])) / self.get_body().get_day_length()
+            tangent_vel_rel_to_body = [-math.sin(math.radians(gpos[1])),
+                                       0,
+                                       -math.cos(math.radians(gpos[1]))]
+            tangent_vel_rel_to_body = vector_scale(tangent_vel_rel_to_body, tangent_vel_mag)
+            tangent_vel_rel_to_body = [tangent_vel_rel_to_body[0] * self.get_body().get_orient()[0][0] + tangent_vel_rel_to_body[2] * self.get_body().get_orient()[2][0],
+                                       tangent_vel_rel_to_body[0] * self.get_body().get_orient()[0][1] + tangent_vel_rel_to_body[2] * self.get_body().get_orient()[2][1],
+                                       tangent_vel_rel_to_body[0] * self.get_body().get_orient()[0][2] + tangent_vel_rel_to_body[2] * self.get_body().get_orient()[2][2]]
+            resvel = vector_add(tangent_vel_rel_to_body, self.get_body().get_vel())
+        else:
+            resvel = self.get_body().get_vel()
+
+        return resvel
+
     def calc_accel(self):
         atmo_density = self.body.get_atmospheric_density_at_alt(self.vessel.get_alt_above(self.body))
 
         if not atmo_density:
             return [0,0,0]
-        
-        accel_dir = self.vessel.get_orientation_rel_to(self.body, "retrograde") # this "retrograde" obviously assumes the atmosphere is more or less static rel to frame
-        accel_mag = 0.5 * atmo_density * self.drag_coeff * self.area * self.vessel.get_vel_mag_rel_to(self.body)**2 / self.mass
-        return vector_scale(accel_dir, accel_mag)
+
+        if self.vessel.get_alt_above(self.body) < self.body.atmos_scale_height * 5:
+            vessel_bcc = self.vessel.get_body_centered_coords(self.body)
+            vessel_gpos = impact_gpos(vessel_bcc)
+            atmo_vel_at_vessel_pos = self.get_atmo_vel_at_pos(vessel_gpos)
+            atmoflow_vel = vector_add_safe(atmo_vel_at_vessel_pos, vector_scale(self.vessel.get_vel(), -1))
+            accel_dir = [atmoflow_vel[0]/mag(atmoflow_vel),
+                         atmoflow_vel[1]/mag(atmoflow_vel),
+                         atmoflow_vel[2]/mag(atmoflow_vel)]
+            accel_mag = 0.5 * atmo_density * self.drag_coeff * self.area * mag(atmoflow_vel)**2 / self.mass
+            return vector_scale(accel_dir, accel_mag)
+            
+        else:
+            accel_dir = self.vessel.get_orientation_rel_to(self.body, "retrograde") # this "retrograde" obviously assumes the atmosphere is more or less static rel to frame
+            accel_mag = 0.5 * atmo_density * self.drag_coeff * self.area * self.vessel.get_vel_mag_rel_to(self.body)**2 / self.mass
+            return vector_scale(accel_dir, accel_mag)
 
     def get_params_str(self):
         output = "Vessel: " + self.vessel.get_name() + "\n"

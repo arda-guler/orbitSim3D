@@ -52,7 +52,8 @@ batch_commands = []
 
 preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
                        "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
-                       "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic"]
+                       "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic",
+                       "prograde_tangential", "prograde_tangential_dynamic"]
 
 sim_time = 0
 
@@ -1716,6 +1717,7 @@ def main(scn_filename=None, start_time=0):
             print("Simulation is in rapid computation mode from T=" + str(rapid_compute_buffer[0][0]) + " to T=" + str(rapid_compute_buffer[0][1]) + ".")
             print("Minimal user output will be provided to allocate more resources for mathematical operations.")
             print("Please wait until the calculations are complete.")
+            print("")
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
             drawRapidCompute(get_active_cam())
             glfw.swap_buffers(window)
@@ -1724,6 +1726,10 @@ def main(scn_filename=None, start_time=0):
         if rapid_compute_buffer and rapid_compute_buffer[0][0] <= sim_time < rapid_compute_buffer[0][1] and rapid_compute_flag:
             for v in vessels:
                 v.update_draw_pos()
+
+            if int(sim_time) % int(output_rate * 1000) < delta_t:
+                rapid_compute_complete_percent = ((sim_time - rapid_compute_buffer[0][0])/(rapid_compute_buffer[0][1] - rapid_compute_buffer[0][0])) * 100
+                print("Time: " + str(sim_time) + " (Current rapid compute is " + str(rapid_compute_complete_percent) + "% complete.)")
                 
         if rapid_compute_flag and sim_time > rapid_compute_buffer[0][1]:
             rapid_compute_flag = False
