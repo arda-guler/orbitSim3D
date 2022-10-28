@@ -345,7 +345,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 def generate_s1():
                     if cv_s1t1.get("1.0","end-1c") and cv_s1t2.get("1.0","end-1c") and cv_s1t3.get("1.0","end-1c") and cv_s1t4.get("1.0","end-1c") and cv_s1t5.get("1.0","end-1c"):
-                        command = "batch " + cv_s1t1.get("1.0","end-1c") + " " + cv_s1t2.get("1.0","end-1c") + " " + cv_s1t3.get("1.0","end-1c") + " " + cv_s1t4.get("1.0","end-1c") + " " + cv_s1t5.get("1.0","end-1c")
+                        command = "create_vessel " + cv_s1t1.get("1.0","end-1c") + " " + cv_s1t2.get("1.0","end-1c") + " " + cv_s1t3.get("1.0","end-1c") + " " + cv_s1t4.get("1.0","end-1c") + " " + cv_s1t5.get("1.0","end-1c")
                         add_to_buffer(command)
 
                 cv_s1_button = tk.Button(entry_panel, text="Create Vessel", command=generate_s1)
@@ -380,7 +380,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 def generate_s2():
                     if cv_s2t1.get("1.0","end-1c") and cv_s2t2.get("1.0","end-1c") and cv_s2t3.get("1.0","end-1c") and cv_s2t4.get("1.0","end-1c") and cv_s2t5.get("1.0","end-1c") and cv_s2t6.get("1.0","end-1c") :
-                        command = "batch " + cv_s2t1.get("1.0","end-1c") + " " + cv_s2t2.get("1.0","end-1c") + " " + cv_s2t3.get("1.0","end-1c") + " " + cv_s2t4.get("1.0","end-1c") + " " + cv_s2t5.get("1.0","end-1c") + " " + cv_s2t5.get("1.0","end-1c")
+                        command = "create_vessel " + cv_s2t1.get("1.0","end-1c") + " " + cv_s2t2.get("1.0","end-1c") + " " + cv_s2t3.get("1.0","end-1c") + " " + cv_s2t4.get("1.0","end-1c") + " " + cv_s2t5.get("1.0","end-1c") + " " + cv_s2t5.get("1.0","end-1c")
                         add_to_buffer(command)
 
                 cv_s2_button = tk.Button(entry_panel, text="Create Vessel", command=generate_s1)
