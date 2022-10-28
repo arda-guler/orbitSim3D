@@ -11,5 +11,5 @@ create_plot pl_vel vel_mag LV Earth 0 600
 ;
 lock_origin pad
 clear traj_visuals
-delta_t 0.2
+delta_t 0.5
 ;
