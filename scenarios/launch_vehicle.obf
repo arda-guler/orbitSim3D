@@ -1,0 +1,15 @@
+;.obf -- orbitSim3D batch format
+;
+delta_t 1E-7
+;
+show LV alt Earth ALT
+show LV vel_mag Earth VEL_EARTH_CENTRE
+show LV vel_mag pad VEL_SITE
+show drag params DRAG
+create_plot pl_alt alt LV Earth 0 600
+create_plot pl_vel vel_mag LV Earth 0 600
+;
+lock_origin pad
+clear traj_visuals
+delta_t 0.2
+;
