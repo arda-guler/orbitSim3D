@@ -15,6 +15,7 @@ rapid_compute 13930 16100
 rapid_compute 16190 16800
 rapid_compute 16830 17130
 rapid_compute 17180 24530
+auto_dt 24780 0.25
 ;
 ;	NOTES
 ;
