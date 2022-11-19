@@ -64,8 +64,7 @@ gvar_far_clip = 10E5
 
 def window_resize(window, width, height):
     global gvar_fov, gvar_near_clip, gvar_far_clip, cameras
-    glfw.get_framebuffer_size(window)
-    glfw.init()
+    #glfw.get_framebuffer_size(window)
     glViewport(0, 0, width, height)
     glLoadIdentity()
     main_cam = cameras[0]
