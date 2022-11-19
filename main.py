@@ -57,9 +57,23 @@ preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde
 
 sim_time = 0
 
+# these three below are default values, should be changed by main() once the program reads config data
+gvar_fov = 70
+gvar_near_clip = 0.01
+gvar_far_clip = 10E5
+
 def window_resize(window, width, height):
+    global gvar_fov, gvar_near_clip, gvar_far_clip, cameras
     glfw.get_framebuffer_size(window)
+    glfw.init()
     glViewport(0, 0, width, height)
+    glLoadIdentity()
+    main_cam = cameras[0]
+    gluPerspective(gvar_fov, width/height, gvar_near_clip, gvar_far_clip)
+    glTranslate(main_cam.pos[0], main_cam.pos[1], main_cam.pos[2])
+    main_cam.orient = [[1,0,0],
+                       [0,1,0],
+                       [0,0,1]]
 
 def read_batch(batch_path):
 
@@ -833,13 +847,19 @@ def get_active_cam():
 
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
-           plots, cameras, barycenters, radiation_pressures, atmospheric_drags
+           plots, cameras, barycenters, radiation_pressures, atmospheric_drags,\
+           gvar_fov, gvar_near_clip, gvar_far_clip
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
     maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload = read_current_config()
+
+    # set global vars
+    gvar_fov = fov
+    gvar_near_clip = near_clip
+    gvar_far_clip = far_clip
 
     # initializing glfw
     glfw.init()

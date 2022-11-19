@@ -8,9 +8,6 @@ class vessel():
         self.color = color
         self.pos = pos
         self.vel = vel
-        self.draw_pos = [self.pos[0]*visual_scaling_factor,
-                         self.pos[1]*visual_scaling_factor,
-                         self.pos[2]*visual_scaling_factor]
         self.traj_history = []
         self.draw_traj_history = []
 
