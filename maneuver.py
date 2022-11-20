@@ -1,3 +1,5 @@
+import math
+
 class maneuver():
     def __init__(self, name, vessel, mnv_type):
         self.name = name
@@ -85,6 +87,7 @@ class maneuver_const_accel(maneuver):
         output += "\nAcceleration: " + str(self.accel) + " m/s^2\n"
         output += "Start time: " + str(self.t_start) + " s\n"
         output += "Duration: " + str(self.duration) + " s\n"
+        output += "Dv: " + str(self.duration * self.accel) + " m/s\n"
 
         return output
     
@@ -109,6 +112,11 @@ class maneuver_const_thrust(maneuver):
         self.mass = mass_init
 
         self.draw_vertices = []
+
+        # calculate Delta-v
+        v_exhaust = self.thrust/self.mass_flow
+        m_final = self.mass_init - self.duration * self.mass_flow
+        self.Dv = v_exhaust * math.log(self.mass_init/m_final)
 
     def set_orientation(self):
         if not type(self.orientation) == list or self.orientation_input[-8:] == "_dynamic":
@@ -181,6 +189,7 @@ class maneuver_const_thrust(maneuver):
         output += "Mass flow: " + str(self.mass_flow) + " kg/s\n"
         output += "Start time: " + str(self.t_start) + " s\n"
         output += "Duration: " + str(self.duration) + " s\n"
+        output += "Dv: " + str(round(self.Dv, 3)) + " m/s\n"
 
         return output
 
