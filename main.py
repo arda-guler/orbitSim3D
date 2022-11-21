@@ -874,7 +874,7 @@ def main(scn_filename=None, start_time=0):
     glPointSize(point_size)
 
     main_cam = camera("main_cam", [cam_pos_x,cam_pos_y,cam_pos_z], [[1,0,0],[0,1,0],[0,0,1]], True)
-    cameras.append(main_cam)
+    cameras = [main_cam]
     # put "camera" in starting position
     glTranslate(main_cam.get_pos()[0], main_cam.get_pos()[1], main_cam.get_pos()[2])
 
