@@ -850,7 +850,7 @@ def main(scn_filename=None, start_time=0):
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
-    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, warn_cycle_time,\
+    cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
     maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload = read_current_config()
 
     # set global vars
@@ -881,10 +881,10 @@ def main(scn_filename=None, start_time=0):
     auto_dt_buffer = []
     rapid_compute_buffer = []
     rapid_compute_flag = False
-
     show_trajectories = True
-
     scene_lock = None
+    accept_keyboard_input = True
+    speed_input_locked = False
 
     sim_time = start_time
 
@@ -923,765 +923,787 @@ def main(scn_filename=None, start_time=0):
 
         frame_command = False
 
-        # get input and move the "camera" around
-        get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed / output_rate,
-                                 (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
-                                 (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
+        if not accept_keyboard_input:
+            if keyboard.is_pressed("CTRL+L"):
+                accept_keyboard_input = True
 
-        get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
-                                        (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
-                                        (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
+        else:
 
-        if keyboard.is_pressed("c") and not rapid_compute_flag:
-            frame_command = True
+            # get input and move the "camera" around
+            get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed / output_rate,
+                                     (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
+                                     (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
 
-        elif keyboard.is_pressed("p") and not rapid_compute_flag:
-            panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
-                                               auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
-                                               scene_lock)
-            if panel_commands:
-                for panel_command in panel_commands:
-                    panel_command = panel_command.split(" ")
-                    batch_commands.append(panel_command)
+            get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
+                                            (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
+                                            (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
 
-        if frame_command or len(batch_commands) > 0:
-            flush_input()
+            # adjust camera speed via hotkey
+            if not speed_input_locked and keyboard.is_pressed(cam_increase_speed):
+                cam_strafe_speed *= 2
+                speed_input_locked = True
 
-            if frame_command:
-                command = input("\n > ")
-                command = command.split(" ")
-                command[0] = command[0].lower()
+            elif not speed_input_locked and keyboard.is_pressed(cam_decrease_speed):
+                cam_strafe_speed *= 0.5
+                speed_input_locked = True
 
-            # --- COMMAND INTERPRETER ---
+            if speed_input_locked and (not keyboard.is_pressed(cam_increase_speed) and not keyboard.is_pressed(cam_decrease_speed)):
+                speed_input_locked = False
 
-            if len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
-                command = batch_commands[0]
-                batch_commands.remove(command)
+            # get command line/panel request
+            if keyboard.is_pressed("c") and not rapid_compute_flag:
+                frame_command = True
 
-            # BATCH command
-            if command[0] == "batch":
-                batch_commands = read_batch(command[1])
-            
-            # SHOW command
-            elif command[0] == "show":
+            elif keyboard.is_pressed("p") and not rapid_compute_flag:
+                panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
+                                                   auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
+                                                   scene_lock)
+                if panel_commands:
+                    for panel_command in panel_commands:
+                        panel_command = panel_command.split(" ")
+                        batch_commands.append(panel_command)
+
+            if frame_command or len(batch_commands) > 0:
+                flush_input()
+
+                if frame_command:
+                    command = input("\n > ")
+                    command = command.split(" ")
+                    command[0] = command[0].lower()
+
+                # --- COMMAND INTERPRETER ---
+
+                if len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
+                    command = batch_commands[0]
+                    batch_commands.remove(command)
+
+                # BATCH command
+                if command[0] == "batch":
+                    batch_commands = read_batch(command[1])
                 
-                if len(command) == 5:
-                    if find_obj_by_name(command[1]):
-                        obj = find_obj_by_name(command[1])
-                        if command[2] == "pos":
-                            output_buffer.append([command[4], "pos_rel", obj, command[3]])
-                        elif command[2] == "vel":
-                            output_buffer.append([command[4], "vel_rel", obj, command[3]])
-                        elif command[2] == "pos_mag" or command[2] == "dist":
-                            output_buffer.append([command[4], "pos_mag_rel", obj, command[3]])
-                        elif command[2] == "vel_mag":
-                            output_buffer.append([command[4], "vel_mag_rel", obj, command[3]])
-                        elif command[2] == "alt":
-                            if (type(find_obj_by_name(command[3])).__name__ == "body" and
-                                type(find_obj_by_name(command[1])).__name__ == "vessel"):
-                                output_buffer.append([command[4], "alt", obj, command[3]])
-                            else:
-                                print("You can only get altitude of a vessel above a celestial body!\n")
-                                time.sleep(2)
-                            
-                    else:
-                        print("Object not found.")
-                        time.sleep(2)
-                            
-                elif len(command) == 4:
+                # SHOW command
+                elif command[0] == "show":
                     
-                    if find_obj_by_name(command[1]):
-                        obj = find_obj_by_name(command[1])
-                        if command[2] == "pos":
-                            output_buffer.append([command[3], "pos", obj])
-                        elif command[2] == "vel":
-                            output_buffer.append([command[3], "vel", obj])
-                        elif command[2] == "pos_mag" or command[2] == "dist":
-                            output_buffer.append([command[3], "pos_mag", obj])
-                        elif command[2] == "vel_mag":
-                            output_buffer.append([command[3], "vel_mag", obj])
-                        elif command[2] == "gps" or command[2] == "gpos":
-                            if type(obj).__name__ == "surface_point":
-                                output_buffer.append([command[3], "gpos", obj])
+                    if len(command) == 5:
+                        if find_obj_by_name(command[1]):
+                            obj = find_obj_by_name(command[1])
+                            if command[2] == "pos":
+                                output_buffer.append([command[4], "pos_rel", obj, command[3]])
+                            elif command[2] == "vel":
+                                output_buffer.append([command[4], "vel_rel", obj, command[3]])
+                            elif command[2] == "pos_mag" or command[2] == "dist":
+                                output_buffer.append([command[4], "pos_mag_rel", obj, command[3]])
+                            elif command[2] == "vel_mag":
+                                output_buffer.append([command[4], "vel_mag_rel", obj, command[3]])
+                            elif command[2] == "alt":
+                                if (type(find_obj_by_name(command[3])).__name__ == "body" and
+                                    type(find_obj_by_name(command[1])).__name__ == "vessel"):
+                                    output_buffer.append([command[4], "alt", obj, command[3]])
+                                else:
+                                    print("You can only get altitude of a vessel above a celestial body!\n")
+                                    time.sleep(2)
+                                
+                        else:
+                            print("Object not found.")
+                            time.sleep(2)
+                                
+                    elif len(command) == 4:
+                        
+                        if find_obj_by_name(command[1]):
+                            obj = find_obj_by_name(command[1])
+                            if command[2] == "pos":
+                                output_buffer.append([command[3], "pos", obj])
+                            elif command[2] == "vel":
+                                output_buffer.append([command[3], "vel", obj])
+                            elif command[2] == "pos_mag" or command[2] == "dist":
+                                output_buffer.append([command[3], "pos_mag", obj])
+                            elif command[2] == "vel_mag":
+                                output_buffer.append([command[3], "vel_mag", obj])
+                            elif command[2] == "gps" or command[2] == "gpos":
+                                if type(obj).__name__ == "surface_point":
+                                    output_buffer.append([command[3], "gpos", obj])
+                                else:
+                                    print("You can only get ground position of a surface point!\n")
+                                    time.sleep(2)
+                                
+                        elif find_maneuver_by_name(command[1]):
+                            maneuver = find_maneuver_by_name(command[1])
+                            if command[2] == "active" or command[2] == "state" or command[2] == "params":
+                                output_buffer.append([command[3], command[2], maneuver, "m"])
                             else:
-                                print("You can only get ground position of a surface point!\n")
+                                print("Illegal parameter!\n")
                                 time.sleep(2)
-                            
-                    elif find_maneuver_by_name(command[1]):
-                        maneuver = find_maneuver_by_name(command[1])
-                        if command[2] == "active" or command[2] == "state" or command[2] == "params":
-                            output_buffer.append([command[3], command[2], maneuver, "m"])
+
+                        elif find_radiation_pressure_by_name(command[1]):
+                            rad_press = find_radiation_pressure_by_name(command[1])
+                            if command[2] == "params":
+                                output_buffer.append([command[3], command[2], rad_press, "rp"])
+                            else:
+                                print("Illegal parameter!\n")
+                                time.sleep(2)
+
+                        elif find_atmospheric_drag_by_name(command[1]):
+                            atmo_drag = find_atmospheric_drag_by_name(command[1])
+                            if command[2] == "params":
+                                output_buffer.append([command[3], command[2], atmo_drag, "ad"])
+                            else:
+                                print("Illegal parameter!\n")
+                                time.sleep(2)
+
+                        elif find_proj_by_name(command[1]):
+                            proj = find_proj_by_name(command[1])
+                            if (command[2] == "apoapsis" or command[2] == "periapsis" or command[2] == "params" or
+                                command[2] == "apoapsis_r" or command[2] == "periapsis_r" or
+                                command[2] == "period" or command[2] == "body" or command[2] == "vessel" or
+                                command[2] == "energy" or command[2] == "semimajor_axis" or command[2] == "eccentricity"):
+                                output_buffer.append([command[3], command[2], proj, "p"])
+                            else:
+                                print("Illegal parameter!\n")
+                                time.sleep(2)
+                                
                         else:
-                            print("Illegal parameter!\n")
+                            print("Object/maneuver/projection not found.")
                             time.sleep(2)
 
-                    elif find_radiation_pressure_by_name(command[1]):
-                        rad_press = find_radiation_pressure_by_name(command[1])
-                        if command[2] == "params":
-                            output_buffer.append([command[3], command[2], rad_press, "rp"])
-                        else:
-                            print("Illegal parameter!\n")
-                            time.sleep(2)
+                    elif len(command) == 2:
+                        if command[1] == "traj":
+                            show_trajectories = True
+                        elif command[1] == "labels":
+                            labels_visible = 1
 
-                    elif find_atmospheric_drag_by_name(command[1]):
-                        atmo_drag = find_atmospheric_drag_by_name(command[1])
-                        if command[2] == "params":
-                            output_buffer.append([command[3], command[2], atmo_drag, "ad"])
-                        else:
-                            print("Illegal parameter!\n")
-                            time.sleep(2)
-
-                    elif find_proj_by_name(command[1]):
-                        proj = find_proj_by_name(command[1])
-                        if (command[2] == "apoapsis" or command[2] == "periapsis" or command[2] == "params" or
-                            command[2] == "apoapsis_r" or command[2] == "periapsis_r" or
-                            command[2] == "period" or command[2] == "body" or command[2] == "vessel" or
-                            command[2] == "energy" or command[2] == "semimajor_axis" or command[2] == "eccentricity"):
-                            output_buffer.append([command[3], command[2], proj, "p"])
-                        else:
-                            print("Illegal parameter!\n")
-                            time.sleep(2)
-                            
                     else:
-                        print("Object/maneuver/projection not found.")
+                        print("Wrong number of arguments for command 'show'.")
                         time.sleep(2)
 
-                elif len(command) == 2:
+                # HIDE command
+                elif command[0] == "hide":
                     if command[1] == "traj":
-                        show_trajectories = True
+                        show_trajectories = False
                     elif command[1] == "labels":
-                        labels_visible = 1
-
-                else:
-                    print("Wrong number of arguments for command 'show'.")
-                    time.sleep(2)
-
-            # HIDE command
-            elif command[0] == "hide":
-                if command[1] == "traj":
-                    show_trajectories = False
-                elif command[1] == "labels":
-                    labels_visible = 0
-                else:
-                    for i in range(len(output_buffer)):
-                        if output_buffer[i][0] == command[1]:
-                            output_buffer.remove(output_buffer[i])
-                            break
-
-            # CLEAR command
-            elif command[0] == "clear":
-                if len(command) == 2:
-                    if command[1] == "output":
-                        output_buffer = []
-                    elif command[1] == "scene":
-                        clear_scene()
-                    elif command[1] == "traj_visuals":
-                        for v in vessels:
-                            v.clear_draw_traj_history()
-                        for m in maneuvers:
-                            m.clear_draw_vertices()
-                else:
-                    print("Wrong number of arguments for command 'clear'.")
-                    time.sleep(2)
-
-            # LOCK_ORIGIN command
-            elif command[0] == "lock_origin":
-                scene_lock = find_obj_by_name(command[1])
-
-            # UNLOCK_ORIGIN command
-            elif command[0] == "unlock_origin":
-                scene_lock = None
-
-            # CREATE_VESSEL command
-            elif command[0] == "create_vessel":
-                if len(command) == 6:
-                    create_vessel(command[1], command[2], eval(command[3]), eval(command[4]), eval(command[5]))
-
-                elif len(command) == 7:
-                    # TO DO - SPHERICAL VELOCITY INPUT
-                    parent_pos = find_obj_by_name(command[4]).get_pos()
-                    
-                    vessel_offset_from_parent = spherical2cartesian(eval(command[5]))
-                    
-                    create_vessel(command[1], command[2], eval(command[3]),
-                                  parent_pos + vessel_offset_from_parent,
-                                  eval(command[6]))
-                else:
-                    print("Wrong number of arguments for command 'create_vessel'.\n")
-                    time.sleep(2)
-
-            # DELETE_VESSEL command
-            elif command[0] == "delete_vessel":
-                if len(command) == 2:
-                    delete_vessel(command[1])
-                else:
-                    print("Wrong number of arguments for command 'delete_vessel'.\n")
-                    time.sleep(2)
-
-            # FRAGMENT command
-            elif command[0] == "fragment":
-                if len(command) == 4:
-                    fragment(command[1], int(command[2]), float(command[3]))
-                elif len(command) == 3:
-                    fragment(command[1], int(command[2]), 100)
-                elif len(command) == 2:
-                    fragment(command[1], 5, 100)
-                else:
-                    print("Wrong number of arguments for command 'fragment'.\n")
-                    time.sleep(2)
-
-            # CREATE_MANEUVER command
-            elif command[0] == "create_maneuver":
-                if len(command) == 9 and command[2] == "const_accel":
-                    # name, type, vessel, frame, orientation, accel, start, duration
-                    if (not command[5] in preset_orientations):
-                        create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
-                                        
-                                                    eval(command[5]),
-                                        
-                                                    float(command[6]), float(command[7]), float(command[8]))
+                        labels_visible = 0
                     else:
-                        create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
-                                        
-                                                    command[5],
-                                        
-                                                    float(command[6]), float(command[7]), float(command[8]))
-                elif len(command) == 11 and command[2] == "const_thrust":
-                    # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
-                    if (not command[5] in preset_orientations):
-                        create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                        for i in range(len(output_buffer)):
+                            if output_buffer[i][0] == command[1]:
+                                output_buffer.remove(output_buffer[i])
+                                break
 
-                                                     eval(command[5]),
-
-                                                     float(command[6]), float(command[7]), float(command[8]),
-                                                     float(command[9]), float(command[10]))
+                # CLEAR command
+                elif command[0] == "clear":
+                    if len(command) == 2:
+                        if command[1] == "output":
+                            output_buffer = []
+                        elif command[1] == "scene":
+                            clear_scene()
+                        elif command[1] == "traj_visuals":
+                            for v in vessels:
+                                v.clear_draw_traj_history()
+                            for m in maneuvers:
+                                m.clear_draw_vertices()
                     else:
-                        create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
-
-                                                     command[5],
-
-                                                     float(command[6]), float(command[7]), float(command[8]),
-                                                     float(command[9]), float(command[10]))
-                else:
-                    print("Wrong syntax for command 'create_maneuver'.\n")
-                    time.sleep(2)
-
-            # DELETE_MANEUVER command
-            elif command[0] == "delete_maneuver":
-                if len(command) == 2:
-                    delete_maneuver(command[1])
-                else:
-                    print("Wrong number of arguments for command 'delete_maneuver'.\n")
-                    time.sleep(2)
-
-            # APPLY_RADIATION_PRESSURE command
-            elif command[0] == "apply_radiation_pressure":
-                if len(command) == 9:
-                    if command[6] in preset_orientations:
-                        apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
-                                                 float(command[4]), find_obj_by_name(command[5]), command[6], float(command[7]), int(command[8]))
-                    else:
-                        apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
-                                                 float(command[4]), find_obj_by_name(command[5]),
-                                                 eval(command[6]),
-                                                 float(command[7]), int(command[8]))
-                else:
-                    print("Wrong number of arguments for command 'apply_radiation_pressure'.\n")
-                    time.sleep(2)
-
-            # REMOVE_RADIATION_PRESSURE command
-            elif command[0] == "remove_radiation_pressure":
-                if len(command) == 2:
-                    remove_radiation_pressure(command[1])
-                else:
-                    print("Wrong number of arguments for command 'remove_radiation_pressure'.\n")
-                    time.sleep(2)
-
-            # APPLY_ATMOSPHERIC_DRAG command
-            elif command[0] == "apply_atmospheric_drag":
-                if len(command) == 8:
-                    apply_atmospheric_drag(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
-                                           float(command[4]), float(command[5]), float(command[6]), int(command[7]))
-                else:
-                    print("Wrong number of arguments for command 'apply_atmospheric_drag'.\n")
-                    time.sleep(2)
-
-            # REMOVE_ATMOSPHERIC_DRAG command
-            elif command[0] == "remove_atmospheric_drag":
-                if len(command) == 2:
-                    remove_atmospheric_drag(command[1])
-                else:
-                    print("Wrong number of arguments for command 'remove_atmospheric_drag'.\n")
-                    time.sleep(2)
-
-            # CREATE_PROJECTION command
-            elif command[0] == "create_projection":
-                if len(command) == 4:
-                    create_keplerian_proj(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]), sim_time)
-                else:
-                    print("Wrong number of arguments for command 'create_projection'.\n")
-                    time.sleep(2)
-
-            # DELETE_PROJECTION command
-            elif command[0] == "delete_projection":
-                if len(command) == 2:
-                    delete_keplerian_proj(command[1])
-                else:
-                    print("Wrong number of arguments for command 'delete_projection'.\n")
-                    time.sleep(2)
-
-            # UPDATE_PROJECTION command
-            elif command[0] == "update_projection":
-                if len(command) == 2:
-                    update_keplerian_proj(command[1], sim_time)
-                else:
-                    print("Wrong number of arguments for command 'delete_projection'.\n")
-                    time.sleep(2)
-
-            # CREATE_PLOT command
-            elif command[0] == "create_plot":
-                if len(command) == 5:
-                    create_plot(command[1], command[2], command[3], command[4])
-                elif len(command) == 6:
-                    if command[5].startswith("end_time"):
-                        create_plot(command[1], command[2], command[3], command[4], -1, float(command[5].split("=")[1]))
-                    elif command[5].startswith("start_time"):
-                        create_plot(command[1], command[2], command[3], command[4], float(command[5].split("=")[1]))
-                    else:
-                        create_plot(command[1], command[2], command[3], command[4], float(command[5]))
-                elif len(command) == 7:
-                    create_plot(command[1], command[2], command[3], command[4], float(command[5]), float(command[6]))
-                else:
-                    print("Wrong number of arguments for command 'create_plot'.\n")
-                    time.sleep(2)
-                    
-            # DELETE_PLOT command
-            elif command[0] == "delete_plot":
-                if len(command) == 2:
-                    delete_plot(command[1])
-                else:
-                    print("Wrong number of arguments for command 'delete_plot'.\n")
-                    time.sleep(2)
-
-            # DISPLAY_PLOT
-            # this is not within 'show' command because this doesn't use the output buffer
-            elif command[0] == "display_plot":
-                if len(command) == 2:
-                    plot_to_display = find_plot_by_name(command[1])
-                    if plot_to_display and sim_time > plot_to_display.get_start_time():
-                        plot_to_display.display()
-                    else:
-                        print("This plotter doesn't exist, or it didn't start plotting yet!")
+                        print("Wrong number of arguments for command 'clear'.")
                         time.sleep(2)
-                else:
-                    print("Wrong number of arguments for command 'display_plot'.\n")
-                    time.sleep(2)
 
-            # CREATE_BARYCENTER
-            elif command[0] == "create_barycenter":
-                if len(command) < 3:
-                    print("Not enough arguments!\n")
-                    time.sleep(2)
-                else:
-                    bodies_names = []
-                    for name in command[2:]:
-                        bodies_names.append(find_obj_by_name(name))
-                    create_barycenter(command[1], bodies_names)
+                # LOCK_ORIGIN command
+                elif command[0] == "lock_origin":
+                    scene_lock = find_obj_by_name(command[1])
 
-            # DELETE_BARYCENTER
-            elif command[0] == "delete_barycenter":
-                delete_barycenter(command[1])
+                # UNLOCK_ORIGIN command
+                elif command[0] == "unlock_origin":
+                    scene_lock = None
 
-            # GET_OBJECTS command
-            elif command[0] == "get_objects":
-                print("Objects currently in simulation:\n")
-                for b in bodies:
-                    print("BODY:", b.get_name() + "\n")
-                for v in vessels:
-                    print("VESSEL:", v.get_name() + "\n")
-                for sp in surface_points:
-                    print("SURFACE POINT:", sp.get_name() + "\n")
-                input("Press Enter to continue...")
+                # CREATE_VESSEL command
+                elif command[0] == "create_vessel":
+                    if len(command) == 6:
+                        create_vessel(command[1], command[2], eval(command[3]), eval(command[4]), eval(command[5]))
 
-            # GET_MANEUVERS command
-            elif command[0] == "get_maneuvers":
-                print("\nManeuvers currently in the simulation:\n")
-                for m in maneuvers:
-                    print("MANEUVER:", m.get_name(), "\nState:", str(m.get_state(sim_time)), "\n\n")
-                input("Press Enter to continue...")
-
-            # GET_PROJECTIONS command
-            elif command[0] == "get_projections":
-                print("\nProjections currently in the simulation:\n")
-                for p in projections:
-                    print("PROJECTION:", p.get_name(), "\n")
-                input("Press Enter to continue...")
-
-            # GET_PLOTS command
-            elif command[0] == "get_plots":
-                print("\nPlots currently in the simulation:\n")
-                for p in plots:
-                    print("PLOT:", p.get_name(), "\n")
-                input("Press Enter to continue...")
-
-            # CAM_STRAFE_SPEED command
-            elif command[0] == "cam_strafe_speed":
-                cam_strafe_speed = float(command[1])
-
-            # CAM_ROTATE_SPEED command
-            elif command[0] == "cam_rotate_speed":
-                cam_rotate_speed = float(command[1])
-
-            # DELTA_T command
-            elif command[0] == "delta_t":
-                delta_t = float(command[1])
-
-            # AUTO_DT command
-            elif command[0] == "auto_dt":
-                if len(command) == 3:
-                    auto_dt_buffer.append([float(command[1]), float(command[2])])
-                    # keep this sorted because the simulation only looks at index 0
-                    auto_dt_buffer = sorted(auto_dt_buffer)
-                else:
-                    print("Wrong number of arguments for command 'auto_dt'.")
-                    time.sleep(2)
-
-            # AUTO_DT_REMOVE command
-            elif command[0] == "auto_dt_remove":
-                if len(command) == 2:
-                    auto_dt_buffer.remove(auto_dt_buffer[int(command[1])])
-
-            # GET_AUTO_DT_BUFFER command
-            elif command[0] == "get_auto_dt_buffer":
-                print(auto_dt_buffer)
-                input("Press enter to continue...")
-
-            # AUTO_DT_CLEAR command
-            elif command[0] == "auto_dt_clear":
-                auto_dt_buffer = []
-
-            # RAPID_COMPUTE command
-            elif command[0] == "rapid_compute":
-                if len(command) == 2:
-                    rapid_compute_buffer.append([sim_time, float(command[1])])
-                elif len(command) == 3:
-                    rapid_compute_buffer.append([float(command[1]), float(command[2])])
-                else:
-                    print("Wrong number of arguments for command 'rapid_compute'.")
-                    time.sleep(2)
-
-                rapid_compute_buffer = sorted(rapid_compute_buffer)
-
-            # CANCEL_RAPID_COMPUTE command
-            elif command[0] == "cancel_rapid_compute":
-                try:
-                    del rapid_compute_buffer[int(command[1])]
-                except IndexError:
-                    print("Given index does not exist in the rapid compute buffer.")
-                    time.sleep(2)
-
-            # GET_RAPID_COMUTE_BUFFER command
-            elif command[0] == "get_rapid_compute_buffer":
-                print(rapid_compute_buffer)
-
-            # RAPID_COMPUTE_CLEAR command
-            elif command[0] == "rapid_compute_clear":
-                rapid_compute_buffer = []
-
-            # VESSEL_BODY_COLLISION command
-            elif command[0] == "vessel_body_collision":
-                vessel_body_collision = int(command[1])
-
-            # OUTPUT_RATE command
-            elif command[0] == "output_rate":
-                output_rate = int(command[1])
-
-            # CYCLE_TIME command
-            elif command[0] == "cycle_time":
-                cycle_time = float(command[1])
-
-            # NOTE command
-            elif command[0] == "note":
-                new_note = ""
-                for i in range(2,len(command)):
-                    new_note = new_note + " " + command[i]
-                output_buffer.append([command[1], "note", new_note])
-
-            # LOCK_CAM command
-            elif command[0] == "lock_cam":
-                if len(command) > 1:
-                    lock_active_cam_by_obj_name(command[1])
-                else:
-                    lock_active_cam_by_proximity()
-
-            elif command[0] == "unlock_cam":
-                unlock_active_cam()
-
-            # DRAW_MODE command
-            elif command[0] == "draw_mode":
-                try:
-                    draw_mode = int(command[1])
-                except ValueError:
-                    print("Illegal command! Accepted draw modes: 0, 1, 2")
-                    time.sleep(2)
-
-            # POINT_SIZE command
-            elif command[0] == "point_size":
-                try:
-                    glPointSize(int(command[1]))
-                except:
-                    print("Illegal command!")
-                    time.sleep(2)
-
-            # EXPORT command
-            elif command[0] == "export":
-                export_scenario(command[1])
-
-            # HELP command
-            elif command[0] == "help":
-                if len(command) == 1:
-                    print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, cam_rotate_speed, delta_t, cycle_time,")
-                    print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
-                    print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
-                    print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
-                    print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
-                    print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
-                    print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
-                    print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin\n")
-                    print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
-                    print("Simulation is paused while typing a command or using the command panel interface.\n")
-                    print("Type help <command> to learn more about a certain command.\n")
-                    input("Press Enter to continue...")
-                elif len(command) == 2:
-                    if command[1] == "show":
-                        print("\n'show' command adds an output element to the command prompt/terminal.\n")
-                        print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
-                        print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
-                        print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
-                        print("Syntax Option 4: show <radiation_pressure_name> params <display_label>\n")
-                        print("Syntax Option 5: show <atmospheric_drag_name> params <display_label>\n")
-                        print("Syntax Option 6: show <projection_name> <(attrib_name/params)> <display_label>\n")
-                        print("Syntax Option 7: show traj (enables trajectory trails)\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "hide":
-                        print("\n'hide' command removes an output element from the command prompt/terminal.\n")
-                        print("Syntax Option 1: hide <display_label>\n")
-                        print("Syntax Option 2: hide traj (disables trajectory trails)\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "clear":
-                        print("\n'clear' command removes all output element from the command prompt/terminal.\n")
-                        print("Syntax: clear <thing>\n")
-                        print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene),")
-                        print("traj_visuals (clears vessel trajectories up to current time in the 3D scene)\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "batch":
-                        print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
-                        print("Syntax: batch <file_path>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "lock_origin":
-                        print("\n'lock_origin' command locks the global coordinate system origin to a body or vessel for optimizing precision for that particular object.\n")
-                        print("Syntax: lock_origin <object_name>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "unlock_origin":
-                        print("\n'unlock_origin' command releases coordinate system origin from the object it was locked to.\n")
-                        print("Syntax: unlock_origin\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "create_vessel":
-                        print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
-                        print("Syntax Option 1: create_vessel <name> <model_name> <color> <position> <velocity>\n")
-                        print("Syntax Option 2: create_vessel <name> <model_name> <color> <frame_of_reference_name> <position(spherical)> <velocity>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delete_vessel":
-                        print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
-                        print("Syntax: delete_vessel <name>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "fragment":
-                        print("\n'fragment' command creates small fragments from an object in space\n(as if it was hit by a kinetic impactor).\n")
-                        print("Syntax Option 1: fragment <object_name> <num_of_fragments> <velocity of fragments>\n")
-                        print("Syntax Option 2: fragment <object_name> <num_of_fragments>\n")
-                        print("Syntax Option 3: fragment <object_name>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "create_maneuver":
-                        print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
-                        print("Syntax: create_maneuver <name> <type> + <<type-specific arguments>>")
-                        print("Maneuver types: const_accel, const_thrust")
-                        print("const_accel params: <vessel> <frame_of_reference> <orientation> <acceleration> <start_time> <duration>")
-                        print("const_thrust params: <vessel> <frame_of_reference> <orientation> <thrust> <initial_mass> <mass_flow> <start_time> <duration>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delete_maneuver":
-                        print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
-                        print("Syntax: delete_maneuver <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "apply_radiation_pressure":
-                        print("\n'apply_radiation_pressure' command sets up a radiation pressure effect on a vessel.\n")
-                        print("Syntax: apply_radiation_pressure <name> <vessel> <radiation_source_body> <illuminated_area> <frame_of_reference> <orientation> <vessel_mass> <mass_auto_update>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "remove_radiation_pressure":
-                        print("\n'remove_radiation_pressure' command removes a radiation pressure effect from the simulation.\n")
-                        print("Syntax: remove_radiation_pressure <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "apply_atmospheric_drag":
-                        print("\n'apply_atmospheric_drag' command sets up an atmospheric drag effect on a vessel.\n")
-                        print("Syntax: apply_atmospheric_drag <name> <vessel> <body> <drag_area> <drag_coeff> <vessel_mass> <mass_auto_update>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "remove_atmospheric_drag":
-                        print("\n'remove_atmospheric_drag' command removes an atmospheric drag effect from the simulation.\n")
-                        print("Syntax: remove_atmospheric_drag <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "create_projection":
-                        print("\n'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.\n")
-                        print("Syntax: create_projection <name> <vessel> <body>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delete_projection":
-                        print("\n'delete_projection' command removes a 2-body Keplerian orbit projection from the simulation.\n")
-                        print("Syntax: delete_projection <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "update_projection":
-                        print("\n'update_projection' command recalculates a 2-body Keplerian orbit projection at current simulation time.\n")
-                        print("Syntax: update_projection <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "create_plot":
-                        print("\n'create_plot' command adds a plotter to the simulation to plot some value against simulation time")
-                        print("during some interval. It will display automatically when finished, or on demand with 'display_plot' command.")
-                        print("Syntax: create_plot <name> <variable> <obj_1_name> <obj_2_name> (+ <start_time> <end_time>)")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delete_plot":
-                        print("\n'delete_plot' command removes a plotter from the simulation.\n")
-                        print("Syntax: delete_plot <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "display_plot":
-                        print("\n'display_plot' command displays a plotter with matplotlib.\n")
-                        print("Syntax: display_plot <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "create_barycenter":
-                        print("'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
-                        print("Syntax: create_barycenter <name> <bodies (separate names with single space)>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delete_barycenter":
-                        print("'delete_barycenter' removes a previously marked barycenter.")
-                        print("Syntax: delete_barycenter <name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_objects":
-                        print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
-                        print("Syntax: get_objects\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_maneuvers":
-                        print("\n'get_maneuvers' command prints out the names of maneuvers currently in the simulation.\n")
-                        print("Syntax: get_maneuvers\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_projections":
-                        print("\n'get_projections' command prints out the names of Keplerian orbit projections currently in the simulation.\n")
-                        print("Syntax: get_projections\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_plots":
-                        print("\n'get_plots' command prints out the names of plotters currently in the simulation.\n")
-                        print("Syntax: get_plots\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "cam_strafe_speed":
-                        print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
-                        print("Syntax: cam_strafe_speed <speed>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "cam_rotate_speed":
-                        print("\n'cam_rotate_speed' command sets the speed of camera rotation.\n")
-                        print("Syntax: cam_rotate_speed <speed> \n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "delta_t":
-                        print("\n'delta_t' command sets time step length of each physics frame.")
-                        print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
-                        print("Syntax: delta_t <seconds>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "auto_dt":
-                        print("\n'auto_dt' command adds an automatic delta_t adjustment to happen at a certain time in the simulation.")
-                        print("This is usually useful for playing back certain scenarios exactly the way they were initially created, since the.")
-                        print("choice of delta_t can have a big influence on the physics.\n")
-                        print("Syntax: auto_dt <simulation_time_at_which_the_change_should_happen> <delta_t_value>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "auto_dt_remove":
-                        print("\n'auto_dt_remove' command removes an auto_dt command from the buffer.")
-                        print("It is a good idea to see the buffer first with the 'get_auto_dt_buffer' command.\n")
-                        print("Syntax: auto_dt_remove <buffer_index>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "auto_dt_clear":
-                        print("\n'auto_dt_clear' command clears the auto_dt buffer.")
-                        print("Syntax: auto_dt_clear\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_auto_dt_buffer":
-                        print("\n'get_auto_dt_buffer' command displays the current state of the auto_dt buffer.")
-                        print("The commands are displayed in format [[<time>, <delta_t>],[<time>, <delta_t>],[<time>, <delta_t>]...]")
-                        print("Syntax: get_auto_dt_buffer\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "rapid_compute":
-                        print("\n'rapid_compute' command sets a time interval for the simulation to enter rapid computation mode.")
-                        print("In this mode, the simulation proceeds much faster without losing sacrificing physical accuracy, but")
-                        print("provides no meaningful user output in the meanwhile.")
-                        print("Syntax Option 1: rapid_compute <end_time>")
-                        print("Syntax Option 2: rapid_compute <start_time> <end_time>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "cancel_rapid_compute":
-                        print("\n'cancel_rapid_compute' command removes a rapid computation iterval from the buffer.")
-                        print("Syntax: cancel_rapid_compute <buffer_index>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "get_rapid_compute_buffer":
-                        print("\n'get_rapid_compute_buffer' command prints out the rapid compute buffer.")
-                        print("Syntax: get_rapid_compute_buffer")
-                        input("Press Enter to continue...")
-                    elif command[1] == "rapid_compute_clear":
-                        print("\n'rapid_compute_clear' command clears the rapid compute buffer.")
-                        print("Syntax: clear_rapid_compute")
-                        input("Press Enter to continue...")
-                    elif command[1] == "vessel_body_collision":
-                        print("\n'vessel_body_collision' commands activates or deactivates vessel-body collision checks.")
-                        print("Syntax: vessel_body_collision <{0, 1}>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "output_rate":
-                        print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
-                        print("Must be a positive integer.\n")
-                        print("Syntax: output_rate <integer>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "cycle_time":
-                        print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
-                        print("Syntax: cycle_time <seconds>\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "note":
-                        print("\n'note' command lets the user take a note on the output screen.")
-                        print("Syntax: note <note_label> <note>")
-                        print("(<note> represents all words beyond <note_label>, spaces can be used while taking notes)\n")
-                        input("Press Enter to continue...")
-                    elif command[1] == "lock_cam":
-                        print("\n'lock_cam' command locks the active camera to an object (if it exists).")
-                        print("Syntax: lock_cam <object_name>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "unlock_cam":
-                        print("\n'lock_cam' command unlocks the active camera and makes it stationary rel. to global coordinates.")
-                        print("Syntax: unlock_cam")
-                        input("Press Enter to continue...")
-                    elif command[1] == "draw_mode":
-                        print("\n'draw_mode' command selects scene visualization mode.")
-                        print("0 = lines, 1 = filled polygon, 2 = filled polygon with line overlay")
-                        print("Syntax: draw_mode <selection>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "point_size":
-                        print("\n'point_size' command sets the size of points that represent distant objects in the scene (in pixels).")
-                        print("Syntax: point_size <size>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "export":
-                        print("\n'export' command exports the current scenario state into an OrbitSim3D scenario (.osf) file.")
-                        print("Syntax: export <filename>")
-                        input("Press Enter to continue...")
-                    elif command[1] == "help":
-                        print("\n'help' command prints out the help text.\n")
-                        print("Syntax: help\n")
-                        input("Press Enter to continue...")
+                    elif len(command) == 7:
+                        # TO DO - SPHERICAL VELOCITY INPUT
+                        parent_pos = find_obj_by_name(command[4]).get_pos()
+                        
+                        vessel_offset_from_parent = spherical2cartesian(eval(command[5]))
+                        
+                        create_vessel(command[1], command[2], eval(command[3]),
+                                      parent_pos + vessel_offset_from_parent,
+                                      eval(command[6]))
                     else:
-                        print("\nUnknown command.")
-                        input("Press Enter to continue...")
+                        print("Wrong number of arguments for command 'create_vessel'.\n")
+                        time.sleep(2)
 
-            elif command[0] == "" or not command[0]:
-                # user probably changed their mind
-                pass
-            else:
-                print("\nUnrecognized command: " + str(command[0]))
-                input("Press Enter to continue...")
+                # DELETE_VESSEL command
+                elif command[0] == "delete_vessel":
+                    if len(command) == 2:
+                        delete_vessel(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'delete_vessel'.\n")
+                        time.sleep(2)
+
+                # FRAGMENT command
+                elif command[0] == "fragment":
+                    if len(command) == 4:
+                        fragment(command[1], int(command[2]), float(command[3]))
+                    elif len(command) == 3:
+                        fragment(command[1], int(command[2]), 100)
+                    elif len(command) == 2:
+                        fragment(command[1], 5, 100)
+                    else:
+                        print("Wrong number of arguments for command 'fragment'.\n")
+                        time.sleep(2)
+
+                # CREATE_MANEUVER command
+                elif command[0] == "create_maneuver":
+                    if len(command) == 9 and command[2] == "const_accel":
+                        # name, type, vessel, frame, orientation, accel, start, duration
+                        if (not command[5] in preset_orientations):
+                            create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                            
+                                                        eval(command[5]),
+                                            
+                                                        float(command[6]), float(command[7]), float(command[8]))
+                        else:
+                            create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                            
+                                                        command[5],
+                                            
+                                                        float(command[6]), float(command[7]), float(command[8]))
+                    elif len(command) == 11 and command[2] == "const_thrust":
+                        # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
+                        if (not command[5] in preset_orientations):
+                            create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+
+                                                         eval(command[5]),
+
+                                                         float(command[6]), float(command[7]), float(command[8]),
+                                                         float(command[9]), float(command[10]))
+                        else:
+                            create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+
+                                                         command[5],
+
+                                                         float(command[6]), float(command[7]), float(command[8]),
+                                                         float(command[9]), float(command[10]))
+                    else:
+                        print("Wrong syntax for command 'create_maneuver'.\n")
+                        time.sleep(2)
+
+                # DELETE_MANEUVER command
+                elif command[0] == "delete_maneuver":
+                    if len(command) == 2:
+                        delete_maneuver(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'delete_maneuver'.\n")
+                        time.sleep(2)
+
+                # APPLY_RADIATION_PRESSURE command
+                elif command[0] == "apply_radiation_pressure":
+                    if len(command) == 9:
+                        if command[6] in preset_orientations:
+                            apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                                     float(command[4]), find_obj_by_name(command[5]), command[6], float(command[7]), int(command[8]))
+                        else:
+                            apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                                     float(command[4]), find_obj_by_name(command[5]),
+                                                     eval(command[6]),
+                                                     float(command[7]), int(command[8]))
+                    else:
+                        print("Wrong number of arguments for command 'apply_radiation_pressure'.\n")
+                        time.sleep(2)
+
+                # REMOVE_RADIATION_PRESSURE command
+                elif command[0] == "remove_radiation_pressure":
+                    if len(command) == 2:
+                        remove_radiation_pressure(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'remove_radiation_pressure'.\n")
+                        time.sleep(2)
+
+                # APPLY_ATMOSPHERIC_DRAG command
+                elif command[0] == "apply_atmospheric_drag":
+                    if len(command) == 8:
+                        apply_atmospheric_drag(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                               float(command[4]), float(command[5]), float(command[6]), int(command[7]))
+                    else:
+                        print("Wrong number of arguments for command 'apply_atmospheric_drag'.\n")
+                        time.sleep(2)
+
+                # REMOVE_ATMOSPHERIC_DRAG command
+                elif command[0] == "remove_atmospheric_drag":
+                    if len(command) == 2:
+                        remove_atmospheric_drag(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'remove_atmospheric_drag'.\n")
+                        time.sleep(2)
+
+                # CREATE_PROJECTION command
+                elif command[0] == "create_projection":
+                    if len(command) == 4:
+                        create_keplerian_proj(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]), sim_time)
+                    else:
+                        print("Wrong number of arguments for command 'create_projection'.\n")
+                        time.sleep(2)
+
+                # DELETE_PROJECTION command
+                elif command[0] == "delete_projection":
+                    if len(command) == 2:
+                        delete_keplerian_proj(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'delete_projection'.\n")
+                        time.sleep(2)
+
+                # UPDATE_PROJECTION command
+                elif command[0] == "update_projection":
+                    if len(command) == 2:
+                        update_keplerian_proj(command[1], sim_time)
+                    else:
+                        print("Wrong number of arguments for command 'delete_projection'.\n")
+                        time.sleep(2)
+
+                # CREATE_PLOT command
+                elif command[0] == "create_plot":
+                    if len(command) == 5:
+                        create_plot(command[1], command[2], command[3], command[4])
+                    elif len(command) == 6:
+                        if command[5].startswith("end_time"):
+                            create_plot(command[1], command[2], command[3], command[4], -1, float(command[5].split("=")[1]))
+                        elif command[5].startswith("start_time"):
+                            create_plot(command[1], command[2], command[3], command[4], float(command[5].split("=")[1]))
+                        else:
+                            create_plot(command[1], command[2], command[3], command[4], float(command[5]))
+                    elif len(command) == 7:
+                        create_plot(command[1], command[2], command[3], command[4], float(command[5]), float(command[6]))
+                    else:
+                        print("Wrong number of arguments for command 'create_plot'.\n")
+                        time.sleep(2)
+                        
+                # DELETE_PLOT command
+                elif command[0] == "delete_plot":
+                    if len(command) == 2:
+                        delete_plot(command[1])
+                    else:
+                        print("Wrong number of arguments for command 'delete_plot'.\n")
+                        time.sleep(2)
+
+                # DISPLAY_PLOT
+                # this is not within 'show' command because this doesn't use the output buffer
+                elif command[0] == "display_plot":
+                    if len(command) == 2:
+                        plot_to_display = find_plot_by_name(command[1])
+                        if plot_to_display and sim_time > plot_to_display.get_start_time():
+                            plot_to_display.display()
+                        else:
+                            print("This plotter doesn't exist, or it didn't start plotting yet!")
+                            time.sleep(2)
+                    else:
+                        print("Wrong number of arguments for command 'display_plot'.\n")
+                        time.sleep(2)
+
+                # CREATE_BARYCENTER
+                elif command[0] == "create_barycenter":
+                    if len(command) < 3:
+                        print("Not enough arguments!\n")
+                        time.sleep(2)
+                    else:
+                        bodies_names = []
+                        for name in command[2:]:
+                            bodies_names.append(find_obj_by_name(name))
+                        create_barycenter(command[1], bodies_names)
+
+                # DELETE_BARYCENTER
+                elif command[0] == "delete_barycenter":
+                    delete_barycenter(command[1])
+
+                # GET_OBJECTS command
+                elif command[0] == "get_objects":
+                    print("Objects currently in simulation:\n")
+                    for b in bodies:
+                        print("BODY:", b.get_name() + "\n")
+                    for v in vessels:
+                        print("VESSEL:", v.get_name() + "\n")
+                    for sp in surface_points:
+                        print("SURFACE POINT:", sp.get_name() + "\n")
+                    input("Press Enter to continue...")
+
+                # GET_MANEUVERS command
+                elif command[0] == "get_maneuvers":
+                    print("\nManeuvers currently in the simulation:\n")
+                    for m in maneuvers:
+                        print("MANEUVER:", m.get_name(), "\nState:", str(m.get_state(sim_time)), "\n\n")
+                    input("Press Enter to continue...")
+
+                # GET_PROJECTIONS command
+                elif command[0] == "get_projections":
+                    print("\nProjections currently in the simulation:\n")
+                    for p in projections:
+                        print("PROJECTION:", p.get_name(), "\n")
+                    input("Press Enter to continue...")
+
+                # GET_PLOTS command
+                elif command[0] == "get_plots":
+                    print("\nPlots currently in the simulation:\n")
+                    for p in plots:
+                        print("PLOT:", p.get_name(), "\n")
+                    input("Press Enter to continue...")
+
+                # CAM_STRAFE_SPEED command
+                elif command[0] == "cam_strafe_speed":
+                    cam_strafe_speed = float(command[1])
+
+                # CAM_ROTATE_SPEED command
+                elif command[0] == "cam_rotate_speed":
+                    cam_rotate_speed = float(command[1])
+
+                # DELTA_T command
+                elif command[0] == "delta_t":
+                    delta_t = float(command[1])
+
+                # AUTO_DT command
+                elif command[0] == "auto_dt":
+                    if len(command) == 3:
+                        auto_dt_buffer.append([float(command[1]), float(command[2])])
+                        # keep this sorted because the simulation only looks at index 0
+                        auto_dt_buffer = sorted(auto_dt_buffer)
+                    else:
+                        print("Wrong number of arguments for command 'auto_dt'.")
+                        time.sleep(2)
+
+                # AUTO_DT_REMOVE command
+                elif command[0] == "auto_dt_remove":
+                    if len(command) == 2:
+                        auto_dt_buffer.remove(auto_dt_buffer[int(command[1])])
+
+                # GET_AUTO_DT_BUFFER command
+                elif command[0] == "get_auto_dt_buffer":
+                    print(auto_dt_buffer)
+                    input("Press enter to continue...")
+
+                # AUTO_DT_CLEAR command
+                elif command[0] == "auto_dt_clear":
+                    auto_dt_buffer = []
+
+                # RAPID_COMPUTE command
+                elif command[0] == "rapid_compute":
+                    if len(command) == 2:
+                        rapid_compute_buffer.append([sim_time, float(command[1])])
+                    elif len(command) == 3:
+                        rapid_compute_buffer.append([float(command[1]), float(command[2])])
+                    else:
+                        print("Wrong number of arguments for command 'rapid_compute'.")
+                        time.sleep(2)
+
+                    rapid_compute_buffer = sorted(rapid_compute_buffer)
+
+                # CANCEL_RAPID_COMPUTE command
+                elif command[0] == "cancel_rapid_compute":
+                    try:
+                        del rapid_compute_buffer[int(command[1])]
+                    except IndexError:
+                        print("Given index does not exist in the rapid compute buffer.")
+                        time.sleep(2)
+
+                # GET_RAPID_COMUTE_BUFFER command
+                elif command[0] == "get_rapid_compute_buffer":
+                    print(rapid_compute_buffer)
+
+                # RAPID_COMPUTE_CLEAR command
+                elif command[0] == "rapid_compute_clear":
+                    rapid_compute_buffer = []
+
+                # VESSEL_BODY_COLLISION command
+                elif command[0] == "vessel_body_collision":
+                    vessel_body_collision = int(command[1])
+
+                # OUTPUT_RATE command
+                elif command[0] == "output_rate":
+                    output_rate = int(command[1])
+
+                # CYCLE_TIME command
+                elif command[0] == "cycle_time":
+                    cycle_time = float(command[1])
+
+                # NOTE command
+                elif command[0] == "note":
+                    new_note = ""
+                    for i in range(2,len(command)):
+                        new_note = new_note + " " + command[i]
+                    output_buffer.append([command[1], "note", new_note])
+
+                # LOCK_CAM command
+                elif command[0] == "lock_cam":
+                    if len(command) > 1:
+                        lock_active_cam_by_obj_name(command[1])
+                    else:
+                        lock_active_cam_by_proximity()
+
+                elif command[0] == "unlock_cam":
+                    unlock_active_cam()
+
+                # DRAW_MODE command
+                elif command[0] == "draw_mode":
+                    try:
+                        draw_mode = int(command[1])
+                    except ValueError:
+                        print("Illegal command! Accepted draw modes: 0, 1, 2")
+                        time.sleep(2)
+
+                # POINT_SIZE command
+                elif command[0] == "point_size":
+                    try:
+                        glPointSize(int(command[1]))
+                    except:
+                        print("Illegal command!")
+                        time.sleep(2)
+
+                # EXPORT command
+                elif command[0] == "export":
+                    export_scenario(command[1])
+
+                # HELP command
+                elif command[0] == "help":
+                    if len(command) == 1:
+                        print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, cam_rotate_speed, delta_t, cycle_time,")
+                        print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
+                        print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
+                        print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
+                        print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
+                        print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
+                        print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
+                        print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin\n")
+                        print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
+                        print("Simulation is paused while typing a command or using the command panel interface.\n")
+                        print("Type help <command> to learn more about a certain command.\n")
+                        input("Press Enter to continue...")
+                    elif len(command) == 2:
+                        if command[1] == "show":
+                            print("\n'show' command adds an output element to the command prompt/terminal.\n")
+                            print("Syntax Option 1: show <object_name> <attribute> <display_label>\n")
+                            print("Syntax Option 2: show <object_name> <relative_attribute> <frame_of_reference_name> <display_label>\n")
+                            print("Syntax Option 3: show <maneuver_name> <(active/state/params)> <display_label>\n")
+                            print("Syntax Option 4: show <radiation_pressure_name> params <display_label>\n")
+                            print("Syntax Option 5: show <atmospheric_drag_name> params <display_label>\n")
+                            print("Syntax Option 6: show <projection_name> <(attrib_name/params)> <display_label>\n")
+                            print("Syntax Option 7: show traj (enables trajectory trails)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "hide":
+                            print("\n'hide' command removes an output element from the command prompt/terminal.\n")
+                            print("Syntax Option 1: hide <display_label>\n")
+                            print("Syntax Option 2: hide traj (disables trajectory trails)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "clear":
+                            print("\n'clear' command removes all output element from the command prompt/terminal.\n")
+                            print("Syntax: clear <thing>\n")
+                            print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene),")
+                            print("traj_visuals (clears vessel trajectories up to current time in the 3D scene)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "batch":
+                            print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
+                            print("Syntax: batch <file_path>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "lock_origin":
+                            print("\n'lock_origin' command locks the global coordinate system origin to a body or vessel for optimizing precision for that particular object.\n")
+                            print("Syntax: lock_origin <object_name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "unlock_origin":
+                            print("\n'unlock_origin' command releases coordinate system origin from the object it was locked to.\n")
+                            print("Syntax: unlock_origin\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_vessel":
+                            print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
+                            print("Syntax Option 1: create_vessel <name> <model_name> <color> <position> <velocity>\n")
+                            print("Syntax Option 2: create_vessel <name> <model_name> <color> <frame_of_reference_name> <position(spherical)> <velocity>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_vessel":
+                            print("\n'delete_vessel' command removes a space vessel from the simulation.\n")
+                            print("Syntax: delete_vessel <name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "fragment":
+                            print("\n'fragment' command creates small fragments from an object in space\n(as if it was hit by a kinetic impactor).\n")
+                            print("Syntax Option 1: fragment <object_name> <num_of_fragments> <velocity of fragments>\n")
+                            print("Syntax Option 2: fragment <object_name> <num_of_fragments>\n")
+                            print("Syntax Option 3: fragment <object_name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_maneuver":
+                            print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
+                            print("Syntax: create_maneuver <name> <type> + <<type-specific arguments>>")
+                            print("Maneuver types: const_accel, const_thrust")
+                            print("const_accel params: <vessel> <frame_of_reference> <orientation> <acceleration> <start_time> <duration>")
+                            print("const_thrust params: <vessel> <frame_of_reference> <orientation> <thrust> <initial_mass> <mass_flow> <start_time> <duration>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_maneuver":
+                            print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
+                            print("Syntax: delete_maneuver <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "apply_radiation_pressure":
+                            print("\n'apply_radiation_pressure' command sets up a radiation pressure effect on a vessel.\n")
+                            print("Syntax: apply_radiation_pressure <name> <vessel> <radiation_source_body> <illuminated_area> <frame_of_reference> <orientation> <vessel_mass> <mass_auto_update>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "remove_radiation_pressure":
+                            print("\n'remove_radiation_pressure' command removes a radiation pressure effect from the simulation.\n")
+                            print("Syntax: remove_radiation_pressure <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "apply_atmospheric_drag":
+                            print("\n'apply_atmospheric_drag' command sets up an atmospheric drag effect on a vessel.\n")
+                            print("Syntax: apply_atmospheric_drag <name> <vessel> <body> <drag_area> <drag_coeff> <vessel_mass> <mass_auto_update>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "remove_atmospheric_drag":
+                            print("\n'remove_atmospheric_drag' command removes an atmospheric drag effect from the simulation.\n")
+                            print("Syntax: remove_atmospheric_drag <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_projection":
+                            print("\n'create_projection' command creates a 2-body Keplerian orbit projection of a vessel around a body.\n")
+                            print("Syntax: create_projection <name> <vessel> <body>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_projection":
+                            print("\n'delete_projection' command removes a 2-body Keplerian orbit projection from the simulation.\n")
+                            print("Syntax: delete_projection <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "update_projection":
+                            print("\n'update_projection' command recalculates a 2-body Keplerian orbit projection at current simulation time.\n")
+                            print("Syntax: update_projection <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_plot":
+                            print("\n'create_plot' command adds a plotter to the simulation to plot some value against simulation time")
+                            print("during some interval. It will display automatically when finished, or on demand with 'display_plot' command.")
+                            print("Syntax: create_plot <name> <variable> <obj_1_name> <obj_2_name> (+ <start_time> <end_time>)")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_plot":
+                            print("\n'delete_plot' command removes a plotter from the simulation.\n")
+                            print("Syntax: delete_plot <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "display_plot":
+                            print("\n'display_plot' command displays a plotter with matplotlib.\n")
+                            print("Syntax: display_plot <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_barycenter":
+                            print("'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
+                            print("Syntax: create_barycenter <name> <bodies (separate names with single space)>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_barycenter":
+                            print("'delete_barycenter' removes a previously marked barycenter.")
+                            print("Syntax: delete_barycenter <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_objects":
+                            print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
+                            print("Syntax: get_objects\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_maneuvers":
+                            print("\n'get_maneuvers' command prints out the names of maneuvers currently in the simulation.\n")
+                            print("Syntax: get_maneuvers\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_projections":
+                            print("\n'get_projections' command prints out the names of Keplerian orbit projections currently in the simulation.\n")
+                            print("Syntax: get_projections\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_plots":
+                            print("\n'get_plots' command prints out the names of plotters currently in the simulation.\n")
+                            print("Syntax: get_plots\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "cam_strafe_speed":
+                            print("\n'cam_strafe_speed' command sets the speed of linear camera movement.\n")
+                            print("Syntax: cam_strafe_speed <speed>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "cam_rotate_speed":
+                            print("\n'cam_rotate_speed' command sets the speed of camera rotation.\n")
+                            print("Syntax: cam_rotate_speed <speed> \n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delta_t":
+                            print("\n'delta_t' command sets time step length of each physics frame.")
+                            print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
+                            print("Syntax: delta_t <seconds>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "auto_dt":
+                            print("\n'auto_dt' command adds an automatic delta_t adjustment to happen at a certain time in the simulation.")
+                            print("This is usually useful for playing back certain scenarios exactly the way they were initially created, since the.")
+                            print("choice of delta_t can have a big influence on the physics.\n")
+                            print("Syntax: auto_dt <simulation_time_at_which_the_change_should_happen> <delta_t_value>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "auto_dt_remove":
+                            print("\n'auto_dt_remove' command removes an auto_dt command from the buffer.")
+                            print("It is a good idea to see the buffer first with the 'get_auto_dt_buffer' command.\n")
+                            print("Syntax: auto_dt_remove <buffer_index>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "auto_dt_clear":
+                            print("\n'auto_dt_clear' command clears the auto_dt buffer.")
+                            print("Syntax: auto_dt_clear\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_auto_dt_buffer":
+                            print("\n'get_auto_dt_buffer' command displays the current state of the auto_dt buffer.")
+                            print("The commands are displayed in format [[<time>, <delta_t>],[<time>, <delta_t>],[<time>, <delta_t>]...]")
+                            print("Syntax: get_auto_dt_buffer\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "rapid_compute":
+                            print("\n'rapid_compute' command sets a time interval for the simulation to enter rapid computation mode.")
+                            print("In this mode, the simulation proceeds much faster without losing sacrificing physical accuracy, but")
+                            print("provides no meaningful user output in the meanwhile.")
+                            print("Syntax Option 1: rapid_compute <end_time>")
+                            print("Syntax Option 2: rapid_compute <start_time> <end_time>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "cancel_rapid_compute":
+                            print("\n'cancel_rapid_compute' command removes a rapid computation iterval from the buffer.")
+                            print("Syntax: cancel_rapid_compute <buffer_index>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_rapid_compute_buffer":
+                            print("\n'get_rapid_compute_buffer' command prints out the rapid compute buffer.")
+                            print("Syntax: get_rapid_compute_buffer")
+                            input("Press Enter to continue...")
+                        elif command[1] == "rapid_compute_clear":
+                            print("\n'rapid_compute_clear' command clears the rapid compute buffer.")
+                            print("Syntax: clear_rapid_compute")
+                            input("Press Enter to continue...")
+                        elif command[1] == "vessel_body_collision":
+                            print("\n'vessel_body_collision' commands activates or deactivates vessel-body collision checks.")
+                            print("Syntax: vessel_body_collision <{0, 1}>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "output_rate":
+                            print("\n'output_rate' command sets the number of cycles per update for the output buffer.")
+                            print("Must be a positive integer.\n")
+                            print("Syntax: output_rate <integer>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "cycle_time":
+                            print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
+                            print("Syntax: cycle_time <seconds>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "note":
+                            print("\n'note' command lets the user take a note on the output screen.")
+                            print("Syntax: note <note_label> <note>")
+                            print("(<note> represents all words beyond <note_label>, spaces can be used while taking notes)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "lock_cam":
+                            print("\n'lock_cam' command locks the active camera to an object (if it exists).")
+                            print("Syntax: lock_cam <object_name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "unlock_cam":
+                            print("\n'lock_cam' command unlocks the active camera and makes it stationary rel. to global coordinates.")
+                            print("Syntax: unlock_cam")
+                            input("Press Enter to continue...")
+                        elif command[1] == "draw_mode":
+                            print("\n'draw_mode' command selects scene visualization mode.")
+                            print("0 = lines, 1 = filled polygon, 2 = filled polygon with line overlay")
+                            print("Syntax: draw_mode <selection>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "point_size":
+                            print("\n'point_size' command sets the size of points that represent distant objects in the scene (in pixels).")
+                            print("Syntax: point_size <size>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "export":
+                            print("\n'export' command exports the current scenario state into an OrbitSim3D scenario (.osf) file.")
+                            print("Syntax: export <filename>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "help":
+                            print("\n'help' command prints out the help text.\n")
+                            print("Syntax: help\n")
+                            input("Press Enter to continue...")
+                        else:
+                            print("\nUnknown command.")
+                            input("Press Enter to continue...")
+
+                elif command[0] == "" or not command[0]:
+                    # user probably changed their mind
+                    pass
+                else:
+                    print("\nUnrecognized command: " + str(command[0]))
+                    input("Press Enter to continue...")
+
+            if keyboard.is_pressed("CTRL+K"):
+                accept_keyboard_input = False
 
         cycle_start = time.perf_counter()
 
@@ -1808,6 +1830,8 @@ def main(scn_filename=None, start_time=0):
 
             # display what the user wants in cmd/terminal
             print("OrbitSim3D Command Interpreter & Output Display\n")
+            if not accept_keyboard_input:
+                print(" - KEYBOARD INPUT LOCKED - \n")
             if sim_time < 30 * delta_t:
                 print("Press C at any time to use the command line or P to open the command panel interface.\n")
             print("Time:", sim_time, "\n")
