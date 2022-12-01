@@ -22,10 +22,18 @@ Run main.py through the command line/terminal to start.
 See the [introductory tutorial](http://github.com/arda-guler/orbitSim3D/blob/master/docs/tutorial.md "introductory tutorial") for a quick introduction to using OS3D.
 
 #### Default Keyboard Controls
-C: Use command line.
-P: Open command panel.
-W, A, S, D, Q, E: Camera rotation.
-U, I, O, J, K, L: Camera translation.
+
+**C**: Use command line.
+
+**P**: Open command panel.
+
+**W, A, S, D, Q, E**: Camera rotation.
+
+**U, I, O, J, K, L**: Camera translation.
+
+**T, G**: Increase/decrease camera translation speed.
+
+**CTRL+L, CTRL+K**: Lock/unlock keyboard inputs.
 
 Controls can be edited via 'Configure OrbitSim3D' option at startup.
 
