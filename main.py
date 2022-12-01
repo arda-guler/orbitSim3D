@@ -923,45 +923,46 @@ def main(scn_filename=None, start_time=0):
 
         frame_command = False
 
-        if not accept_keyboard_input:
+        if (not accept_keyboard_input) and len(batch_commands) < 1:
             if keyboard.is_pressed("CTRL+L"):
                 accept_keyboard_input = True
 
         else:
+            
+            if accept_keyboard_input:
+                # get input and move the "camera" around
+                get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed / output_rate,
+                                         (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
+                                         (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
 
-            # get input and move the "camera" around
-            get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed / output_rate,
-                                     (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
-                                     (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
+                get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
+                                                (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
+                                                (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
 
-            get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
-                                            (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
-                                            (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
+                # adjust camera speed via hotkey
+                if not speed_input_locked and keyboard.is_pressed(cam_increase_speed):
+                    cam_strafe_speed *= 2
+                    speed_input_locked = True
 
-            # adjust camera speed via hotkey
-            if not speed_input_locked and keyboard.is_pressed(cam_increase_speed):
-                cam_strafe_speed *= 2
-                speed_input_locked = True
+                elif not speed_input_locked and keyboard.is_pressed(cam_decrease_speed):
+                    cam_strafe_speed *= 0.5
+                    speed_input_locked = True
 
-            elif not speed_input_locked and keyboard.is_pressed(cam_decrease_speed):
-                cam_strafe_speed *= 0.5
-                speed_input_locked = True
+                if speed_input_locked and (not keyboard.is_pressed(cam_increase_speed) and not keyboard.is_pressed(cam_decrease_speed)):
+                    speed_input_locked = False
 
-            if speed_input_locked and (not keyboard.is_pressed(cam_increase_speed) and not keyboard.is_pressed(cam_decrease_speed)):
-                speed_input_locked = False
+                # get command line/panel request
+                if keyboard.is_pressed("c") and not rapid_compute_flag:
+                    frame_command = True
 
-            # get command line/panel request
-            if keyboard.is_pressed("c") and not rapid_compute_flag:
-                frame_command = True
-
-            elif keyboard.is_pressed("p") and not rapid_compute_flag:
-                panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
-                                                   auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
-                                                   scene_lock)
-                if panel_commands:
-                    for panel_command in panel_commands:
-                        panel_command = panel_command.split(" ")
-                        batch_commands.append(panel_command)
+                elif keyboard.is_pressed("p") and not rapid_compute_flag:
+                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
+                                                       auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
+                                                       scene_lock)
+                    if panel_commands:
+                        for panel_command in panel_commands:
+                            panel_command = panel_command.split(" ")
+                            batch_commands.append(panel_command)
 
             if frame_command or len(batch_commands) > 0:
                 flush_input()
@@ -1106,6 +1107,8 @@ def main(scn_filename=None, start_time=0):
                 # LOCK_ORIGIN command
                 elif command[0] == "lock_origin":
                     scene_lock = find_obj_by_name(command[1])
+                    for v in vessels:
+                        v.clear_draw_traj_history() # so we don't get odd "jumps" in the trajectory trails
 
                 # UNLOCK_ORIGIN command
                 elif command[0] == "unlock_origin":
