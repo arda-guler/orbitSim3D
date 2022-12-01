@@ -65,15 +65,19 @@ gvar_far_clip = 10E5
 
 def window_resize(window, width, height):
     global gvar_fov, gvar_near_clip, gvar_far_clip, cameras
-    #glfw.get_framebuffer_size(window)
-    glViewport(0, 0, width, height)
-    glLoadIdentity()
-    main_cam = cameras[0]
-    gluPerspective(gvar_fov, width/height, gvar_near_clip, gvar_far_clip)
-    glTranslate(main_cam.pos.x, main_cam.pos.y, main_cam.pos.z)
-    main_cam.orient = [[1,0,0],
-                       [0,1,0],
-                       [0,0,1]]
+
+    try:
+        #glfw.get_framebuffer_size(window)
+        glViewport(0, 0, width, height)
+        glLoadIdentity()
+        main_cam = cameras[0]
+        gluPerspective(gvar_fov, width/height, gvar_near_clip, gvar_far_clip)
+        glTranslate(main_cam.pos.x, main_cam.pos.y, main_cam.pos.z)
+        main_cam.orient = [[1,0,0],
+                           [0,1,0],
+                           [0,0,1]]
+    except ZeroDivisionError:
+        pass # if the window is minimized it makes height = 0, but we don't need to update projection in that case anyway
 
 def read_batch(batch_path):
 
