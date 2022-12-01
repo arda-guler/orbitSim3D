@@ -26,6 +26,7 @@ from command_panel import *
 from config_utils import *
 from radiation_pressure import *
 from atmospheric_drag import *
+from vector3 import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -69,7 +70,7 @@ def window_resize(window, width, height):
     glLoadIdentity()
     main_cam = cameras[0]
     gluPerspective(gvar_fov, width/height, gvar_near_clip, gvar_far_clip)
-    glTranslate(main_cam.pos[0], main_cam.pos[1], main_cam.pos[2])
+    glTranslate(main_cam.pos.x, main_cam.pos.y, main_cam.pos.z)
     main_cam.orient = [[1,0,0],
                        [0,1,0],
                        [0,0,1]]
@@ -161,18 +162,16 @@ def import_scenario(scn_filename):
 
         # import bodies
         if line[0] == "B":
-            line[5] = line[5][1:-1].split(",")
-            line[6] = line[6][1:-1].split(",")
-            line[7] = line[7][1:-1].split(",")
+            line[5] = eval(line[5])
+            line[6] = eval(line[6])
+            line[7] = eval(line[7])
 
             orient_nums = re.findall(r"[-+]?\d*\.\d+|\d+", line[8])
             
             new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
                             float(line[3]), float(line[4]),
                             
-                            [float(line[5][0]), float(line[5][1]), float(line[5][2])],
-                            [float(line[6][0]), float(line[6][1]), float(line[6][2])],
-                            [float(line[7][0]), float(line[7][1]), float(line[7][2])],
+                            line[5], vec3(lst=line[6]), vec3(lst=line[7]),
                             
                             [[float(orient_nums[0]), float(orient_nums[1]), float(orient_nums[2])],
                              [float(orient_nums[3]), float(orient_nums[4]), float(orient_nums[5])],
@@ -192,13 +191,11 @@ def import_scenario(scn_filename):
 
         # import vessels
         elif line[0] == "V":
-            line[3] = line[3][1:-1].split(",")
-            line[4] = line[4][1:-1].split(",")
-            line[5] = line[5][1:-1].split(",")
+            line[3] = eval(line[3])
+            line[4] = eval(line[4])
+            line[5] = eval(line[5])
             new_vessel = vessel(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
-                                [float(line[3][0]), float(line[3][1]), float(line[3][2])],
-                                [float(line[4][0]), float(line[4][1]), float(line[4][2])],
-                                [float(line[5][0]), float(line[5][1]), float(line[5][2])])
+                                line[3], vec3(lst=line[4]), vec3(lst=line[5]))
             vessels.append(new_vessel)
             objs.append(new_vessel)
             print("Loading vessel:", new_vessel.get_name())
@@ -210,9 +207,9 @@ def import_scenario(scn_filename):
                     new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                         line[5], float(line[6]), float(line[7]), float(line[8]))
                 else:
-                    line[5] = line[5][1:-1].split(",")
+                    line[5] = eval(line[5])
                     new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
-                                                        [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                                                        vec3(lst=line[5]),
                                                         float(line[6]), float(line[7]), float(line[8]))
                     
             elif line[2] == "const_thrust":
@@ -221,9 +218,9 @@ def import_scenario(scn_filename):
                                                          line[5], float(line[6]), float(line[7]), float(line[8]),
                                                          float(line[9]), float(line[10]))
                 else:
-                    line[5] = line[5][1:-1].split(",")
+                    line[5] = eval(line[5])
                     new_maneuver = maneuver_const_thrust(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
-                                                         [float(line[5][0]), float(line[5][1]), float(line[5][2])],
+                                                         vec3(lst=line[5]),
                                                          float(line[6]), float(line[7]), float(line[8]),
                                                          float(line[9]), float(line[10]))
 
@@ -232,11 +229,9 @@ def import_scenario(scn_filename):
 
         # import surface points
         elif line[0] == "S":
-            line[3] = line[3][1:-1].split(",") # color
-            line[4] = line[4][1:-1].split(",") # gpos
-            new_sp = surface_point(line[1], find_obj_by_name(line[2]),
-                                   [float(line[3][0]), float(line[3][1]), float(line[3][2])],
-                                   [float(line[4][0]), float(line[4][1]), float(line[4][2])])
+            line[3] = eval(line[3]) # color
+            line[4] = eval(line[4]) # gpos
+            new_sp = surface_point(line[1], find_obj_by_name(line[2]), line[3], line[4])
 
             surface_points.append(new_sp)
             objs.append(new_sp)
@@ -260,10 +255,9 @@ def import_scenario(scn_filename):
                 new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
                                             float(line[4]), find_obj_by_name(line[5]), line[6], float(line[7]), int(line[8]))
             else:
-                line[6] = line[6][1:-1].split(",")
+                line[6] = eval(line[6])
                 new_rp = radiation_pressure(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]),
-                                            float(line[4]), find_obj_by_name(line[5]),
-                                            [float(line[6][0]), float(line[6][1]), float(line[6][2])],
+                                            float(line[4]), find_obj_by_name(line[5]), vec3(lst=line[6]),
                                             float(line[7]), int(line[8]))
 
             radiation_pressures.append(new_rp)
@@ -542,11 +536,11 @@ def fragment(vessel_name, num_of_frags, vel_of_frags):
 
     for i in range(num_of_frags):
         
-        fragment_vel = [vessel.get_vel()[0] + random.uniform(-vel_of_frags, vel_of_frags),
-                        vessel.get_vel()[1] + random.uniform(-vel_of_frags, vel_of_frags),
-                        vessel.get_vel()[2] + random.uniform(-vel_of_frags, vel_of_frags)]
+        fragment_vel = vec3(lst=[vessel.get_vel().x + random.uniform(-vel_of_frags, vel_of_frags),
+                                 vessel.get_vel().y + random.uniform(-vel_of_frags, vel_of_frags),
+                                 vessel.get_vel().z + random.uniform(-vel_of_frags, vel_of_frags)])
 
-        fragment_pos = [vessel.get_pos()[0], vessel.get_pos()[1], vessel.get_pos()[2]]
+        fragment_pos = vessel.get_pos()
         
         create_vessel(vessel_name + "_frag_" + str(i), "fragment", vessel.get_color(), fragment_pos, fragment_vel)
 
@@ -579,7 +573,7 @@ def find_obj_by_name(name):
 # arbitrary point in the 3D scene
 def get_closest_object_to(point):
     global objs
-    current_pos = [0,0,0]
+    current_pos = vec3(0, 0, 0)
     result_obj = None
     
     if point.get_pos:
@@ -589,7 +583,7 @@ def get_closest_object_to(point):
 
     min_dist = None
     for obj in objs:
-        current_dist = ((obj.get_pos()[0] - current_pos[0])**2 + (obj.get_pos()[1] - current_pos[1])**2 + (obj.get_pos()[2] - current_pos[2])**2)**0.5
+        current_dist = ((obj.get_pos().x - current_pos.x)**2 + (obj.get_pos().y - current_pos.y)**2 + (obj.get_pos().z - current_pos.z)**2)**0.5
         if not min_dist or current_dist < min_dist:
             min_dist = current_dist
             result_obj = obj
@@ -873,10 +867,10 @@ def main(scn_filename=None, start_time=0):
     glEnable(GL_CULL_FACE)
     glPointSize(point_size)
 
-    main_cam = camera("main_cam", [cam_pos_x,cam_pos_y,cam_pos_z], [[1,0,0],[0,1,0],[0,0,1]], True)
+    main_cam = camera("main_cam", vec3(cam_pos_x,cam_pos_y,cam_pos_z), [[1,0,0],[0,1,0],[0,0,1]], True)
     cameras = [main_cam]
     # put "camera" in starting position
-    glTranslate(main_cam.get_pos()[0], main_cam.get_pos()[1], main_cam.get_pos()[2])
+    glTranslate(main_cam.get_pos().x, main_cam.get_pos().y, main_cam.get_pos().z)
 
     batch_commands = []
     output_buffer = []
@@ -930,9 +924,9 @@ def main(scn_filename=None, start_time=0):
                                  (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
                                  (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
 
-        get_active_cam().move([(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
-                               (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
-                               (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate])
+        get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
+                                        (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
+                                        (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
 
         if keyboard.is_pressed("c") and not rapid_compute_flag:
             frame_command = True
@@ -1097,41 +1091,17 @@ def main(scn_filename=None, start_time=0):
             # CREATE_VESSEL command
             elif command[0] == "create_vessel":
                 if len(command) == 6:
-                    create_vessel(command[1], command[2],
-                                  
-                                  [float(command[3][1:-1].split(",")[0]),
-                                   float(command[3][1:-1].split(",")[1]),
-                                   float(command[3][1:-1].split(",")[2])],
-
-                                  [float(command[4][1:-1].split(",")[0]),
-                                   float(command[4][1:-1].split(",")[1]),
-                                   float(command[4][1:-1].split(",")[2])],
-                                  
-                                  [float(command[5][1:-1].split(",")[0]),
-                                   float(command[5][1:-1].split(",")[1]),
-                                   float(command[5][1:-1].split(",")[2])])
+                    create_vessel(command[1], command[2], eval(command[3]), eval(command[4]), eval(command[5]))
 
                 elif len(command) == 7:
                     # TO DO - SPHERICAL VELOCITY INPUT
                     parent_pos = find_obj_by_name(command[4]).get_pos()
                     
-                    vessel_offset_from_parent = spherical2cartesian([float(command[5][1:-1].split(",")[0]),
-                                                                     float(command[5][1:-1].split(",")[1]),
-                                                                     float(command[5][1:-1].split(",")[2])])
+                    vessel_offset_from_parent = spherical2cartesian(eval(command[5]))
                     
-                    create_vessel(command[1], command[2],
-                                  
-                                  [float(command[3][1:-1].split(",")[0]),
-                                   float(command[3][1:-1].split(",")[1]),
-                                   float(command[3][1:-1].split(",")[2])],
-
-                                  [parent_pos[0] + vessel_offset_from_parent[0],
-                                   parent_pos[1] + vessel_offset_from_parent[1],
-                                   parent_pos[2] + vessel_offset_from_parent[2]],
-
-                                  [float(command[6][1:-1].split(",")[0]),
-                                   float(command[6][1:-1].split(",")[1]),
-                                   float(command[6][1:-1].split(",")[2])])
+                    create_vessel(command[1], command[2], eval(command[3]),
+                                  parent_pos + vessel_offset_from_parent,
+                                  eval(command[6]))
                 else:
                     print("Wrong number of arguments for command 'create_vessel'.\n")
                     time.sleep(2)
@@ -1163,9 +1133,7 @@ def main(scn_filename=None, start_time=0):
                     if (not command[5] in preset_orientations):
                         create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                         
-                                                    [float(command[5][1:-1].split(",")[0]),
-                                                    float(command[5][1:-1].split(",")[1]),
-                                                    float(command[5][1:-1].split(",")[2])],
+                                                    eval(command[5]),
                                         
                                                     float(command[6]), float(command[7]), float(command[8]))
                     else:
@@ -1179,9 +1147,7 @@ def main(scn_filename=None, start_time=0):
                     if (not command[5] in preset_orientations):
                         create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
 
-                                                     [float(command[5][1:-1].split(",")[0]),
-                                                     float(command[5][1:-1].split(",")[1]),
-                                                     float(command[5][1:-1].split(",")[2])],
+                                                     eval(command[5]),
 
                                                      float(command[6]), float(command[7]), float(command[8]),
                                                      float(command[9]), float(command[10]))
@@ -1213,9 +1179,7 @@ def main(scn_filename=None, start_time=0):
                     else:
                         apply_radiation_pressure(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
                                                  float(command[4]), find_obj_by_name(command[5]),
-                                                 [float(command[6][1:-1].split(",")[0]),
-                                                  float(command[6][1:-1].split(",")[1]),
-                                                  float(command[6][1:-1].split(",")[2])],
+                                                 eval(command[6]),
                                                  float(command[7]), int(command[8]))
                 else:
                     print("Wrong number of arguments for command 'apply_radiation_pressure'.\n")
@@ -1780,16 +1744,14 @@ def main(scn_filename=None, start_time=0):
             m.perform_maneuver(sim_time, delta_t)
         
         for v in vessels:
-            accel = [0,0,0]
+            accel = vec3(0, 0, 0)
 
             for b in bodies:
 
                 if vessel_body_collision and v.get_alt_above(b) <= 0:
                     vessel_body_crash(v, b)
-                    
-                accel[0] += v.get_gravity_by(b)[0]
-                accel[1] += v.get_gravity_by(b)[1]
-                accel[2] += v.get_gravity_by(b)[2]
+
+                accel = accel + v.get_gravity_by(b)
 
             v.update_vel(accel, delta_t)
             v.update_pos(delta_t)
@@ -1797,12 +1759,10 @@ def main(scn_filename=None, start_time=0):
             v.update_draw_traj_history()
 
         for x in bodies:
-            accel = [0,0,0]
+            accel = vec3(0,0,0)
             for y in bodies:
                 if not x == y: # don't attempt to apply gravity to self
-                    accel[0] += x.get_gravity_by(y)[0]
-                    accel[1] += x.get_gravity_by(y)[1]
-                    accel[2] += x.get_gravity_by(y)[2]
+                    accel = accel + x.get_gravity_by(y)
 
             x.update_vel(accel, delta_t)
             x.update_pos(delta_t)
@@ -1830,9 +1790,9 @@ def main(scn_filename=None, start_time=0):
 
         # lock coordinate system to specified object
         if scene_lock:
-            delta_pos = [-scene_lock.pos[0], -scene_lock.pos[1], -scene_lock.pos[2]]
+            delta_pos = scene_lock.pos * (-1)
             for o in objs:
-                o.pos = vector_add_safe(o.get_pos(), delta_pos)
+                o.pos = o.get_pos() + delta_pos
 
         if (int(sim_time) % int(output_rate) < delta_t) and not rapid_compute_flag:
 

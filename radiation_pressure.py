@@ -1,6 +1,7 @@
 import math
 
 from math_utils import *
+from vector3 import *
 c = 299792458 # m s-1, speed of light
 
 class radiation_pressure:
@@ -55,8 +56,8 @@ class radiation_pressure:
 
                 vec_to_illum_body = self.vessel.get_unit_vector_towards(self.body)
                 vec_to_occult_body = self.vessel.get_unit_vector_towards(occulting_body)
-                c_numerator = dot(vec_to_illum_body, vec_to_occult_body)
-                c_denominator = mag(vec_to_illum_body) * mag(vec_to_occult_body)
+                c_numerator = vec_to_illum_body.dot(vec_to_occult_body)
+                c_denominator = vec_to_illum_body.mag() * vec_to_occult_body.mag()
                 eq_c = math.acos(c_numerator / c_denominator)
 
                 # body is covering the star entirely
@@ -145,13 +146,13 @@ class radiation_pressure:
         flux_density = self.body.get_flux_density_at_dist(self.vessel.get_dist_to(self.body)) # W m-2
         pressure = flux_density/c # N m-2
         zenith_dir = self.body.get_unit_vector_towards(self.vessel)
-        cos_diverge_angle = (dot(zenith_dir, self.direction)/mag(zenith_dir)*mag(self.direction))
+        cos_diverge_angle = zenith_dir.dot(self.direction)/(zenith_dir.mag()*self.direction.mag())
         scaled_area = self.area * cos_diverge_angle**2
         force = pressure * scaled_area # N
         accel = force/self.mass
         accel *= (1 - self.occultation)
 
-        return vector_scale(self.direction, accel)
+        return self.direction * accel
         
     def get_params_str(self):
         output = "Vessel: " + self.vessel.get_name() + "\n"

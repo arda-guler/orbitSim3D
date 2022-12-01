@@ -1,4 +1,5 @@
 from math_utils import *
+from vector3 import *
 
 class vessel():
     def __init__(self, name, model, model_path, color, pos, vel):
@@ -11,7 +12,7 @@ class vessel():
         self.traj_history = []
         self.draw_traj_history = []
 
-        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+        self.draw_pos = self.pos * visual_scaling_factor
 
     def get_name(self):
         return self.name
@@ -29,61 +30,54 @@ class vessel():
         self.pos = pos
 
     def get_pos_rel_to(self, obj):
-        return [self.pos[0] - obj.pos[0],
-                self.pos[1] - obj.pos[1],
-                self.pos[2] - obj.pos[2]]
+        return self.pos - obj.pos
 
     def get_vel(self):
         return self.vel
 
     def get_vel_rel_to(self, obj):
-        return [self.vel[0] - obj.vel[0],
-                self.vel[1] - obj.vel[1],
-                self.vel[2] - obj.vel[2]]
+        return self.vel - obj.vel
 
     def get_vel_mag(self):
-        return mag(self.vel)
+        return self.vel.mag()
 
     def get_vel_mag_rel_to(self, obj):
-        return (((self.vel[0] - obj.vel[0])**2 +
-                 (self.vel[1] - obj.vel[1])**2 +
-                 (self.vel[2] - obj.vel[2])**2)**0.5)
+        return (self.vel - obj.vel).mag()
 
     def set_vel(self, vel):
         self.vel = vel
 
     # dist. between centers (ignore surface)
     def get_dist_to(self, obj):
-        return ((self.pos[0] - obj.pos[0])**2 +
-                (self.pos[1] - obj.pos[1])**2 +
-                (self.pos[2] - obj.pos[2])**2)**0.5
+        return (self.pos - obj.pos).mag()
 
     # get altitude above surface
     def get_alt_above(self, body):
-        return (self.get_dist_to(body) - body.get_radius())
+        return self.get_dist_to(body) - body.get_radius()
 
     # drawing scene is scaled down by a factor of visual_scaling_factor
     def update_draw_pos(self):
-        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+        self.draw_pos = self.pos * visual_scaling_factor
 
     def get_draw_pos(self):
         return self.draw_pos
 
     def get_unit_vector_towards(self, obj):
-        return [((obj.pos[0] - self.pos[0])/(self.get_dist_to(obj))),
-                ((obj.pos[1] - self.pos[1])/(self.get_dist_to(obj))),
-                ((obj.pos[2] - self.pos[2])/(self.get_dist_to(obj)))]
+        return (obj.pos - self.pos).normalized()
 
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system
-    def get_body_centered_coords(self, body):        
-        return [((self.pos[0] - body.pos[0]) * body.orient[0][0]) + ((self.pos[1] - body.pos[1]) * body.orient[0][1]) + ((self.pos[2] - body.pos[2]) * body.orient[0][2]),
-                ((self.pos[0] - body.pos[0]) * body.orient[1][0]) + ((self.pos[1] - body.pos[1]) * body.orient[1][1]) + ((self.pos[2] - body.pos[2]) * body.orient[1][2]),
-                ((self.pos[0] - body.pos[0]) * body.orient[2][0]) + ((self.pos[1] - body.pos[1]) * body.orient[2][1]) + ((self.pos[2] - body.pos[2]) * body.orient[2][2])]
+    def get_body_centered_coords(self, body):
+        x_diff = self.pos.x - body.pos.x
+        y_diff = self.pos.y - body.pos.y
+        z_diff = self.pos.z - body.pos.z
+        return vec3(lst=[(x_diff * body.orient[0][0]) + (y_diff * body.orient[0][1]) + (z_diff * body.orient[0][2]),
+                         (x_diff * body.orient[1][0]) + (y_diff * body.orient[1][1]) + (z_diff * body.orient[1][2]),
+                         (x_diff * body.orient[2][0]) + (y_diff * body.orient[2][1]) + (z_diff * body.orient[2][2])])
 
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
-        grav_vec = vector_scale(self.get_unit_vector_towards(body), grav_mag)
+        grav_vec = self.get_unit_vector_towards(body) * grav_mag
 
         # Apply J2 perturbation
         # https://www.vcalc.com/equation/?uuid=1e5aa6ea-95a3-11e7-9770-bc764e2038f2
@@ -94,31 +88,27 @@ class vessel():
             J2_mult = J2_mult_numerator / J2_mult_denominator
 
             R_squared = self.get_dist_to(body)**2
-            Z_squared = self.get_body_centered_coords(body)[1]**2
-            X = self.get_body_centered_coords(body)[0]
-            Y = self.get_body_centered_coords(body)[2]
-            Z = self.get_body_centered_coords(body)[1]
-            J2_perturbation_accel = [(((5*(Z_squared/R_squared))-1) * X),
-                                     (((5*(Z_squared/R_squared))-3) * Z),
-                                     (((5*(Z_squared/R_squared))-1) * Y)]
+            Z_squared = self.get_body_centered_coords(body).y**2
+            X = self.get_body_centered_coords(body).x
+            Y = self.get_body_centered_coords(body).z
+            Z = self.get_body_centered_coords(body).y
+            J2_perturbation_accel = vec3(lst=[(((5*(Z_squared/R_squared))-1) * X),
+                                              (((5*(Z_squared/R_squared))-3) * Z),
+                                              (((5*(Z_squared/R_squared))-1) * Y)])
 
-            J2_perturbation_accel = vector_scale(J2_perturbation_accel, J2_mult)
+            J2_perturbation_accel = J2_perturbation_accel * J2_mult
 
-            grav_vec = [grav_vec[0] + (J2_perturbation_accel[0] * body.orient[0][0]) + (J2_perturbation_accel[1] * body.orient[1][0]) + (J2_perturbation_accel[2] * body.orient[2][0]),
-                        grav_vec[1] + (J2_perturbation_accel[0] * body.orient[0][1]) + (J2_perturbation_accel[1] * body.orient[1][1]) + (J2_perturbation_accel[2] * body.orient[2][1]),
-                        grav_vec[2] + (J2_perturbation_accel[0] * body.orient[0][2]) + (J2_perturbation_accel[1] * body.orient[1][2]) + (J2_perturbation_accel[2] * body.orient[2][2])]
+            grav_vec = vec3(lst=[grav_vec.x + (J2_perturbation_accel.x * body.orient[0][0]) + (J2_perturbation_accel.y * body.orient[1][0]) + (J2_perturbation_accel.z * body.orient[2][0]),
+                                 grav_vec.y + (J2_perturbation_accel.x * body.orient[0][1]) + (J2_perturbation_accel.y * body.orient[1][1]) + (J2_perturbation_accel.z * body.orient[2][1]),
+                                 grav_vec.z + (J2_perturbation_accel.x * body.orient[0][2]) + (J2_perturbation_accel.y * body.orient[1][2]) + (J2_perturbation_accel.z * body.orient[2][2])])
         
         return grav_vec
 
     def update_vel(self, accel, dt):
-        self.vel[0] += accel[0] * dt
-        self.vel[1] += accel[1] * dt
-        self.vel[2] += accel[2] * dt
+        self.vel = self.vel + accel * dt
 
     def update_pos(self, dt):
-        self.pos[0] += self.vel[0] * dt
-        self.pos[1] += self.vel[1] * dt
-        self.pos[2] += self.vel[2] * dt
+        self.pos = self.pos + self.vel * dt
 
     def update_traj_history(self):
         self.traj_history.append(self.pos)
@@ -143,52 +133,35 @@ class vessel():
 
     def get_orientation_rel_to(self, frame, orientation):
         if orientation == "prograde" or orientation == "prograde_dynamic":
-            return [self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
-                    self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
-                    self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            return self.get_vel_rel_to(frame).normalized()
+
         elif orientation == "retrograde" or orientation == "retrograde_dynamic":
-            return [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
-                    -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
-                    -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            return self.get_vel_rel_to(frame).normalized() * (-1)
+        
         elif orientation == "radial_in" or orientation == "radial_in_dynamic":
             return self.get_unit_vector_towards(frame)
+        
         elif orientation == "radial_out" or orientation == "radial_out_dynamic":
-            return [-self.get_unit_vector_towards(frame)[0],
-                    -self.get_unit_vector_towards(frame)[1],
-                    -self.get_unit_vector_towards(frame)[2]]
+            return self.get_unit_vector_towards(frame) * (-1)
+        
         elif orientation == "normal" or orientation == "normal_dynamic":
-            cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
-            cross_vec_mag = mag(cross_vec)
-            normal_vec = [cross_vec[0]/cross_vec_mag,
-                          cross_vec[1]/cross_vec_mag,
-                          cross_vec[2]/cross_vec_mag]
-            return normal_vec
+            return self.get_vel_rel_to(frame).cross(self.get_unit_vector_towards(frame)).normalized()
+
         elif orientation == "antinormal" or orientation == "antinormal_dynamic":
-            cross_vec = cross(self.get_vel_rel_to(frame), self.get_unit_vector_towards(frame))
-            cross_vec_mag = mag(cross_vec)
-            antinormal_vec = [-cross_vec[0]/cross_vec_mag,
-                              -cross_vec[1]/cross_vec_mag,
-                              -cross_vec[2]/cross_vec_mag]
-            return antinormal_vec
+            return self.get_vel_rel_to(frame).cross(self.get_unit_vector_towards(frame)).normalized() * (-1)
+        
         elif orientation == "prograde_tangential" or orientation == "prograde_tangential_dynamic":
-            prograde = [self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
-                        self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
-                        self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            prograde = self.get_vel_rel_to(frame).normalized()
             radial = self.get_unit_vector_towards(frame)
-            radial_dot = dot(prograde, radial)
-            unvec = vector_add_safe(prograde, vector_scale(radial, -radial_dot))
-            vec = [unvec[0]/mag(unvec),
-                   unvec[1]/mag(unvec),
-                   unvec[2]/mag(unvec)]
+            radial_dot = prograde.dot(radial)
+            unvec = prograde - radial * radial_dot
+            vec = unvec.normalized()
             return vec
+        
         elif orientation == "retrograde_tangential" or orientation == "retrograde_tangential_dynamic":
-            retrograde = [-self.get_vel_rel_to(frame)[0]/self.get_vel_mag_rel_to(frame),
-                        -self.get_vel_rel_to(frame)[1]/self.get_vel_mag_rel_to(frame),
-                        -self.get_vel_rel_to(frame)[2]/self.get_vel_mag_rel_to(frame)]
+            retrograde = self.get_vel_rel_to(frame).normalized() * (-1)
             radial = self.get_unit_vector_towards(frame)
-            radial_dot = dot(retrograde, radial)
-            unvec = vector_add_safe(retrograde, vector_scale(radial, -radial_dot))
-            vec = [unvec[0]/mag(unvec),
-                   unvec[1]/mag(unvec),
-                   unvec[2]/mag(unvec)]
+            radial_dot = retrograde.dot(radial)
+            unvec = retrograde - radial * radial_dot
+            vec = unvec.normalized()
             return vec

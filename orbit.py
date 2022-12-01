@@ -1,4 +1,5 @@
 from math_utils import *
+from vector3 import *
 import math
 import time
 
@@ -43,14 +44,12 @@ class kepler_projection():
 
     def get_eccentricity_vector(self):
         r_scaler = self.vessel.get_vel_mag_rel_to(self.body)**2 - (self.mu/self.vessel.get_dist_to(self.body))
-        v_scaler = dot(self.pos0, self.vel0)
+        v_scaler = self.pos0.dot(self.vel0)
 
-        scaled_r = vector_scale(self.pos0, r_scaler)
-        scaled_v = vector_scale(self.vel0, v_scaler)
+        scaled_r = self.pos0 * r_scaler
+        scaled_v = self.vel0 * v_scaler
 
-        e_vec = [(scaled_r[0] - scaled_v[0])/self.mu,
-                 (scaled_r[1] - scaled_v[1])/self.mu,
-                 (scaled_r[2] - scaled_v[2])/self.mu]
+        e_vec = (scaled_r - scaled_v)/self.mu
 
         return e_vec
 
@@ -58,7 +57,7 @@ class kepler_projection():
         return mag(self.get_eccentricity_vector())
 
     def get_energy(self):
-        return ((mag(self.vel0)**2)/2) - (self.mu/mag(self.pos0))
+        return (self.vel0.mag()**2)/2 - self.mu/self.pos0.mag()
     
     def get_semimajor_axis(self):
         if not self.eccentricity == 1:
@@ -72,7 +71,7 @@ class kepler_projection():
         if not self.semimajor_axis == "inf":
             p = self.semimajor_axis * (1 - (self.eccentricity**2))
         else:
-            p = (mag(self.angular_momentum)**2)/self.mu
+            p = self.angular_momentum.mag()**2/self.mu
 
         return p
 
@@ -120,32 +119,26 @@ class kepler_projection():
         t = 0
         while t <= end_time:
             # update gravity
-            current_grav = [((self.mu * -current_pos[0])/mag(current_pos)**3),
-                            ((self.mu * -current_pos[1])/mag(current_pos)**3),
-                            ((self.mu * -current_pos[2])/mag(current_pos)**3)]
+            current_grav = current_pos*(-1) * self.mu / current_pos.mag()**3
             
             # update velocity
-            current_vel[0] += current_grav[0] * time_step
-            current_vel[1] += current_grav[1] * time_step
-            current_vel[2] += current_grav[2] * time_step
+            current_vel = current_vel + current_grav * time_step
 
             # update position
-            current_pos[0] += current_vel[0] * time_step
-            current_pos[1] += current_vel[1] * time_step
-            current_pos[2] += current_vel[2] * time_step
+            current_pos = current_pos + current_vel * time_step
             
             vertices.append(current_pos)
-            draw_vertices.append(vector_scale(current_pos, visual_scaling_factor))
-            Rs.append(mag(current_pos))
-            Ys.append(abs2frame_coords(vector_add_safe(current_pos, self.get_body().get_pos()), self.get_body())[1])
+            draw_vertices.append(current_pos * visual_scaling_factor)
+            Rs.append(current_pos.mag())
+            Ys.append(abs2frame_coords((current_pos + self.get_body().get_pos()).tolist(), self.get_body())[1])
 
             t += time_step
-            time_step = min((self.mu/mag(current_grav) * 0.000000000000001), end_time/100000)
+            time_step = min((self.mu/current_grav.mag() * 1e-15), end_time/1e5)
 
-            current_rel_pos = abs2frame_coords(vector_add_safe(current_pos, self.get_body().get_pos()), self.get_body())
+            current_rel_pos = vec3(lst=abs2frame_coords(current_pos + self.get_body().get_pos(), self.get_body()))
             
             try:
-                current_lat = math.degrees(math.atan(current_rel_pos[1]/math.sqrt(current_rel_pos[0]**2 + current_rel_pos[2]**2)))
+                current_lat = math.degrees(math.atan(current_rel_pos.y/math.sqrt(current_rel_pos.x**2 + current_rel_pos.z**2)))
             except ZeroDivisionError:
                 current_lat = 90
                 
@@ -156,7 +149,7 @@ class kepler_projection():
         pe_index = Rs.index(min(Rs))
 
         # the below two lines are just a failsafe, because
-        # the usual way can fail when an obejct is on a perfect
+        # the usual way can fail when an object is on a perfect
         # equatorial orbit - so just assign arbitrary
         # ascending and descending nodes at the beginning in
         # case it does fail

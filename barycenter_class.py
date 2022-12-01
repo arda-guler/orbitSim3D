@@ -1,4 +1,5 @@
 from math_utils import *
+from vector3 import *
 
 class barycenter:
     def __init__(self, name, bodies):
@@ -48,17 +49,13 @@ class barycenter:
         return mass
 
     def get_pos(self):
-        
-        sum_x = 0
-        sum_y = 0
-        sum_z = 0
+
+        sum_vec = vec3()
         
         for b in self.get_bodies():
-            sum_x += b.get_mass() * b.get_pos()[0]
-            sum_y += b.get_mass() * b.get_pos()[1]
-            sum_z += b.get_mass() * b.get_pos()[2]
+            sum_vec += b.get_pos() * b.get_mass()
 
-        return [sum_x/self.get_mass(), sum_y/self.get_mass(), sum_z/self.get_mass()]
+        return sum_vec/self.get_mass()
 
     def get_vel(self):
 
@@ -67,9 +64,9 @@ class barycenter:
         sum_z = 0
 
         for b in self.get_bodies():
-            sum_x += b.get_mass() * b.get_vel()[0]
-            sum_y += b.get_mass() * b.get_vel()[1]
-            sum_z += b.get_mass() * b.get_vel()[2]
+            sum_x += b.get_mass() * b.get_vel().x
+            sum_y += b.get_mass() * b.get_vel().y
+            sum_z += b.get_mass() * b.get_vel().z
 
         return [sum_x/self.get_mass(), sum_y/self.get_mass(), sum_z/self.get_mass()]
 
@@ -77,24 +74,17 @@ class barycenter:
         return mag(self.vel)
 
     def get_draw_pos(self):
-        return vector_scale(self.get_pos(), visual_scaling_factor)
+        return self.get_pos() * visual_scaling_factor
 
     def get_pos_rel_to(self, obj):
-        return [self.pos[0] - obj.pos[0],
-                self.pos[1] - obj.pos[1],
-                self.pos[2] - obj.pos[2]]
+        return self.pos - obj.pos
 
     def get_dist_to(self, obj):
-        return ((self.pos[0] - obj.pos[0])**2 +
-                (self.pos[1] - obj.pos[1])**2 +
-                (self.pos[2] - obj.pos[2])**2)**0.5
+        return (self.pos - obj.pos).mag()
 
     def get_vel_rel_to(self, obj):
-        return [self.vel[0] - obj.vel[0],
-                self.vel[1] - obj.vel[1],
-                self.vel[2] - obj.vel[2]]
+        return self.vel - obj.vel
 
     def get_vel_mag_rel_to(self, obj):
-        return (((self.vel[0] - obj.vel[0])**2 +
-                 (self.vel[1] - obj.vel[1])**2 +
-                 (self.vel[2] - obj.vel[2])**2)**0.5)
+        return (self.vel - obj.vel).mag()
+

@@ -1,4 +1,5 @@
 import math
+from vector3 import *
 
 class maneuver():
     def __init__(self, name, vessel, mnv_type):
@@ -26,25 +27,21 @@ class maneuver_const_accel(maneuver):
         self.draw_vertices = []
 
     def set_orientation(self):
-        if not type(self.orientation) == list or self.orientation_input[-8:] == "_dynamic":
+        if not type(self.orientation) == type(vec3()) or (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
         
         if (not self.done) and current_time >= self.t_start:
             self.set_orientation()
-            
-            self.vessel.update_vel([self.orientation[0] * self.accel,
-                                    self.orientation[1] * self.accel,
-                                    self.orientation[2] * self.accel], delta_t)
 
-            self.draw_vertices.append([self.vessel.get_draw_pos()[0],
-                                       self.vessel.get_draw_pos()[1],
-                                       self.vessel.get_draw_pos()[2]])
+            self.vessel.update_vel(self.orientation * self.accel, delta_t)
+
+            self.draw_vertices.append(self.vessel.get_draw_pos())
 
             # if the orientation is set as "dynamic"
             # it needs to be updated every frame
-            if self.orientation_input[-8:] == "_dynamic":
+            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
                 self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
@@ -76,8 +73,8 @@ class maneuver_const_accel(maneuver):
     def get_params_str(self):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
-        if not type(self.orientation_input) == list:
-            if self.orientation_input[-8:] == "_dynamic":
+        if not type(self.orientation_input) == type(vec3()):
+            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
                 output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
             else:
                 output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()
@@ -119,7 +116,7 @@ class maneuver_const_thrust(maneuver):
         self.Dv = v_exhaust * math.log(self.mass_init/m_final)
 
     def set_orientation(self):
-        if not type(self.orientation) == list or self.orientation_input[-8:] == "_dynamic":
+        if not type(self.orientation) == type(vec3()) or (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
             self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
 
     def perform_maneuver(self, current_time, delta_t):
@@ -133,18 +130,14 @@ class maneuver_const_thrust(maneuver):
             
             accel = self.thrust/self.mass
             self.mass -= self.mass_flow * delta_t
-            
-            self.vessel.update_vel([self.orientation[0] * accel,
-                                    self.orientation[1] * accel,
-                                    self.orientation[2] * accel], delta_t)
 
-            self.draw_vertices.append([self.vessel.get_draw_pos()[0],
-                                       self.vessel.get_draw_pos()[1],
-                                       self.vessel.get_draw_pos()[2]])
+            self.vessel.update_vel(self.orientation * accel, delta_t)
+
+            self.draw_vertices.append(self.vessel.get_draw_pos())
 
             # if the orientation is set as "dynamic"
             # it needs to be updated every frame
-            if self.orientation_input[-8:] == "_dynamic":
+            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
                 self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
@@ -176,8 +169,8 @@ class maneuver_const_thrust(maneuver):
     def get_params_str(self):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
-        if not type(self.orientation_input) == list:
-            if self.orientation_input[-8:] == "_dynamic":
+        if not type(self.orientation_input) == type(vec3()):
+            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
                 output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
             else:
                 output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()

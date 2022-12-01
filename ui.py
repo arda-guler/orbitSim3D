@@ -1,13 +1,14 @@
 import OpenGL
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from vector3 import *
 
 def drawPoint2D(x, y, color, camera):
     glPushMatrix()
 
-    glTranslate(-camera.get_pos()[0],
-                -camera.get_pos()[1],
-                -camera.get_pos()[2])
+    glTranslate(-camera.get_pos().x,
+                -camera.get_pos().y,
+                -camera.get_pos().z)
     
     glColor(color[0], color[1], color[2])
 
@@ -26,9 +27,9 @@ def drawPoint2D(x, y, color, camera):
 
 def drawLine2D(x1, y1, x2, y2, color, camera):
     glPushMatrix()
-    glTranslate(-camera.get_pos()[0],
-                -camera.get_pos()[1],
-                -camera.get_pos()[2])
+    glTranslate(-camera.get_pos().x,
+                -camera.get_pos().y,
+                -camera.get_pos().z)
     
     glColor(color[0], color[1], color[2])
     

@@ -1,4 +1,5 @@
 from math_utils import *
+from vector3 import *
 import math
 
 class body():
@@ -20,7 +21,7 @@ class body():
         self.atmos_sea_level_density = atmos_sea_level_density
         self.atmos_scale_height = atmos_scale_height
 
-        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+        self.draw_pos = self.pos * visual_scaling_factor
 
     def get_name(self):
         return self.name
@@ -66,9 +67,7 @@ class body():
         return self.pos
 
     def get_pos_rel_to(self, obj):
-        return [self.pos[0] - obj.pos[0],
-                self.pos[1] - obj.pos[1],
-                self.pos[2] - obj.pos[2]]
+        return self.pos - obj.pos
 
     def set_pos(self, pos):
         self.pos = pos
@@ -77,17 +76,13 @@ class body():
         return self.vel
 
     def get_vel_rel_to(self, obj):
-        return [self.vel[0] - obj.vel[0],
-                self.vel[1] - obj.vel[1],
-                self.vel[2] - obj.vel[2]]
+        return self.vel - obj.vel
 
     def get_vel_mag(self):
         return mag(self.vel)
 
     def get_vel_mag_rel_to(self, obj):
-        return (((self.vel[0] - obj.vel[0])**2 +
-                 (self.vel[1] - obj.vel[1])**2 +
-                 (self.vel[2] - obj.vel[2])**2)**0.5)
+        return (self.vel - obj.vel).mag()
 
     def set_vel(self, vel):
         self.vel = vel
@@ -100,30 +95,22 @@ class body():
 
     # dist. between centers (ignore surface)
     def get_dist_to(self, obj):
-        return ((self.pos[0] - obj.pos[0])**2 +
-                (self.pos[1] - obj.pos[1])**2 +
-                (self.pos[2] - obj.pos[2])**2)**0.5
+        return (self.pos - obj.pos).mag()
 
     def get_unit_vector_towards(self, obj):
-        return [((obj.pos[0] - self.pos[0])/(self.get_dist_to(obj))),
-                ((obj.pos[1] - self.pos[1])/(self.get_dist_to(obj))),
-                ((obj.pos[2] - self.pos[2])/(self.get_dist_to(obj)))]
+        return (obj.pos - self.pos).normalized()
 
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
-        grav_vec = vector_scale(self.get_unit_vector_towards(body), grav_mag)
+        grav_vec = self.get_unit_vector_towards(body) * grav_mag
         
         return grav_vec
 
     def update_vel(self, accel, dt):
-        self.vel[0] += accel[0] * dt
-        self.vel[1] += accel[1] * dt
-        self.vel[2] += accel[2] * dt
+        self.vel = self.vel + accel * dt
 
     def update_pos(self, dt):
-        self.pos[0] += self.vel[0] * dt
-        self.pos[1] += self.vel[1] * dt
-        self.pos[2] += self.vel[2] * dt
+        self.pos = self.pos + self.vel * dt
 
     # rotate the planet around its rotation axis
     def update_orient(self, dt):
@@ -133,10 +120,13 @@ class body():
 
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system
-    def get_body_centered_coords(self, body):        
-        return [((self.pos[0] - body.pos[0]) * body.orient[0][0]) + ((self.pos[1] - body.pos[1]) * body.orient[0][1]) + ((self.pos[2] - body.pos[2]) * body.orient[0][2]),
-                ((self.pos[0] - body.pos[0]) * body.orient[1][0]) + ((self.pos[1] - body.pos[1]) * body.orient[1][1]) + ((self.pos[2] - body.pos[2]) * body.orient[1][2]),
-                ((self.pos[0] - body.pos[0]) * body.orient[2][0]) + ((self.pos[1] - body.pos[1]) * body.orient[2][1]) + ((self.pos[2] - body.pos[2]) * body.orient[2][2])]
+    def get_body_centered_coords(self, body):
+        x_diff = self.pos.x - body.pos.x
+        y_diff = self.pos.y - body.pos.y
+        z_diff = self.pos.z - body.pos.z
+        return vec3(lst=[(x_diff * body.orient[0][0]) + (y_diff * body.orient[0][1]) + (z_diff * body.orient[0][2]),
+                         (x_diff * body.orient[1][0]) + (y_diff * body.orient[1][1]) + (z_diff * body.orient[1][2]),
+                         (x_diff * body.orient[2][0]) + (y_diff * body.orient[2][1]) + (z_diff * body.orient[2][2])])
 
     def update_traj_history(self):
         self.traj_history.append(self.pos)
@@ -148,7 +138,7 @@ class body():
         return self.traj_history
 
     def update_draw_pos(self):
-        self.draw_pos = vector_scale(self.pos, visual_scaling_factor)
+        self.draw_pos = self.pos * visual_scaling_factor
 
     def get_draw_pos(self):
         return self.draw_pos
@@ -174,7 +164,8 @@ class body():
 
     def get_angular_radius_from(self, point):
         if type(point) == list:
-            dist = ((self.pos[0] - point[0])**2 + (self.pos[1] - point[1])**2 + (self.pos[2] - point[2])**2)**0.5
+            point = vec3(lst=point)
+            dist = (self.pos - point).mag()
         else:
             dist = self.get_dist_to(point)
 
