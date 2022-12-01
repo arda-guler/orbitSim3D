@@ -97,3 +97,5 @@ There are only two configuration files;
 - config_utils.py: handles reading and editing of config files at data/config which hold values that the simulations are initialized with more of a convenience utility rather than a necessity.
 
 - ui.py: includes functions to print alphanumeric characters on 3D viewport to help out graphics.py.
+
+- vector3.py: 3D vector class to handle vector math/operations
