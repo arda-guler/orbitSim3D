@@ -1,0 +1,16 @@
+; ARTEMIS-1.OSF
+; Author: arda-guler
+;
+; First flight of the Artemis program, first launch of the SLS, and the second flight of Orion.
+; This scenario starts off just a short while after the trans-lunar injection. Orbital maneuvers are not
+; set up as I don't know where I would get the actual acceleration data for those.
+; (I guess I could estimate them from post-maneuver ephemeris? How accurate would that be?)
+;
+; If you wish, you can set up your own orbital maneuvers and see how the mission would progress
+; under your command. Just keep the meatball safe!
+;
+B|Sol|data/models/minisol.obj|1988500000000000000000000000000|695700000|[1.0,0.94,0.12]|[ 7.580782634688012E+07, 3.103120669561965E+07,-1.359049785714166E+09]|[-1.567305526953146E+01, 1.165432747414494E-01,6.246364253767459E-01]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|3.9E26|0|0
+B|Earth|data/models/miniearth.obj|5972190000000000000000000|6371000|[0.04,0.15,0.85]|[1.193206664850672E+11,2.396820879560709E+07,8.622075978961307E+10]|[1.751387887100818E+04,-4.592280882063093E-01,-2.448558240668618E+04]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+B|Luna|data/models/miniluna.obj|73490000000000000000000|1737530|[0.78,0.78,0.78]|[1.195665817455511E+11,6.045657722787559E+07,8.590479448735762E+10]|[1.672912509981469E+04,-1.732739695482266E+01,-2.505851018785369E+04]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+V|Orion|data/models/minicapsule.obj|[0,1,0]|[1.193330192450932E+11,2.814510998584330E+07,8.619151508623794E+10]|[  1.703117644803845E+04, 3.864893648041905E+02,  -2.922594006740287E+04]
+;

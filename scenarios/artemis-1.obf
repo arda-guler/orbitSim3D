@@ -1,0 +1,8 @@
+create_projection luna-orbit Luna Earth
+lock_origin Earth
+clear traj_visuals
+output_rate 20
+show Orion alt Earth ALT_EARTH_M
+show Orion vel_mag Earth VEL_EARTH_M/S
+show Orion alt Luna ALT_LUNA_M
+show Orion vel_mag Luna VEL_LUNA_M/S
