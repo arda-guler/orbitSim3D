@@ -103,3 +103,18 @@ class surface_point:
 
     def get_draw_pos(self):
         return self.get_pos() * visual_scaling_factor
+
+    def is_obj_above_horizon(self, obj):
+        surface_normal = self.get_pos_rel_to(self.body).normalized()
+        obj_dir = obj.get_pos_rel_to(self).normalized()
+
+        if obj_dir.dot(surface_normal) > 0:
+            return True
+        else:
+            return False
+
+    def get_obj_angle_above_horizon(self, obj):
+        surface_normal = self.get_pos_rel_to(self.body).normalized()
+        obj_dir = obj.get_pos_rel_to(self).normalized()
+
+        return math.degrees(math.pi/2 - math.acos(obj_dir.dot(surface_normal)))

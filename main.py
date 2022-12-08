@@ -1003,7 +1003,11 @@ def main(scn_filename=None, start_time=0):
                                 else:
                                     print("You can only get altitude of a vessel above a celestial body!\n")
                                     time.sleep(2)
-                                
+                            
+                            elif command[2] == "horizon_angle":
+                                if find_surface_point_by_name(command[3]) and find_obj_by_name(command[1]):
+                                    output_buffer.append([command[4], "horizon_angle", find_surface_point_by_name(command[3]), find_obj_by_name(command[1])])
+                                    
                         else:
                             print("Object not found.")
                             time.sleep(2)
@@ -1880,6 +1884,10 @@ def main(scn_filename=None, start_time=0):
                           "\nLat: " + str(element[2].get_gpos()[0]) + " deg" +
                           "\nLong: " + str(element[2].get_gpos()[1]) + " deg" +
                           "\nAlt: " + str(element[2].get_gpos()[2]) + " m")
+
+                # angle above horizon
+                elif element[1] == "horizon_angle":
+                    print(element[0] + " " + str(element[2].get_obj_angle_above_horizon(element[3])) + " deg")
 
                 # maneuver state and parameters
                 elif element[1] == "active":
