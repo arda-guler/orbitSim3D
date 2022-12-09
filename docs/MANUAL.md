@@ -12,7 +12,6 @@
   - pywavefront
   - keyboard
   - matplotlib
-  - pyquaternion
   - numpy
 
 ## Quickstart
@@ -107,3 +106,5 @@ There are only two configuration files;
 - ui.py: includes functions to print alphanumeric characters on 3D viewport to help out graphics.py.
 
 - vector3.py: 3D vector class to handle vector math/operations
+
+- matrix3x3.py: 3x3 matrix class to handle matrix operations
