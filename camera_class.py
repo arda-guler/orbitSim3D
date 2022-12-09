@@ -26,19 +26,19 @@ class camera():
 
     def move(self, movement):
         
-        glTranslate((movement.x * self.orient[0][0]) + (movement.y * self.orient[1][0]) + (movement.z * self.orient[2][0]),
-                    (movement.x * self.orient[0][1]) + (movement.y * self.orient[1][1]) + (movement.z * self.orient[2][1]),
-                    (movement.x * self.orient[0][2]) + (movement.y * self.orient[1][2]) + (movement.z * self.orient[2][2]))
+        glTranslate((movement.x * self.orient.m11) + (movement.y * self.orient.m21) + (movement.z * self.orient.m31),
+                    (movement.x * self.orient.m12) + (movement.y * self.orient.m22) + (movement.z * self.orient.m32),
+                    (movement.x * self.orient.m13) + (movement.y * self.orient.m23) + (movement.z * self.orient.m33))
         
         if not self.lock:
-            self.pos = vec3(lst=[self.pos.x + (movement.x * self.orient[0][0]) + (movement.y * self.orient[1][0]) + (movement.z * self.orient[2][0]),
-                                 self.pos.y + (movement.x * self.orient[0][1]) + (movement.y * self.orient[1][1]) + (movement.z * self.orient[2][1]),
-                                 self.pos.z + (movement.x * self.orient[0][2]) + (movement.y * self.orient[1][2]) + (movement.z * self.orient[2][2])])
+            self.pos = vec3(lst=[self.pos.x + (movement.x * self.orient.m11) + (movement.y * self.orient.m21) + (movement.z * self.orient.m31),
+                                 self.pos.y + (movement.x * self.orient.m12) + (movement.y * self.orient.m22) + (movement.z * self.orient.m32),
+                                 self.pos.z + (movement.x * self.orient.m13) + (movement.y * self.orient.m23) + (movement.z * self.orient.m33)])
 
         else:
-            self.offset = vec3(lst=[self.offset.x + (movement.x * self.orient[0][0]) + (movement.y * self.orient[1][0]) + (movement.z * self.orient[2][0]),
-                                    self.offset.y + (movement.x * self.orient[0][1]) + (movement.y * self.orient[1][1]) + (movement.z * self.orient[2][1]),
-                                    self.offset.z + (movement.x * self.orient[0][2]) + (movement.y * self.orient[1][2]) + (movement.z * self.orient[2][2])])
+            self.offset = vec3(lst=[self.offset.x + (movement.x * self.orient.m11) + (movement.y * self.orient.m21) + (movement.z * self.orient.m31),
+                                    self.offset.y + (movement.x * self.orient.m12) + (movement.y * self.orient.m22) + (movement.z * self.orient.m32),
+                                    self.offset.z + (movement.x * self.orient.m13) + (movement.y * self.orient.m23) + (movement.z * self.orient.m33)])
 
     def get_orient(self):
         return self.orient
@@ -62,24 +62,24 @@ class camera():
             about_pos = self.pos - self.offset
         
         glTranslate(-about_pos.x, -about_pos.y, -about_pos.z)
-        glRotate(-rotation[0], self.orient[0][0], self.orient[0][1], self.orient[0][2])
+        glRotate(-rotation[0], self.orient.m11, self.orient.m12, self.orient.m13)
         glTranslate(about_pos.x, about_pos.y, about_pos.z)
 
         glTranslate(-about_pos.x, -about_pos.y, -about_pos.z)
-        glRotate(-rotation[1], self.orient[1][0], self.orient[1][1], self.orient[1][2])
+        glRotate(-rotation[1], self.orient.m21, self.orient.m22, self.orient.m23)
         glTranslate(about_pos.x, about_pos.y, about_pos.z)
 
         glTranslate(-about_pos.x, -about_pos.y, -about_pos.z)
-        glRotate(-rotation[2], self.orient[2][0], self.orient[2][1], self.orient[2][2])
+        glRotate(-rotation[2], self.orient.m31, self.orient.m32, self.orient.m33)
         glTranslate(about_pos.x, about_pos.y, about_pos.z)
 
-        self.orient = rotate_matrix(self.orient, rotation)
+        self.orient = self.orient.rotate_legacy(rotation)
 
     def lock_to_target(self, target):
         self.lock = target
         if type(target).__name__ == "body":
             offset_amount = target.get_radius() * 2 * visual_scaling_factor
-            self.offset = vec3(lst=self.orient[2]) * -offset_amount
+            self.offset = self.orient.vz() * -offset_amount
         else:
             self.offset = vec3(0,0,-100)
 

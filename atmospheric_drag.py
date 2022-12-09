@@ -1,5 +1,6 @@
 from math_utils import *
 from vector3 import *
+from matrix3x3 import *
 
 class atmospheric_drag:
     def __init__(self, name, vessel, body, area, drag_coeff, mass, mass_auto_update):
@@ -56,9 +57,9 @@ class atmospheric_drag:
             tangent_vel_mag = 2 * math.pi * (self.get_body().get_radius() + gpos[2]) * math.cos(math.radians(gpos[0])) / self.get_body().get_day_length()
             tangent_vel_rel_to_body = vec3(lst=[-math.sin(math.radians(gpos[1])), 0, -math.cos(math.radians(gpos[1]))])
             tangent_vel_rel_to_body = tangent_vel_rel_to_body * tangent_vel_mag
-            tangent_vel_rel_to_body = vec3(lst=[tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][0] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][0],
-                                                tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][1] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][1],
-                                                tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][2] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][2]])
+            tangent_vel_rel_to_body = vec3(lst=[tangent_vel_rel_to_body.x * self.get_body().get_orient().m11 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m31,
+                                                tangent_vel_rel_to_body.x * self.get_body().get_orient().m12 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m32,
+                                                tangent_vel_rel_to_body.x * self.get_body().get_orient().m13 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m33])
             resvel = tangent_vel_rel_to_body + self.get_body().get_vel()
         else:
             resvel = self.get_body().get_vel()
@@ -77,7 +78,7 @@ class atmospheric_drag:
             atmo_vel_at_vessel_pos = self.get_atmo_vel_at_pos(vessel_gpos)
             atmoflow_vel = atmo_vel_at_vessel_pos - self.vessel.get_vel()
             accel_dir = atmoflow_vel.normalized()
-            accel_mag = 0.5 * atmo_density * self.drag_coeff * self.area * mag(atmoflow_vel)**2 / self.mass
+            accel_mag = 0.5 * atmo_density * self.drag_coeff * self.area * atmoflow_vel.mag()**2 / self.mass
             return accel_dir * accel_mag
             
         else:

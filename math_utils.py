@@ -1,6 +1,7 @@
 import math
 import numpy
-from pyquaternion import Quaternion
+
+from matrix3x3 import *
 
 # constants
 grav_const = (6.674*(10**-11)) # m^3 kg^-1 s^-2
@@ -84,13 +85,15 @@ def impact_gpos(bcc):
 
     return [lat, tlon, alt]
 
-# cross product
-def cross(a, b):
-    return [a[1] * b[2] - a[2] * b[1],
-            a[2] * b[0] - a[0] * b[2],
-            a[0] * b[1] - a[1] * b[0]]
-
-# dot product
+## --- --- --- LEGACY CODE, DON'T USE! --- --- ---
+##
+### cross product
+##def cross(a, b):
+##    return [a[1] * b[2] - a[2] * b[1],
+##            a[2] * b[0] - a[0] * b[2],
+##            a[0] * b[1] - a[1] * b[0]]
+##
+### dot product
 def dot(a, b):
     result = 0
     for a,b in zip(a,b):
@@ -98,29 +101,29 @@ def dot(a, b):
 
     return result
 
-# get vector magnitude
-def mag(vect):
-    square_sum = 0
-    for element in vect:
-        square_sum += element**2
-
-    return square_sum**0.5
-
-# multiply vector with scalar
+### get vector magnitude
+##def mag(vect):
+##    square_sum = 0
+##    for element in vect:
+##        square_sum += element**2
+##
+##    return square_sum**0.5
+##
+### multiply vector with scalar
 def vector_scale(vect, sca):
     result_vec = []
     for element in vect:
         result_vec.append(element * sca)
         
     return result_vec
-
-# add vectors
-def vector_add(vect1, vect2):
-    for i in range(len(vect1)):
-        vect1[i] = vect1[i] + vect2[i]
-
-    return vect1
-
+##
+### add vectors
+##def vector_add(vect1, vect2):
+##    for i in range(len(vect1)):
+##        vect1[i] = vect1[i] + vect2[i]
+##
+##    return vect1
+##
 def vector_add_safe(vect1, vect2):
     result_vect = []
 
@@ -132,40 +135,45 @@ def vector_add_safe(vect1, vect2):
         return -1
 
     return result_vect
-
-# rotate an orientation matrix
-def rotate_matrix(orientation_matrix, rotation):
-    # orientation matrix is a 3x3 matrix, rotation is a list of three angles in degrees
-    orientation_matrix = numpy.array(orientation_matrix)
-        
-    if rotation[0]:
-        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
-        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-
-    if rotation[1]:
-        rotator = Quaternion(axis=orientation_matrix[1], angle=math.radians(rotation[1]))
-        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-
-    if rotation[2]:
-        rotator = Quaternion(axis=orientation_matrix[2], angle=math.radians(rotation[2]))
-        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-
-    return orientation_matrix.tolist()
+##
+### rotate an orientation matrix
+##def rotate_matrix(orientation_matrix, rotation):
+##    # orientation matrix is a 3x3 matrix, rotation is a list of three angles in degrees
+##    orientation_matrix = numpy.array(orientation_matrix)
+##        
+##    if rotation[0]:
+##        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
+##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+##
+##    if rotation[1]:
+##        rotator = Quaternion(axis=orientation_matrix[1], angle=math.radians(rotation[1]))
+##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+##
+##    if rotation[2]:
+##        rotator = Quaternion(axis=orientation_matrix[2], angle=math.radians(rotation[2]))
+##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
+##
+##    return orientation_matrix.tolist()
+##
 
 def abs2frame_coords(abs_coords, body):
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system
-    return [((abs_coords[0] - body.pos[0]) * body.orient[0][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[0][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[0][2]),
-            ((abs_coords[0] - body.pos[0]) * body.orient[1][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[1][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[1][2]),
-            ((abs_coords[0] - body.pos[0]) * body.orient[2][0]) + ((abs_coords[1] - body.pos[1]) * body.orient[2][1]) + ((abs_coords[2] - body.pos[2]) * body.orient[2][2])]
+    rel_x = abs_coords.x - body.pos.x
+    rel_y = abs_coords.y - body.pos.y
+    rel_z = abs_coords.z - body.pos.z
+    
+    return vec3(lst=[(rel_x * body.orient.m11) + (rel_y * body.orient.m12) + (rel_z * body.orient.m13),
+                     (rel_x * body.orient.m21) + (rel_y * body.orient.m22) + (rel_z * body.orient.m23),
+                     (rel_x * body.orient.m31) + (rel_y * body.orient.m32) + (rel_z * body.orient.m33)])
 
 def world2cam(w_coords, cam, factor=10):
     w_coords = vector_scale(w_coords, -visual_scaling_factor)
     cam_orient = cam.get_orient()
     rel_pos = vector_add_safe(w_coords, vector_scale(cam.get_pos(), -1))
-    cam_x = cam_orient[0]
-    cam_y = cam_orient[1]
-    cam_z = cam_orient[2]
+    cam_x = cam_orient.vx().tolist()
+    cam_y = cam_orient.vy().tolist()
+    cam_z = cam_orient.vz().tolist()
 
     z_dist = dot(rel_pos, cam_z)
 

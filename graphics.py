@@ -49,7 +49,7 @@ def drawBodies(bodies, active_cam, draw_mode):
                     for face in mesh.faces:
                         for vertex_i in face:
                             vertex_i = b.model.vertices[vertex_i]
-                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
+                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
                             vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
                             glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
                     glEnd()
@@ -63,7 +63,7 @@ def drawBodies(bodies, active_cam, draw_mode):
                     for face in mesh.faces:
                         for vertex_i in face:
                             vertex_i = b.model.vertices[vertex_i]
-                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient)
+                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
                             vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
                             glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
                     glEnd()
@@ -146,7 +146,6 @@ def drawManeuvers(maneuvers):
         if len(vertices) > 3:
             glBegin(GL_LINE_STRIP)
             for i in range(1, len(vertices)):
-                #glVertex3f(vertices[i-1][0], vertices[i-1][1], vertices[i-1][2])
                 glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z)
             glEnd()
 

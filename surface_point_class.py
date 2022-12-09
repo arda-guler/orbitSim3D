@@ -47,9 +47,9 @@ class surface_point:
             tangent_vel_mag = 2 * math.pi * self.get_body().get_radius() * math.cos(math.radians(self.gpos[0])) / self.get_body().get_day_length()
             tangent_vel_rel_to_body = vec3(lst=[-math.sin(math.radians(self.gpos[1])), 0, -math.cos(math.radians(self.gpos[1]))])
             tangent_vel_rel_to_body = tangent_vel_rel_to_body * tangent_vel_mag
-            tangent_vel_rel_to_body = vec3(lst=[tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][0] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][0],
-                                                tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][1] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][1],
-                                                tangent_vel_rel_to_body.x * self.get_body().get_orient()[0][2] + tangent_vel_rel_to_body.z * self.get_body().get_orient()[2][2]])
+            tangent_vel_rel_to_body = vec3(lst=[tangent_vel_rel_to_body.x * self.get_body().get_orient().m11 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m31,
+                                                tangent_vel_rel_to_body.x * self.get_body().get_orient().m12 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m32,
+                                                tangent_vel_rel_to_body.x * self.get_body().get_orient().m13 + tangent_vel_rel_to_body.z * self.get_body().get_orient().m33])
             self.vel = tangent_vel_rel_to_body + self.get_body().get_vel()
         else:
             self.vel = self.get_body().get_vel()
@@ -86,9 +86,9 @@ class surface_point:
         rel_pos = rel_pos * R
 
         # now take the planet's orientation matrix into account
-        rel_pos = vec3(lst=[rel_pos.x * self.get_body().get_orient()[0][0] + rel_pos.y * self.get_body().get_orient()[1][0] + rel_pos.z * self.get_body().get_orient()[2][0],
-                            rel_pos.x * self.get_body().get_orient()[0][1] + rel_pos.y * self.get_body().get_orient()[1][1] + rel_pos.z * self.get_body().get_orient()[2][1],
-                            rel_pos.x * self.get_body().get_orient()[0][2] + rel_pos.y * self.get_body().get_orient()[1][2] + rel_pos.z * self.get_body().get_orient()[2][2]])
+        rel_pos = vec3(lst=[rel_pos.x * self.get_body().get_orient().m11 + rel_pos.y * self.get_body().get_orient().m21 + rel_pos.z * self.get_body().get_orient().m31,
+                            rel_pos.x * self.get_body().get_orient().m12 + rel_pos.y * self.get_body().get_orient().m22 + rel_pos.z * self.get_body().get_orient().m32,
+                            rel_pos.x * self.get_body().get_orient().m13 + rel_pos.y * self.get_body().get_orient().m23 + rel_pos.z * self.get_body().get_orient().m33])
 
         return self.get_body().get_pos() + rel_pos
 

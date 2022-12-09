@@ -91,7 +91,7 @@ class body():
         return self.orient
 
     def rotate_body(self, rotation):
-        self.orient = rotate_matrix(self.orient, rotation)
+        self.orient = self.orient.rotate_legacy(rotation)
 
     # dist. between centers (ignore surface)
     def get_dist_to(self, obj):
@@ -124,9 +124,9 @@ class body():
         x_diff = self.pos.x - body.pos.x
         y_diff = self.pos.y - body.pos.y
         z_diff = self.pos.z - body.pos.z
-        return vec3(lst=[(x_diff * body.orient[0][0]) + (y_diff * body.orient[0][1]) + (z_diff * body.orient[0][2]),
-                         (x_diff * body.orient[1][0]) + (y_diff * body.orient[1][1]) + (z_diff * body.orient[1][2]),
-                         (x_diff * body.orient[2][0]) + (y_diff * body.orient[2][1]) + (z_diff * body.orient[2][2])])
+        return vec3(lst=[(x_diff * body.orient.m11) + (y_diff * body.orient.m12) + (z_diff * body.orient.m13),
+                         (x_diff * body.orient.m21) + (y_diff * body.orient.m22) + (z_diff * body.orient.m23),
+                         (x_diff * body.orient.m31) + (y_diff * body.orient.m32) + (z_diff * body.orient.m33)])
 
     def update_traj_history(self):
         self.traj_history.append(self.pos)

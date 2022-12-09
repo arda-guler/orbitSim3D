@@ -18,7 +18,7 @@ class kepler_projection():
         # mu = standard gravitational parameter
         self.mu = body.get_mass() * grav_const
 
-        self.angular_momentum = cross(self.pos0, self.vel0)
+        self.angular_momentum = self.pos0.cross(self.vel0)
 
         self.eccentricity = self.get_eccentricity()
         self.energy = self.get_energy()
@@ -54,7 +54,7 @@ class kepler_projection():
         return e_vec
 
     def get_eccentricity(self):
-        return mag(self.get_eccentricity_vector())
+        return self.get_eccentricity_vector().mag()
 
     def get_energy(self):
         return (self.vel0.mag()**2)/2 - self.mu/self.pos0.mag()
@@ -130,12 +130,12 @@ class kepler_projection():
             vertices.append(current_pos)
             draw_vertices.append(current_pos * visual_scaling_factor)
             Rs.append(current_pos.mag())
-            Ys.append(abs2frame_coords((current_pos + self.get_body().get_pos()).tolist(), self.get_body())[1])
+            Ys.append(abs2frame_coords((current_pos + self.get_body().get_pos()), self.get_body()).y)
 
             t += time_step
             time_step = min((self.mu/current_grav.mag() * 1e-15), end_time/1e5)
 
-            current_rel_pos = vec3(lst=abs2frame_coords(current_pos + self.get_body().get_pos(), self.get_body()))
+            current_rel_pos = abs2frame_coords(current_pos + self.get_body().get_pos(), self.get_body())
             
             try:
                 current_lat = math.degrees(math.atan(current_rel_pos.y/math.sqrt(current_rel_pos.x**2 + current_rel_pos.z**2)))

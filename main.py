@@ -73,9 +73,7 @@ def window_resize(window, width, height):
         main_cam = cameras[0]
         gluPerspective(gvar_fov, width/height, gvar_near_clip, gvar_far_clip)
         glTranslate(main_cam.pos.x, main_cam.pos.y, main_cam.pos.z)
-        main_cam.orient = [[1,0,0],
-                           [0,1,0],
-                           [0,0,1]]
+        main_cam.orient = matrix3x3()
     except ZeroDivisionError:
         pass # if the window is minimized it makes height = 0, but we don't need to update projection in that case anyway
 
@@ -177,9 +175,9 @@ def import_scenario(scn_filename):
                             
                             line[5], vec3(lst=line[6]), vec3(lst=line[7]),
                             
-                            [[float(orient_nums[0]), float(orient_nums[1]), float(orient_nums[2])],
-                             [float(orient_nums[3]), float(orient_nums[4]), float(orient_nums[5])],
-                             [float(orient_nums[6]), float(orient_nums[7]), float(orient_nums[8])]],
+                            matrix3x3([[float(orient_nums[0]), float(orient_nums[1]), float(orient_nums[2])],
+                                       [float(orient_nums[3]), float(orient_nums[4]), float(orient_nums[5])],
+                                       [float(orient_nums[6]), float(orient_nums[7]), float(orient_nums[8])]]),
 
                             float(line[9]),
                             
@@ -324,7 +322,7 @@ def export_scenario(scn_filename):
         for b in bodies:
             body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
                                str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos().tolist()) + "|" +\
-                               str(b.get_vel().tolist()) + "|" + str(b.get_orient()) + "|" + str(b.get_day_length()) + "|" +\
+                               str(b.get_vel().tolist()) + "|" + str(b.get_orient().tolist()) + "|" + str(b.get_day_length()) + "|" +\
                                str(b.get_J2()) + "|" + str(b.luminosity) + "|" + str(b.atmos_sea_level_density) + "|" +\
                                str(b.atmos_scale_height) + "\n"
             scn_file.write(body_save_string)
@@ -871,7 +869,7 @@ def main(scn_filename=None, start_time=0):
     glEnable(GL_CULL_FACE)
     glPointSize(point_size)
 
-    main_cam = camera("main_cam", vec3(cam_pos_x,cam_pos_y,cam_pos_z), [[1,0,0],[0,1,0],[0,0,1]], True)
+    main_cam = camera("main_cam", vec3(cam_pos_x,cam_pos_y,cam_pos_z), matrix3x3(), True)
     cameras = [main_cam]
     # put "camera" in starting position
     glTranslate(main_cam.get_pos().x, main_cam.get_pos().y, main_cam.get_pos().z)
@@ -931,9 +929,22 @@ def main(scn_filename=None, start_time=0):
             
             if accept_keyboard_input:
                 # get input and move the "camera" around
-                get_active_cam().rotate([(keyboard.is_pressed(cam_pitch_down) - keyboard.is_pressed(cam_pitch_up)) * cam_rotate_speed / output_rate,
-                                         (keyboard.is_pressed(cam_yaw_left) - keyboard.is_pressed(cam_yaw_right)) * cam_rotate_speed / output_rate,
-                                         (keyboard.is_pressed(cam_roll_ccw) - keyboard.is_pressed(cam_roll_cw)) * cam_rotate_speed / output_rate])
+
+                # don't allow rotation on multiple axes at once because the orientation matrix screws up
+                if keyboard.is_pressed(cam_pitch_down):
+                    get_active_cam().rotate([cam_rotate_speed/output_rate,0,0])
+                elif keyboard.is_pressed(cam_pitch_up):
+                    get_active_cam().rotate([-cam_rotate_speed/output_rate,0,0])
+
+                elif keyboard.is_pressed(cam_yaw_left):
+                    get_active_cam().rotate([0, cam_rotate_speed/output_rate,0])
+                elif keyboard.is_pressed(cam_yaw_right):
+                    get_active_cam().rotate([0, -cam_rotate_speed/output_rate,0])
+
+                elif keyboard.is_pressed(cam_roll_ccw):
+                    get_active_cam().rotate([0,0,cam_rotate_speed/output_rate])
+                elif keyboard.is_pressed(cam_roll_cw):
+                    get_active_cam().rotate([0,0,-cam_rotate_speed/output_rate])
 
                 get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
                                                 (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,

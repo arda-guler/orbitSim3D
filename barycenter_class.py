@@ -1,5 +1,6 @@
 from math_utils import *
 from vector3 import *
+from matrix3x3 import *
 
 class barycenter:
     def __init__(self, name, bodies):
@@ -9,7 +10,7 @@ class barycenter:
         self.vel = self.get_vel()
 
         # this is required so that orbit projections work
-        self.orient = [[1,0,0],[0,1,0],[0,0,1]]
+        self.orient = matrix3x3()
 
         self.color = self.calc_color()
 

@@ -71,9 +71,9 @@ class vessel():
         x_diff = self.pos.x - body.pos.x
         y_diff = self.pos.y - body.pos.y
         z_diff = self.pos.z - body.pos.z
-        return vec3(lst=[(x_diff * body.orient[0][0]) + (y_diff * body.orient[0][1]) + (z_diff * body.orient[0][2]),
-                         (x_diff * body.orient[1][0]) + (y_diff * body.orient[1][1]) + (z_diff * body.orient[1][2]),
-                         (x_diff * body.orient[2][0]) + (y_diff * body.orient[2][1]) + (z_diff * body.orient[2][2])])
+        return vec3(lst=[(x_diff * body.orient.m11) + (y_diff * body.orient.m12) + (z_diff * body.orient.m13),
+                         (x_diff * body.orient.m21) + (y_diff * body.orient.m22) + (z_diff * body.orient.m23),
+                         (x_diff * body.orient.m31) + (y_diff * body.orient.m32) + (z_diff * body.orient.m33)])
 
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
@@ -98,9 +98,9 @@ class vessel():
 
             J2_perturbation_accel = J2_perturbation_accel * J2_mult
 
-            grav_vec = vec3(lst=[grav_vec.x + (J2_perturbation_accel.x * body.orient[0][0]) + (J2_perturbation_accel.y * body.orient[1][0]) + (J2_perturbation_accel.z * body.orient[2][0]),
-                                 grav_vec.y + (J2_perturbation_accel.x * body.orient[0][1]) + (J2_perturbation_accel.y * body.orient[1][1]) + (J2_perturbation_accel.z * body.orient[2][1]),
-                                 grav_vec.z + (J2_perturbation_accel.x * body.orient[0][2]) + (J2_perturbation_accel.y * body.orient[1][2]) + (J2_perturbation_accel.z * body.orient[2][2])])
+            grav_vec = vec3(lst=[grav_vec.x + (J2_perturbation_accel.x * body.orient.m11) + (J2_perturbation_accel.y * body.orient.m21) + (J2_perturbation_accel.z * body.orient.m31),
+                                 grav_vec.y + (J2_perturbation_accel.x * body.orient.m12) + (J2_perturbation_accel.y * body.orient.m22) + (J2_perturbation_accel.z * body.orient.m32),
+                                 grav_vec.z + (J2_perturbation_accel.x * body.orient.m13) + (J2_perturbation_accel.y * body.orient.m23) + (J2_perturbation_accel.z * body.orient.m33)])
         
         return grav_vec
 
