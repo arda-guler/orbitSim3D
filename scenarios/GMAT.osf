@@ -1,0 +1,15 @@
+; GMAT.OSF
+; Author: arda-guler
+; GMAT VALIDATION TEST SCENARIO 1
+; Small test case used to compare orbit propogation and impulsive burn against GMAT R2020 RungeKutta89 solver with default parameters
+
+;Celestial bodies
+B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
+B|Luna|data/models/miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[346410000,10,-200000000]|[-483,0,-836.5]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0|0|0|0
+
+;Vessels
+V|orbiter|data/models/miniprobe.obj|[0.0,0.8,0.7]|[7100E3,0,1300E3]|[-1000,0,7350]
+
+;Maneuvers
+M|mnv_impulsive|const_accel|orbiter|Earth|prograde|1000|6000|1
+

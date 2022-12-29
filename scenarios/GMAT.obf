@@ -1,0 +1,12 @@
+;.obf -- orbitSim3D batch format
+;
+lock_origin Earth
+clear traj_visuals
+delta_t 0.25
+create_plot pl_alt alt orbiter Earth 0 18000
+create_plot pl_vel vel_mag orbiter Earth 0 18000
+auto_dt 5998 0.00390625
+auto_dt 6002 0.25
+rapid_compute 5900
+output_rate 100
+;

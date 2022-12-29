@@ -1,0 +1,9 @@
+lock_origin Earth
+delta_t 10000
+rapid_compute 317000
+delta_t 1
+output_rate 150
+show Apophis alt Earth APOPHIS_ALT
+show Apophis vel_mag Earth APOPHIS_VEL
+create_plot pl_alt alt Apophis Earth 330000 346700
+;
