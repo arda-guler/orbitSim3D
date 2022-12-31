@@ -1,0 +1,4 @@
+lock_origin Earth
+clear traj_visuals
+output_rate 20
+;
