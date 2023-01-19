@@ -226,6 +226,15 @@ def import_scenario(scn_filename):
                                                          float(line[6]), float(line[7]), float(line[8]),
                                                          float(line[9]), float(line[10]))
 
+            elif line[2] == "impulsive":
+                if (line[5] in preset_orientations):
+                    new_maneuver = maneuver_impulsive(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                      line[5], float(line[6]), float(line[7]))
+                else:
+                    line[5] = eval(line[5])
+                    new_maneuver = maneuver_impulsive(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
+                                                      vec3(lst=line[5]), float(line[6]), float(line[7]))
+
             maneuvers.append(new_maneuver)
             print("Loading maneuver:", new_maneuver.get_name())
 
@@ -318,6 +327,8 @@ def export_scenario(scn_filename):
         time_save_string = "T|" + str(sim_time) + "\n"
         scn_file.write(time_save_string)
 
+        scn_file.write("\n")
+
         print("Writing bodies...")
         for b in bodies:
             body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
@@ -327,11 +338,15 @@ def export_scenario(scn_filename):
                                str(b.atmos_scale_height) + "\n"
             scn_file.write(body_save_string)
 
+        scn_file.write("\n")
+
         print("Writing vessels...")
         for v in vessels:
             vessel_save_string = "V|" + v.get_name() + "|" + v.get_model_path() + "|" + str(v.get_color()) + "|" +\
                                  str(v.get_pos().tolist()) + "|" + str(v.get_vel().tolist()) + "\n"
             scn_file.write(vessel_save_string)
+
+        scn_file.write("\n")
 
         print("Writing maneuvers...")
         for m in maneuvers:
@@ -343,12 +358,20 @@ def export_scenario(scn_filename):
                 maneuver_save_string += "const_thrust|" + m.get_vessel().get_name() + "|" + m.frame_body.get_name() + "|" +\
                                         str(m.orientation_input) + "|" + str(m.thrust) + "|" +  str(m.mass_init) + "|" + str(m.mass_flow) + "|" +\
                                         str(m.t_start) + "|" + str(m.duration) + "\n"
+
+            elif m.get_type() == "impulsive":
+                maneuver_save_string += "impulsive|" + m.get_vessel().get_name() + "|" + m.frame_body.get_name() + "|" +\
+                                        str(m.orientation_input) + "|" + str(m.delta_v) + "|" + str(m.t_perform) + "\n"
             scn_file.write(maneuver_save_string)
+
+        scn_file.write("\n")
 
         print("Writing surface points...")
         for s in surface_points:
             sp_save_string = "S|" + s.get_name() + "|" + s.get_body().get_name() + "|" + str(s.get_color()) + "|" + str(s.get_gpos()) + "\n"
             scn_file.write(sp_save_string)
+
+        scn_file.write("\n")
 
         print("Writing barycenters...")
         for bc in barycenters:
@@ -358,17 +381,23 @@ def export_scenario(scn_filename):
             bc_save_string = bc_save_string[:-1]+"\n"
             scn_file.write(bc_save_string)
 
+        scn_file.write("\n")
+
         print("Writing radiation pressures...")
         for rp in radiation_pressures:
             rp_save_string = "R|" + rp.get_name() + "|" + rp.vessel.get_name() + "|" + rp.body.get_name() + "|" + str(rp.get_area()) +\
                              "|" + rp.orientation_frame.get_name() + "|" + str(rp.direction_input) + "|" + str(rp.mass) + "|" + str(rp.mass_auto_update) + "\n"
             scn_file.write(rp_save_string)
 
+        scn_file.write("\n")
+
         print("Writing atmospheric drags...")
         for ad in atmospheric_drags:
             ad_save_string = "A|" + ad.get_name() + "|" + ad.vessel.get_name() + "|" + ad.body.get_name() + "|" + str(ad.get_area()) +\
                              "|" + str(ad.get_drag_coeff()) + "|" + str(ad.get_mass()) + "|" + str(ad.mass_auto_update) + "\n"
             scn_file.write(ad_save_string)
+
+        scn_file.write("\n")
 
         print("Scenario export complete!")
         time.sleep(2)
@@ -400,6 +429,17 @@ def create_maneuver_const_thrust(mnv_name, mnv_vessel, mnv_frame, mnv_orientatio
     new_maneuver = maneuver_const_thrust(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_thrust,
                                          mnv_mass_init, mnv_mass_flow, mnv_start, mnv_duration)
 
+    maneuvers.append(new_maneuver)
+
+def create_maneuver_impulsive(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_deltav, mnv_t_perform):
+    global maneuvers
+
+    if find_maneuver_by_name(mnv_name):
+        print("A maneuver with this name already exists. Please pick another name for the new maneuver.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_maneuver = maneuver_impulsive(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_deltav, mnv_t_perform)
     maneuvers.append(new_maneuver)
 
 def delete_maneuver(mnv_name):
@@ -1199,6 +1239,15 @@ def main(scn_filename=None, start_time=0):
 
                                                          float(command[6]), float(command[7]), float(command[8]),
                                                          float(command[9]), float(command[10]))
+
+                    elif len(command) == 8 and command[2] == "impulsive":
+                        # name, type, vessel, frame, orientation, delta_v, perform_time
+                        if (not command[5] in preset_orientations):
+                            create_maneuver_impulsive(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                                      eval(command[5]), float(command[6]), float(command[7]))
+                        else:
+                            create_maneuver_impulsive(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
+                                                      command[5], float(command[6]), float(command[7]))
                     else:
                         print("Wrong syntax for command 'create_maneuver'.\n")
                         time.sleep(2)
@@ -1544,6 +1593,7 @@ def main(scn_filename=None, start_time=0):
                             print("Maneuver types: const_accel, const_thrust")
                             print("const_accel params: <vessel> <frame_of_reference> <orientation> <acceleration> <start_time> <duration>")
                             print("const_thrust params: <vessel> <frame_of_reference> <orientation> <thrust> <initial_mass> <mass_flow> <start_time> <duration>")
+                            print("impulsive params: <vessel> <frame_of_reference> <orientation> <delta_v> <perform_time>")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_maneuver":
                             print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
@@ -1952,7 +2002,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

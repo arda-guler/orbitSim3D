@@ -134,20 +134,36 @@ def drawTrajectories(vessels, scene_lock):
                     glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z)
                 glEnd()
 
-def drawManeuvers(maneuvers):
-
-    # change color to maneuver color
-    glColor(1.0, 1.0, 0.0)
+def drawManeuvers(maneuvers, point_size, cam):
 
     for m in maneuvers:
-        
-        vertices = m.get_draw_vertices()
 
-        if len(vertices) > 3:
-            glBegin(GL_LINE_STRIP)
-            for i in range(1, len(vertices)):
-                glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z)
-            glEnd()
+        if m.type != "impulsive":
+
+            if m.type == "const_accel":
+                glColor(0.0, 1.0, 1.0)
+            else: # const_thrust
+                glColor(1.0, 1.0, 0.0)
+                
+            vertices = m.get_draw_vertices()
+
+            if len(vertices) > 3:
+                glBegin(GL_LINE_STRIP)
+                for i in range(1, len(vertices)):
+                    glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z)
+                glEnd()
+                
+        else:
+            if m.get_draw_point():
+                glColor(1.0, 0.0, 1.0)
+                vertex = m.get_draw_point()
+                cam_dist = (cam.get_pos() - vertex).mag()
+                mnv_point_size = max(int(60000/cam_dist), 1)
+                glPointSize(mnv_point_size)
+                glBegin(GL_POINTS)
+                glVertex3f(vertex.x, vertex.y, vertex.z)
+                glEnd()
+                glPointSize(point_size)
 
 def drawProjections(projections):
     
@@ -337,7 +353,7 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None):
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None, point_size=2):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -370,6 +386,6 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
             drawProjectionLabels(projections, active_cam)
             
         drawTrajectories(vessels, scene_lock)
-        drawManeuvers(maneuvers)
+        drawManeuvers(maneuvers, point_size, active_cam)
         glDisable(GL_LINE_SMOOTH)
         

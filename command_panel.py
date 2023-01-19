@@ -554,6 +554,41 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 cm_s2_button = tk.Button(entry_panel, text="Create Const. Thrust Mnv.", command=generate_s2)
                 cm_s2_button.grid(row=4, column=0)
 
+                # option 3
+                cm_s3t1_label = tk.Label(entry_panel, text="Maneuver Name")
+                cm_s3t2_label = tk.Label(entry_panel, text="Vessel Name")
+                cm_s3t3_label = tk.Label(entry_panel, text="Frame of Ref.")
+                cm_s3t4_label = tk.Label(entry_panel, text="Orientation")
+                cm_s3t5_label = tk.Label(entry_panel, text="Delta-v")
+                cm_s3t6_label = tk.Label(entry_panel, text="Perform Time")
+                cm_s3t1_label.grid(row=5, column=1)
+                cm_s3t2_label.grid(row=5, column=2)
+                cm_s3t3_label.grid(row=5, column=3)
+                cm_s3t4_label.grid(row=5, column=4)
+                cm_s3t5_label.grid(row=5, column=5)
+                cm_s3t6_label.grid(row=5, column=6)
+
+                cm_s3t1 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t2 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t3 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t4 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t5 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t6 = tk.Text(entry_panel, width=15, height=1)
+                cm_s3t1.grid(row=6, column=1)
+                cm_s3t2.grid(row=6, column=2)
+                cm_s3t3.grid(row=6, column=3)
+                cm_s3t4.grid(row=6, column=4)
+                cm_s3t5.grid(row=6, column=5)
+                cm_s3t6.grid(row=6, column=6)
+
+                def generate_s3():
+                    if cm_s3t1.get("1.0","end-1c") and cm_s3t2.get("1.0","end-1c") and cm_s3t3.get("1.0","end-1c") and cm_s3t4.get("1.0","end-1c") and cm_s3t5.get("1.0","end-1c") and cm_s3t6.get("1.0","end-1c"):
+                        command = "create_maneuver " + cm_s3t1.get("1.0", "end-1c") + " impulsive " + cm_s3t2.get("1.0","end-1c") + " " + cm_s3t3.get("1.0","end-1c") + " " + cm_s3t4.get("1.0","end-1c") + " " + cm_s3t5.get("1.0","end-1c") + " " + cm_s3t6.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                cm_s3_button = tk.Button(entry_panel, text="Create Impulsive Mnv.", command=generate_s3)
+                cm_s3_button.grid(row=6, column=0)
+                
             elif cmd_a == "delete_maneuver":
                 dm_help = tk.Label(entry_panel, text="'delete_maneuver' command removes a maneuver from the simulation.")
                 dm_help.grid(row=0, column=0, columnspan=10)

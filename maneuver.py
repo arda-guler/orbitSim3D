@@ -13,6 +13,63 @@ class maneuver():
     def get_type(self):
         return self.type
 
+class maneuver_impulsive(maneuver):
+    def __init__(self, name, vessel, frame_body, orientation, delta_v, t_perform):
+        super().__init__(name, vessel, "impulsive")
+        self.frame_body = frame_body
+        self.orientation = orientation
+        self.orientation_input = orientation
+        self.delta_v = delta_v
+        self.t_perform = t_perform
+        self.done = False
+
+        self.draw_point = None
+
+    def set_orientation(self):
+        if not type(self.orientation) == type(vec3()):
+            self.orientation = self.vessel.get_orientation_rel_to(self.frame_body, self.orientation)
+
+    def perform_maneuver(self, current_time, delta_t):
+        if (not self.done) and current_time >= self.t_perform:
+            self.set_orientation()
+            self.vessel.set_vel(self.vessel.get_vel() + self.orientation * self.delta_v)
+            self.done = True
+            self.draw_point = self.vessel.get_draw_pos()
+
+    def is_performing(self, current_time):
+        return False
+
+    def get_state(self, current_time):
+        if self.done:
+            return "Completed"
+        else:
+            return "Pending"
+
+    def get_duration(self):
+        return 0
+
+    def get_name(self):
+        return self.name
+
+    def get_draw_point(self):
+        return self.draw_point
+
+    def clear_draw_vertices(self):
+        self.draw_point = None
+
+    def get_params_str(self):
+        output = "Vessel: " + self.vessel.get_name() + "\n"
+        
+        if type(self.orientation_input) == str:
+            output += "Orientation: " + self.orientation_input + " rel to " + self.frame_body.get_name()
+        else:
+            output += "Orientation: " + str(self.orientation) + " rel to global frame"
+            
+        output += "\nDv: " + str(self.delta_v) + " m/s\n"
+        output += "Perform Time: " + str(self.t_perform) + " s\n"
+
+        return output
+
 class maneuver_const_accel(maneuver):
     def __init__(self, name, vessel, frame_body, orientation, accel, t_start, duration):
         super().__init__(name, vessel, "const_accel")
