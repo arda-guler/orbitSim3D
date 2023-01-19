@@ -11,5 +11,5 @@ B|Luna|data/models/miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[3
 V|orbiter|data/models/miniprobe.obj|[0.0,0.8,0.7]|[7100E3,0,1300E3]|[-1000,0,7350]
 
 ;Maneuvers
-M|mnv_impulsive|const_accel|orbiter|Earth|prograde|1000|6000|1
+M|mnv_test|impulsive|orbiter|Earth|prograde|1000|6000
 
