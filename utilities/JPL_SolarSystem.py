@@ -67,7 +67,7 @@ for i in range(1, 10): # 1 to 10 for Mercury - Neptune and Sol (10)
             useful_text = eval(str(useful_text))
             print(useful_text)
 
-            if filenames[i-1] == "sol":
+            if filenames[i-1] == "Sol":
                 useful_text[0] = float(useful_text[0])
                 useful_text[2] = float(useful_text[2])
                 useful_text[4] = float(useful_text[4])
