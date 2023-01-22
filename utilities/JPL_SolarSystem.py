@@ -10,7 +10,7 @@ from datetime import datetime
 from datetime import timedelta
 import re
 
-filenames = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune", "sol"]
+filenames = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Sol"]
 
 headers = ["B|Mercury|data/models/minimercury.obj|330200000000000000000000|2440000|[0.87,0.80,0.77]|",
            "B|Venus|data/models/minivenus.obj|4868500000000000000000000|6051840|[1.0,0.93,0.69]|",
@@ -67,19 +67,34 @@ for i in range(1, 10): # 1 to 10 for Mercury - Neptune and Sol (10)
             useful_text = eval(str(useful_text))
             print(useful_text)
 
-            useful_text[0] = float(useful_text[0])
-            useful_text[2] = float(useful_text[2])
-            useful_text[4] = float(useful_text[4])
-            useful_text[1] = float(useful_text[1]) + 3
-            useful_text[3] = float(useful_text[3]) + 3
-            useful_text[5] = float(useful_text[5]) + 3
+            if filenames[i-1] == "sol":
+                useful_text[0] = float(useful_text[0])
+                useful_text[2] = float(useful_text[2])
+                useful_text[4] = float(useful_text[4])
+                useful_text[1] = float(useful_text[1])
+                useful_text[3] = float(useful_text[3])
+                useful_text[5] = float(useful_text[5])
 
-            useful_text[6] = float(useful_text[6])
-            useful_text[8] = float(useful_text[8])
-            useful_text[10] = float(useful_text[10])
-            useful_text[7] = float(useful_text[7]) + 3
-            useful_text[9] = float(useful_text[9]) + 3
-            useful_text[11] = float(useful_text[11]) + 3
+                useful_text[6] = float(useful_text[6])
+                useful_text[8] = float(useful_text[8])
+                useful_text[10] = float(useful_text[10])
+                useful_text[7] = float(useful_text[7]) + 3
+                useful_text[9] = float(useful_text[9]) + 3
+                useful_text[11] = float(useful_text[11]) + 3
+            else:
+                useful_text[0] = float(useful_text[0])
+                useful_text[2] = float(useful_text[2])
+                useful_text[4] = float(useful_text[4])
+                useful_text[1] = float(useful_text[1]) + 3
+                useful_text[3] = float(useful_text[3]) + 3
+                useful_text[5] = float(useful_text[5]) + 3
+
+                useful_text[6] = float(useful_text[6])
+                useful_text[8] = float(useful_text[8])
+                useful_text[10] = float(useful_text[10])
+                useful_text[7] = float(useful_text[7]) + 3
+                useful_text[9] = float(useful_text[9]) + 3
+                useful_text[11] = float(useful_text[11]) + 3
 
             print(useful_text)
 
