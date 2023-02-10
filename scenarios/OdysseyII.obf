@@ -1,0 +1,5 @@
+lock_origin Jupiter
+create_projection io_orbit Io Jupiter
+create_projection leonov_orbit Leonov Jupiter
+create_projection discovery_orbit Discovery Io
+;

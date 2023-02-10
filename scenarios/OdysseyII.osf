@@ -1,20 +1,16 @@
-;  SOL.OSF
+;  ODYSSEY_II.OSF
 ;  Author: arda-guler
 ;
-;This is a crowded scenario with all major
-;planets in the Sol system. In addition,
-;the four Galilean moons of Jupiter, Titan
-;of Saturn and Luna are also included.
+; You are in command of the spaceship Leonov, tasked with rendezvousing
+; with the disabled exploration ship Discovery, which is in orbit of Io. Do it spending
+; the least Delta-v possible.
 ;
-;An n-body fest is about to happen! :)
-;
-;You probably need a high delta_t to see
-;things moving on their orbits, but don't
-;set it to something ridiculous because you
-;might end up launching the moons away from
-;their parent bodies, and although that might
-;be fun, it's not very realistic.
-;(But don't quote me on that one.)
+; Discovery had five souls onboard, three of whom were in cryosleep when the
+; communications were severed unexpectedly. The Discovery was run by an artificial intelligence,
+; HAL 9000, which is now assumed inoperational. Crew members Dave Bowman and Frank Poole
+; were awake, but their fates remain unknwon. It is assumed that they are alive, since the
+; spaceship Discovery is known to have performed orbital maneuvers after communications
+; were cut with mission control. 
 ;
 ;Bodies
 ;
@@ -41,4 +37,7 @@ B|Titan|data/models/minititan.obj|134550000000000000000000|2575500|[0.80,0.62,0.
 B|Uranus|data/models/miniuranus.obj|86813000000000000000000000|25362000|[0.60,0.76,0.71]|[1980399048054.056,-21001416836.31372,2188827654007.702]|[4732.5955385772495,77.32443003648082,-4619.121101218544]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
 ;
 B|Neptune|data/models/minineptune.obj|102409000000000000000000000|24624000|[0.50,0.64,0.85]|[-653539523787.2499,-88545525184.25507,4426094962979.564]|[5408.554129416047,-128.9979516633886,757.3380931969883]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+V|Leonov|data/models/minicapsule.obj|[0,1,1]|[-364650072337.8086+714920e3,-13111891700.27162,653691331042.8435]|[12023.981189417898,-188.7424672028821,6208.6482020211615-13313]
+V|Discovery|data/models/minicapsule.obj|[1,0,0]|[-364233608907.9724+2821600,-13095755948.88355,653765150002.87]|[15082.31381925126,-340.0402315539548,-10793.375058000389-1456]
 ;
