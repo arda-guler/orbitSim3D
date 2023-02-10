@@ -1,5 +1,6 @@
-lock_origin Jupiter
+lock_origin Leonov
 create_projection io_orbit Io Jupiter
 create_projection leonov_orbit Leonov Jupiter
 create_projection discovery_orbit Discovery Io
+note INTRO You are in command of the spaceship Leonov, tasked with rendezvousing with the disabled exploration ship Discovery, which is in orbit of Io. Do it spending the least Delta-v possible.
 ;
