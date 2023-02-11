@@ -33,6 +33,10 @@ class kepler_projection():
 
         self.body_draw_pos_prev = self.body.get_draw_pos()
 
+        if type(self.period) == complex:
+            self.apoapsis = float("inf")
+            self.period = float("inf")
+
     def get_name(self):
         return self.name
 
@@ -60,15 +64,15 @@ class kepler_projection():
         return (self.vel0.mag()**2)/2 - self.mu/self.pos0.mag()
     
     def get_semimajor_axis(self):
-        if not self.eccentricity == 1:
+        if not self.eccentricity >= 1:
             smj = (-self.mu)/(2*self.energy)
         else:
-            smj = "inf"
+            smj = float("inf")
 
         return smj
 
     def get_periapsis(self):
-        if not self.semimajor_axis == "inf":
+        if not self.semimajor_axis == float("inf"):
             p = self.semimajor_axis * (1 - (self.eccentricity**2))
         else:
             p = self.angular_momentum.mag()**2/self.mu
@@ -79,10 +83,10 @@ class kepler_projection():
         return self.get_periapsis() - self.body.get_radius()
 
     def get_apoapsis(self):
-        if not self.semimajor_axis == "inf":
+        if not self.semimajor_axis == float("inf"):
             a = self.semimajor_axis * (1 + (self.eccentricity**2))
         else:
-            a = "inf"
+            a = float("inf")
 
         return a
 
@@ -90,10 +94,10 @@ class kepler_projection():
         return self.get_apoapsis() - self.body.get_radius()
 
     def get_period(self):
-        if not self.semimajor_axis == "inf":
+        if not self.semimajor_axis == float("inf"):
             return 2*3.141*((self.semimajor_axis**3)/self.mu)**0.5
         else:
-            return "inf"
+            return float("inf")
 
     def get_inclination(self):
         return self.inclination
@@ -105,6 +109,12 @@ class kepler_projection():
             end_time = 10000
         else:
             end_time = self.period
+
+        if type(end_time) == complex:
+            end_time = min(max((end_time.real**2 + end_time.imag**2)**0.5, 10000), 100000)
+
+        if self.period == float("inf"):
+            end_time = max(min(self.mu, 300000), 10000)
         
         current_pos = self.pos0
         current_vel = self.vel0

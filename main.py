@@ -54,7 +54,8 @@ batch_commands = []
 preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
                        "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
                        "radial_in", "radial_in_dynamic", "radial_out", "radial_out_dynamic",
-                       "prograde_tangential", "prograde_tangential_dynamic"]
+                       "prograde_tangential", "prograde_tangential_dynamic",
+                       "retrograde_tangential", "retrograde_tangential_dynamic"]
 
 sim_time = 0
 
