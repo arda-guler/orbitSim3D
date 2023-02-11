@@ -1,0 +1,13 @@
+create_maneuver io_intercept impulsive Leonov Jupiter retrograde 2300 213000
+create_maneuver io_align impulsive Leonov Jupiter normal 448 235101
+create_maneuver io_capture impulsive Leonov Io retrograde 4000 304412
+;
+show io_intercept params MNV_IO_INTERCEPT
+show io_intercept state IO_INTERCEPT_STATE
+;
+show io_align params MNV_IO_ALIGN
+show io_align state IO_ALIGN_STATE
+;
+show io_capture params MNV_IO_CAPTURE
+show io_capture state IO_CAPTURE_STATE
+;
