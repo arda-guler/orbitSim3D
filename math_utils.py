@@ -85,77 +85,6 @@ def impact_gpos(bcc):
 
     return [lat, tlon, alt]
 
-## --- --- --- LEGACY CODE, DON'T USE! --- --- ---
-##
-### cross product
-##def cross(a, b):
-##    return [a[1] * b[2] - a[2] * b[1],
-##            a[2] * b[0] - a[0] * b[2],
-##            a[0] * b[1] - a[1] * b[0]]
-##
-### dot product
-def dot(a, b):
-    result = 0
-    for a,b in zip(a,b):
-        result += a*b
-
-    return result
-
-### get vector magnitude
-##def mag(vect):
-##    square_sum = 0
-##    for element in vect:
-##        square_sum += element**2
-##
-##    return square_sum**0.5
-##
-### multiply vector with scalar
-def vector_scale(vect, sca):
-    result_vec = []
-    for element in vect:
-        result_vec.append(element * sca)
-        
-    return result_vec
-##
-### add vectors
-##def vector_add(vect1, vect2):
-##    for i in range(len(vect1)):
-##        vect1[i] = vect1[i] + vect2[i]
-##
-##    return vect1
-##
-def vector_add_safe(vect1, vect2):
-    result_vect = []
-
-    if len(vect1) == len(vect2):
-        for i in range(len(vect1)):
-            result_vect.append(vect1[i] + vect2[i])
-
-    else:
-        return -1
-
-    return result_vect
-##
-### rotate an orientation matrix
-##def rotate_matrix(orientation_matrix, rotation):
-##    # orientation matrix is a 3x3 matrix, rotation is a list of three angles in degrees
-##    orientation_matrix = numpy.array(orientation_matrix)
-##        
-##    if rotation[0]:
-##        rotator = Quaternion(axis=orientation_matrix[0], angle=math.radians(rotation[0]))
-##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-##
-##    if rotation[1]:
-##        rotator = Quaternion(axis=orientation_matrix[1], angle=math.radians(rotation[1]))
-##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-##
-##    if rotation[2]:
-##        rotator = Quaternion(axis=orientation_matrix[2], angle=math.radians(rotation[2]))
-##        orientation_matrix = (numpy.array([rotator.rotate(orientation_matrix[0]), rotator.rotate(orientation_matrix[1]), rotator.rotate(orientation_matrix[2])]))
-##
-##    return orientation_matrix.tolist()
-##
-
 def abs2frame_coords(abs_coords, body):
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system
@@ -188,4 +117,34 @@ def world2cam(w_coords, cam, factor=10):
     y_skew = -(y_dist/z_dist) * factor
 
     return [x_skew, y_skew]
-    
+
+
+## --- --- --- LEGACY CODE, DON'T USE! --- --- ---
+def dot(a, b):
+    result = 0
+    for a, b in zip(a, b):
+        result += a * b
+
+    return result
+
+
+def vector_scale(vect, sca):
+    result_vec = []
+    for element in vect:
+        result_vec.append(element * sca)
+
+    return result_vec
+
+
+def vector_add_safe(vect1, vect2):
+    result_vect = []
+
+    if len(vect1) == len(vect2):
+        for i in range(len(vect1)):
+            result_vect.append(vect1[i] + vect2[i])
+
+    else:
+        return -1
+
+    return result_vect
+## - - - END OF LEGACY CODE - - -

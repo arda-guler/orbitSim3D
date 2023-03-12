@@ -81,46 +81,6 @@ class radiation_pressure:
 
         self.occultation = s
 
-##    def update_occultation_old(self, bodies):
-##        # checks how much of the illuminating body's disk is occulted
-##        # returns 1 if the illuminating body is not visible, 0 if it is completely visible
-##        a = self.body.get_angular_radius_from(self.vessel)
-##        s = 0
-##
-##        for occulting_body in bodies:
-##            if not occulting_body == self.body and self.vessel.get_dist_to(self.body) > occulting_body.get_dist_to(self.body):
-##                b = occulting_body.get_angular_radius_from(self.vessel)
-##
-##                vec_to_illum_body = self.vessel.get_unit_vector_towards(self.body)
-##                vec_to_occult_body = self.vessel.get_unit_vector_towards(occulting_body)
-##                # the angular separation of the centers of both bodies
-##                c_numerator = dot(vec_to_illum_body, vec_to_occult_body)
-##                c_denominator = mag(vec_to_illum_body) * mag(vec_to_occult_body)
-##                c = math.acos(c_numerator / c_denominator)
-##
-##                if b > a + c:
-##                    s_c = 1
-##                    
-##                elif c < a + b:
-##                    try:
-##                        A = 2 * math.acos((b**2 - a**2 - c**2)/(-2*a*c))
-##                    except ValueError:
-##                        print((b**2 - a**2 - c**2)/(-2*a*c))
-##                        time.sleep(5)
-##                        A = 2 * math.pi
-##                        
-##                    ratio_est = A / (2*math.pi)
-##                    s_c = ratio_est
-##                    
-##                else:
-##                    s_c = 0
-##
-##                # multiple bodies may occlude the source. use the largest occlusion.
-##                if s_c > s:
-##                    s = s_c
-##        
-##        self.occultation = s
-
     def update_mass(self, maneuvers, sim_time, dt):
         # if a vessel makes a maneuver and spends propellant, its mass will change
         # we can auto-update it to make user's life easier (if they wish so)
@@ -130,7 +90,7 @@ class radiation_pressure:
                 if m.type == "const_thrust" and m.t_start <= sim_time <= m.t_start + m.duration:
                     self.mass = m.mass
                 # maneuver finish update
-                elif m.type == "const_thrust" and m.t_start + m.duration >= sim_time and m.t_start + m.duration <= sim_time + dt:
+                elif m.type == "const_thrust" and sim_time <= m.t_start + m.duration <= sim_time + dt:
                     self.mass = m.mass_init - mass_flow * duration
 
             # in case of a const-accel maneuver the user will have to update manaully

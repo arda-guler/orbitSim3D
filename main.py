@@ -68,7 +68,7 @@ def window_resize(window, width, height):
     global gvar_fov, gvar_near_clip, gvar_far_clip, cameras
 
     try:
-        #glfw.get_framebuffer_size(window)
+        # glfw.get_framebuffer_size(window)
         glViewport(0, 0, width, height)
         glLoadIdentity()
         main_cam = cameras[0]
@@ -76,7 +76,8 @@ def window_resize(window, width, height):
         glTranslate(main_cam.pos.x, main_cam.pos.y, main_cam.pos.z)
         main_cam.orient = matrix3x3()
     except ZeroDivisionError:
-        pass # if the window is minimized it makes height = 0, but we don't need to update projection in that case anyway
+        # if the window is minimized it makes height = 0, but we don't need to update projection in that case anyway
+        pass
 
 def read_batch(batch_path):
 
@@ -206,7 +207,7 @@ def import_scenario(scn_filename):
         # import maneuvers
         elif line[0] == "M":
             if line[2] == "const_accel":
-                if (line[5] in preset_orientations):
+                if line[5] in preset_orientations:
                     new_maneuver = maneuver_const_accel(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                         line[5], float(line[6]), float(line[7]), float(line[8]))
                 else:
@@ -216,7 +217,7 @@ def import_scenario(scn_filename):
                                                         float(line[6]), float(line[7]), float(line[8]))
                     
             elif line[2] == "const_thrust":
-                if (line[5] in preset_orientations):
+                if line[5] in preset_orientations:
                     new_maneuver = maneuver_const_thrust(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                          line[5], float(line[6]), float(line[7]), float(line[8]),
                                                          float(line[9]), float(line[10]))
@@ -228,7 +229,7 @@ def import_scenario(scn_filename):
                                                          float(line[9]), float(line[10]))
 
             elif line[2] == "impulsive":
-                if (line[5] in preset_orientations):
+                if line[5] in preset_orientations:
                     new_maneuver = maneuver_impulsive(line[1], find_obj_by_name(line[3]), find_obj_by_name(line[4]),
                                                       line[5], float(line[6]), float(line[7]))
                 else:
@@ -299,26 +300,7 @@ def export_scenario(scn_filename):
         print("Writing header...")
         header_string = """
 ;.osf -- orbitSim3D scenario format
-;
-;An arbitrary file extension/format to
-;distinguish scenario files from
-;regular text files for human reading.
-;
-;Lines starting in B are for bodies,
-;lines starting in V are for vessels,
-;lines starting in M are for maneuvers,
-;lines starting in S are for surface points,
-;lines starting in C are for barycenters,
-;lines starting in R are for radiation pressure effects,
-;lines starting in A are for atmoshperic drag effects.
-;
-;All other lines will be ignored and
-;can be used for comments.
-;
-;(For redundancy, you can use an
-;arbitrary non-letter character to
-;denote comments.)
-;
+; This scenario was exported by orbitSim3D.
 ;= = = = = = = = = =\n
 """
                          
@@ -868,7 +850,7 @@ def flush_input():
         while msvcrt.kbhit():
             msvcrt.getch()
     except ImportError:
-        import sys, termios    #for linux/unix
+        import sys, termios  # for linux/unix
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
 def get_active_cam():
@@ -901,8 +883,8 @@ def main(scn_filename=None, start_time=0):
     glfw.init()
 
     # creating a window
-    window = glfw.create_window(int(window_x),int(window_y),"OrbitSim3D", None, None)
-    glfw.set_window_pos(window,100,100)
+    window = glfw.create_window(int(window_x), int(window_y), "OrbitSim3D", None, None)
+    glfw.set_window_pos(window, 100, 100)
     glfw.make_context_current(window)
     glfw.set_window_size_callback(window, window_resize)
     
@@ -1212,7 +1194,7 @@ def main(scn_filename=None, start_time=0):
                 elif command[0] == "create_maneuver":
                     if len(command) == 9 and command[2] == "const_accel":
                         # name, type, vessel, frame, orientation, accel, start, duration
-                        if (not command[5] in preset_orientations):
+                        if not command[5] in preset_orientations:
                             create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                             
                                                         eval(command[5]),
@@ -1226,7 +1208,7 @@ def main(scn_filename=None, start_time=0):
                                                         float(command[6]), float(command[7]), float(command[8]))
                     elif len(command) == 11 and command[2] == "const_thrust":
                         # name, type, vessel, frame, orientation, thrust, mass_init, mass_flow, start, duration
-                        if (not command[5] in preset_orientations):
+                        if not command[5] in preset_orientations:
                             create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
 
                                                          eval(command[5]),
@@ -1243,7 +1225,7 @@ def main(scn_filename=None, start_time=0):
 
                     elif len(command) == 8 and command[2] == "impulsive":
                         # name, type, vessel, frame, orientation, delta_v, perform_time
-                        if (not command[5] in preset_orientations):
+                        if not command[5] in preset_orientations:
                             create_maneuver_impulsive(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                                       eval(command[5]), float(command[6]), float(command[7]))
                         else:
@@ -1881,7 +1863,7 @@ def main(scn_filename=None, start_time=0):
             p.update(sim_time)
             
             # going to display any of the plots?
-            if sim_time >= p.get_end_time() and (sim_time - delta_t) < p.get_end_time():
+            if sim_time >= p.get_end_time() > (sim_time - delta_t):
                 p.display()
 
         # update cameras

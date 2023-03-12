@@ -98,17 +98,17 @@ class matrix3x3:
         return output
 
     def __mul__(self, other):
-        n11 = self.m11 * other.m11 + self.m12 * other.m21 + self.m13 * other.m31;
-        n12 = self.m11 * other.m12 + self.m12 * other.m22 + self.m13 * other.m32;
-        n13 = self.m11 * other.m13 + self.m12 * other.m23 + self.m13 * other.m33;
+        n11 = self.m11 * other.m11 + self.m12 * other.m21 + self.m13 * other.m31
+        n12 = self.m11 * other.m12 + self.m12 * other.m22 + self.m13 * other.m32
+        n13 = self.m11 * other.m13 + self.m12 * other.m23 + self.m13 * other.m33
 
-        n21 = self.m21 * other.m11 + self.m22 * other.m21 + self.m23 * other.m31;
-        n22 = self.m21 * other.m12 + self.m22 * other.m22 + self.m23 * other.m32;
-        n23 = self.m21 * other.m13 + self.m22 * other.m23 + self.m23 * other.m33;
+        n21 = self.m21 * other.m11 + self.m22 * other.m21 + self.m23 * other.m31
+        n22 = self.m21 * other.m12 + self.m22 * other.m22 + self.m23 * other.m32
+        n23 = self.m21 * other.m13 + self.m22 * other.m23 + self.m23 * other.m33
 
-        n31 = self.m31 * other.m11 + self.m32 * other.m21 + self.m33 * other.m31;
-        n32 = self.m31 * other.m12 + self.m32 * other.m22 + self.m33 * other.m32;
-        n33 = self.m31 * other.m13 + self.m32 * other.m23 + self.m33 * other.m33;
+        n31 = self.m31 * other.m11 + self.m32 * other.m21 + self.m33 * other.m31
+        n32 = self.m31 * other.m12 + self.m32 * other.m22 + self.m33 * other.m32
+        n33 = self.m31 * other.m13 + self.m32 * other.m23 + self.m33 * other.m33
 
         return matrix3x3(n11, n12, n13, n21, n22, n23, n31, n32, n33)
 
@@ -119,15 +119,15 @@ class matrix3x3:
         c = math.cos(a)
         s = math.sin(a)
 
-        m11 = v.x * v.x * (1 - c) + c;
-        m12 = v.x * v.y * (1 - c) - v.z * s;
-        m13 = v.x * v.z * (1 - c) + v.y * s;
-        m21 = v.y * v.x * (1 - c) + v.z * s;
-        m22 = v.y * v.y * (1 - c) + c;
-        m23 = v.y * v.z * (1 - c) - v.x * s;
-        m31 = v.x * v.z * (1 - c) - v.y * s;
-        m32 = v.y * v.z * (1 - c) + v.x * s;
-        m33 = v.z * v.z * (1 - c) + c;
+        m11 = v.x * v.x * (1 - c) + c
+        m12 = v.x * v.y * (1 - c) - v.z * s
+        m13 = v.x * v.z * (1 - c) + v.y * s
+        m21 = v.y * v.x * (1 - c) + v.z * s
+        m22 = v.y * v.y * (1 - c) + c
+        m23 = v.y * v.z * (1 - c) - v.x * s
+        m31 = v.x * v.z * (1 - c) - v.y * s
+        m32 = v.y * v.z * (1 - c) + v.x * s
+        m33 = v.z * v.z * (1 - c) + c
 
         rotation_matrix = matrix3x3(m11, m12, m13, m21, m22, m23, m31, m32, m33)
 
@@ -138,13 +138,13 @@ class matrix3x3:
         return self.rotate_rel_X(rotation[0]).rotate_rel_Y(rotation[1]).rotate_rel_Z(rotation[2])
 
     def rotate_rel_X(self, angle):
-        return self.rotated(angle, vec3(1,0,0))
+        return self.rotated(angle, vec3(1, 0, 0))
 
     def rotate_rel_Y(self, angle):
-        return self.rotated(angle, vec3(0,1,0))
+        return self.rotated(angle, vec3(0, 1, 0))
 
     def rotate_rel_Z(self, angle):
-        return self.rotated(angle, vec3(0,0,1))
+        return self.rotated(angle, vec3(0, 0, 1))
 
     def rotate_abs_X(self, angle):
         return self.rotated(angle, self.vx())

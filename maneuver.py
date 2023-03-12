@@ -98,7 +98,7 @@ class maneuver_const_accel(maneuver):
 
             # if the orientation is set as "dynamic"
             # it needs to be updated every frame
-            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
                 self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
@@ -131,7 +131,7 @@ class maneuver_const_accel(maneuver):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
         if not type(self.orientation_input) == type(vec3()):
-            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
                 output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
             else:
                 output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()
@@ -194,7 +194,7 @@ class maneuver_const_thrust(maneuver):
 
             # if the orientation is set as "dynamic"
             # it needs to be updated every frame
-            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
                 self.orientation = self.orientation_input
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
@@ -227,7 +227,7 @@ class maneuver_const_thrust(maneuver):
         output = "Vessel: " + self.vessel.get_name() + "\n"
         
         if not type(self.orientation_input) == type(vec3()):
-            if (type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic"):
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
                 output += "Orientation: " + self.orientation_input[0:-8] + " (dynamic) rel to " + self.frame_body.get_name()
             else:
                 output += "Orientation: " + self.orientation_input[-8:] + " rel to " + self.frame_body.get_name()

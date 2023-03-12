@@ -1,5 +1,5 @@
 # this is used to mark surface features or
-# space ports that move with the surface of the
+# spaceports that move with the surface of the
 # body they are on
 
 import math

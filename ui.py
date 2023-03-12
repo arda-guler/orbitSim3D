@@ -17,9 +17,9 @@ def drawPoint2D(x, y, color, camera):
     x1 = x * 100
     y1 = y * 100
 
-    glVertex3f((x1) * camera.get_orient().m11 + (y1) * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               (x1) * camera.get_orient().m12 + (y1) * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               (x1) * camera.get_orient().m13 + (y1) * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
+               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
+               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
 
     glEnd()
     
@@ -39,13 +39,13 @@ def drawLine2D(x1, y1, x2, y2, color, camera):
     y1 = y1 * 100
     x2 = x2 * 100
     y2 = y2 * 100
-    glVertex3f((x1) * camera.get_orient().m11 + (y1) * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               (x1) * camera.get_orient().m12 + (y1) * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               (x1) * camera.get_orient().m13 + (y1) * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
+               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
+               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
     
-    glVertex3f((x2) * camera.get_orient().m11 + (y2) * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               (x2) * camera.get_orient().m12 + (y2) * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               (x2) * camera.get_orient().m13 + (y2) * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    glVertex3f(x2 * camera.get_orient().m11 + y2 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
+               x2 * camera.get_orient().m12 + y2 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
+               x2 * camera.get_orient().m13 + y2 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
     glEnd()
     glPopMatrix()
 
