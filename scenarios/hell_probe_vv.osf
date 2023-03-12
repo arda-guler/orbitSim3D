@@ -1,0 +1,55 @@
+;  HELL_PROBE_VV.OSF
+;  Author: arda-guler
+;
+;Venus, the twin sister of planet Earth. That
+;terrestrial planet has a diameter and mass
+;that's pretty close to that of our own home
+;in the Solar System. It also has a dense atmosphere
+;with thick cloud layers. It is literally the hottest
+;planet in the Solar system thanks to the greenhouse
+;effect and its proximity to the Sun. This active
+;planet is rich in volcanism and tectonics, and it
+;is often blessed with acid rains. If hell was a planet
+;in our own Solar System, Venus would make a perfect
+;candidate. Reminds you of Earth, does it not?
+;
+;No?
+;
+;Well, that sounds like a you problem. Either way, we have 
+;reasons to probe that planet.
+;
+;In this scenario, a probe in a parking orbit
+;around Earth is sent on an interplanetary mission
+;to Venus, where it will orbit the planet and gather
+;data. If you wish, you can delete the planned maneuvers
+;and create a more optimized trajectory with less Delta-V
+;requirements. If you feel like it, you can try a gravity
+;assist to Mars!
+;
+;The difference between this scenario and hell_probe.osf is that
+;this one is supposed to be used with the Velocity Verlet integrator.
+;
+;Bodies
+;
+B|Sol|data/models/minisol.obj|1988500000000000000000000000000|695700000|[1.0,0.94,0.12]|[612210148.2327719,23777613.749065932,-1231225282.185268]|[-13.94661251899787,0.2936834260584492,-7.718009418492464]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|3.9E26|0|0
+;
+B|Mercury|data/models/minimercury.obj|330200000000000000000000|2440000|[0.87,0.80,0.77]|[-14247274683.64399,-6119430447.419096,52503234018.724945]|[49123.0263288905,3692.157985321799,3518.899955720336]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+B|Venus|data/models/minivenus.obj|4868500000000000000000000|6051840|[1.0,0.93,0.69]|[-80676422364.02856,-5266002422.753338,71104816597.22885]|[23138.976136809488,-1178.38576641836,25924.81374673003]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+B|Earth|data/models/miniearth.obj|5972190000000000000000000|6371000|[0.04,0.15,0.85]|[25856294836.110878,21599789.2998755,146329330234.741]|[29247.01802867118,-1.177581752415335,-5509.084949671387]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+B|Mars|data/models/minimars.obj|641710000000000000000000|3389920|[0.91,0.31,0.23]|[-52092777889.85413,4770885429.896569,-239785074140.9292]|[-21603.01320167865,-602.4785914127522,6120.267805164572]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+B|Jupiter|data/models/minijupiter.obj|1898187220000000000000000000|69911000|[0.90,0.79,0.72]|[-364650072337.8086,-13111891700.27162,653691331042.8435]|[12023.981189417898,-188.7424672028821,6208.6482020211615]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+;
+;Vessels
+;
+V|akaito|data/models/miniprobe.obj|[1,0,0]|[25855116656.51324,21599789.2998755,146322662526.45135]|[21712.734152725934,-188.7424672028821,-4177.782025213]
+;
+;Maneuvers
+M|mnv_escape|const_accel|akaito|Earth|prograde|30|4920|117
+M|mnv_align|const_accel|akaito|Sol|normal|10|5930000|177
+M|mnv_sync|const_accel|akaito|Sol|retrograde_dynamic|9.0|5930200.0|4.0
+M|mnv_inject|const_accel|akaito|Venus|retrograde_dynamic|10.0|14195150.0|270.0
+;

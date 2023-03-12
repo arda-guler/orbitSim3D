@@ -36,6 +36,18 @@ class maneuver_impulsive(maneuver):
             self.done = True
             self.draw_point = self.vessel.get_draw_pos()
 
+    # Ok, here is a hack. Since this is an instantaneous maneuver, we don't deal with accelerations.
+    # So we let this function update the velocity and return a null acceleration so the solver doesn't
+    # apply anything (because this function already does what needs to be done).
+    def get_accel(self, current_time, delta_t):
+        if (not self.done) and current_time >= self.t_perform:
+            self.set_orientation()
+            self.vessel.set_vel(self.vessel.get_vel() + self.orientation * self.delta_v)
+            self.done = True
+            self.draw_point = self.vessel.get_draw_pos()
+
+        return vec3(0, 0, 0)
+
     def is_performing(self, current_time):
         return False
 
@@ -103,6 +115,27 @@ class maneuver_const_accel(maneuver):
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
             self.done = True
+
+    # basically identical to perform_maneuver but doesn't auto-update the vessel, instead returns the acceleration vector
+    def get_accel(self, current_time, delta_t):
+        accel_vec = vec3(0, 0, 0)
+
+        if (not self.done) and current_time >= self.t_start:
+            self.set_orientation()
+
+            accel_vec = self.orientation * self.accel
+
+            self.draw_vertices.append(self.vessel.get_draw_pos())
+
+            # if the orientation is set as "dynamic"
+            # it needs to be updated every frame
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
+                self.orientation = self.orientation_input
+
+        if (not self.done) and (current_time > (self.t_start + self.duration)):
+            self.done = True
+
+        return accel_vec
 
     def is_performing(self, current_time):
         if not self.done and current_time >= self.t_start:
@@ -199,6 +232,33 @@ class maneuver_const_thrust(maneuver):
             
         if (not self.done) and (current_time > (self.t_start + self.duration)):
             self.done = True
+
+    # basically identical to perform_maneuver but doesn't auto-update the vessel, instead returns the acceleration vector
+    def get_accel(self, current_time, delta_t):
+        accel_vec = vec3(0, 0, 0)
+
+        if (not self.done) and current_time >= self.t_start:
+            self.set_orientation()
+
+            if self.mass <= 0:
+                self.done = True
+                return
+
+            accel = self.thrust / self.mass
+            self.mass -= self.mass_flow * delta_t
+
+            accel_vec = self.orientation * accel
+            self.draw_vertices.append(self.vessel.get_draw_pos())
+
+            # if the orientation is set as "dynamic"
+            # it needs to be updated every frame
+            if type(self.orientation_input) == str and self.orientation_input[-8:] == "_dynamic":
+                self.orientation = self.orientation_input
+
+        if (not self.done) and (current_time > (self.t_start + self.duration)):
+            self.done = True
+
+        return accel_vec
 
     def is_performing(self, current_time):
         if not self.done and current_time >= self.t_start:

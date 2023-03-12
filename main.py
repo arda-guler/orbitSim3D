@@ -1,13 +1,13 @@
-import OpenGL
-from OpenGL.GL import *
-from OpenGL.GLU import *
+# import OpenGL
+# from OpenGL.GL import *
+# from OpenGL.GLU import *
 import pywavefront
 import os
 import keyboard
 import glfw
-import time
+# import time
 import re
-import shutil
+# import shutil
 import sys
 import random
 import glob
@@ -18,7 +18,7 @@ from body_class import *
 from camera_class import *
 from surface_point_class import *
 from barycenter_class import *
-from math_utils import *
+# from math_utils import *
 from maneuver import *
 from orbit import *
 from plot import *
@@ -26,7 +26,8 @@ from command_panel import *
 from config_utils import *
 from radiation_pressure import *
 from atmospheric_drag import *
-from vector3 import *
+# from vector3 import *
+from solver import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -872,7 +873,7 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type = read_current_config()
 
     # set global vars
     gvar_fov = fov
@@ -1506,6 +1507,16 @@ def main(scn_filename=None, start_time=0):
                 elif command[0] == "export":
                     export_scenario(command[1])
 
+                # SOLVER_TYPE command
+                # This command is not exposed in the help text or the command panel
+                # because I think changing the solver in the middle of a simulation is not
+                # something that should be encouraged. Regardless, it is possible to do it.
+                # This is mainly here for scenario authors to set their integrators to a
+                # predefined method at the scenario start so everyone will experience
+                # the intended playback.
+                elif command[0] == "solver_type":
+                    solver_type = int(command[1])
+
                 # HELP command
                 elif command[0] == "help":
                     if len(command) == 1:
@@ -1799,64 +1810,26 @@ def main(scn_filename=None, start_time=0):
             rapid_compute_buffer.remove(rapid_compute_buffer[0])
 
         # update physics
-        for rp in radiation_pressures:
-            rp.update_occultation(bodies)
-            rp.update_mass(maneuvers, sim_time, delta_t)
-            accel = rp.calc_accel()
-            rp.vessel.update_vel(accel, delta_t)
-            # do not update vessel position in this 'for' loop, we did not apply all accelerations!
 
-        for ad in atmospheric_drags:
-            ad.update_mass(maneuvers, sim_time, delta_t)
-            accel = ad.calc_accel()
-            ad.vessel.update_vel(accel, delta_t)
-            # do not update vessel position in this 'for' loop, we did not apply all accelerations!
-
+        # lower delta_t if a maneuver is in progress
         for m in maneuvers:
-            # lower delta_t if a maneuver is in progress
             if maneuver_auto_dt and ((delta_t > maneuver_auto_dt and (m.get_state(sim_time) == "Performing" or
-               (m.get_state(sim_time) == "Pending" and not m.get_state(sim_time+delta_t) == "Pending")))):
+                                                                      (m.get_state(
+                                                                          sim_time) == "Pending" and not m.get_state(
+                                                                          sim_time + delta_t) == "Pending")))):
                 delta_t = maneuver_auto_dt
-                
-            m.perform_maneuver(sim_time, delta_t)
-        
+
+        # compute time step with the selected solver
+        if not solver_type == 1:
+            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+        else:
+            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+
+        # check collisions
         for v in vessels:
-            accel = vec3(0, 0, 0)
-
             for b in bodies:
-
                 if vessel_body_collision and v.get_alt_above(b) <= 0:
                     vessel_body_crash(v, b)
-
-                accel = accel + v.get_gravity_by(b)
-
-            v.update_vel(accel, delta_t)
-
-        for x in bodies:
-            accel = vec3(0,0,0)
-            for y in bodies:
-                if not x == y: # don't attempt to apply gravity to self
-                    accel = accel + x.get_gravity_by(y)
-
-            x.update_vel(accel, delta_t)
-
-        # update positions after all accelerations are calculated
-        for v in vessels:
-            v.update_pos(delta_t)
-            v.update_traj_history()
-            v.update_draw_traj_history()
-
-        for x in bodies:
-            x.update_pos(delta_t)
-
-            # planets rotate!
-            x.update_orient(delta_t)
-
-        # update surface point positions
-        for sp in surface_points:
-            # this doesn't require a delta_t since it only uses
-            # parent body attributes
-            sp.update_state_vectors(delta_t)
 
         # update plots
         for p in plots:
@@ -1914,9 +1887,9 @@ def main(scn_filename=None, start_time=0):
 
                 # absolute pos and vel magnitude
                 elif element[1] == "pos_mag":
-                    print(element[0], mag(element[2].get_pos()))
+                    print(element[0], (element[2].get_pos().mag()))
                 elif element[1] == "vel_mag":
-                    print(element[0], mag(element[2].get_vel()))
+                    print(element[0], (element[2].get_vel().mag()))
 
                 # altitude
                 elif element[1] == "alt":

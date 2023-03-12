@@ -4,6 +4,7 @@
 ;
 ; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 ;
+solver_type 0
 rapid_compute 100 2650
 rapid_compute 2950 3990
 rapid_compute 4130 7630

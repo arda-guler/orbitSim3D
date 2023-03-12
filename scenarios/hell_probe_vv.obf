@@ -1,6 +1,6 @@
 ;.obf -- orbitSim3D batch format
 ;
-solver_type 0
+solver_type 1
 lock_origin akaito
 clear traj_visuals
 ;
@@ -29,7 +29,7 @@ show mnv_inject state INJECT
 auto_dt 5920000 1000
 auto_dt 5929000 100
 auto_dt 5930250 10000
-auto_dt 14291250 2500
-auto_dt 14301250 1000
-auto_dt 14310250 100
+auto_dt 14181150 2500
+auto_dt 14191150 1000
+auto_dt 14194150 100
 ;
