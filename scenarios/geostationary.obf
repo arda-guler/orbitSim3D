@@ -1,2 +1,5 @@
 show Hacivat horizon_angle Eq1 HACIVAT_ANGLE_ABOVE_HORIZON
 show Karagoz horizon_angle Eq2 KARAGOZ_ANGLE_ABOVE_HORIZON
+create_plot HacivatGroundTrack groundtrack Hacivat Earth 50 12000
+create_plot KaragozGroundTrack groundtrack Karagoz Earth 50 12000
+;

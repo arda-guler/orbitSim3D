@@ -83,6 +83,15 @@ def impact_gpos(bcc):
     else:
         tlon = -270 + lon
 
+    # the two ifs below are unnecessary.
+    # this can be fixed instead by modifying
+    # the calculations above.
+    if tlon < -180:
+        tlon += 360
+
+    elif tlon > 180:
+        tlon -= 360
+
     return [lat, tlon, alt]
 
 def abs2frame_coords(abs_coords, body):

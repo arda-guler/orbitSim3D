@@ -714,6 +714,12 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
         new_plot = plot(name, "Time", [], "Velocity of " + obj1_name + " rel to " + obj2_name, [],
                         obj1, obj2, "vel_mag", start_time, end_time)
 
+    elif variable == "groundtrack":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Longitude", [], "Latitude", [], obj1, obj2, "groundtrack",
+                        start_time, end_time)
+
     plots.append(new_plot)
 
 def delete_plot(name):
