@@ -1,9 +1,6 @@
 from vector3 import *
 
 def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
-    vessel_accels = []
-    body_accels = []
-
     # update physics
     for rp in radiation_pressures:
         rp.update_occultation(bodies)
@@ -54,6 +51,15 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
         sp.update_state_vectors(delta_t)
 
 def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
+    
+    # update masses and occultation calculations
+    for ad in atmospheric_drags:
+        ad.update_mass(maneuvers, sim_time, delta_t)
+
+    for rp in radiation_pressures:
+        rp.update_occultation(bodies)
+        rp.update_mass(maneuvers, sim_time, delta_t)
+        
     # - - - FIRST ACCELERATIONS - - -
     vessel_accels_1 = [vec3(0, 0, 0)] * len(vessels)
     body_accels_1 = [vec3(0, 0, 0)] * len(bodies)
@@ -73,21 +79,24 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
 
     # calculate vessel accelerations due to maneuvers
     for m in maneuvers:
-        v_idx = vessels.index(m.vessel)
-        accel_vec = m.get_accel(sim_time, delta_t)
-        vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+        if m.vessel in vessels:
+            v_idx = vessels.index(m.vessel)
+            accel_vec = m.get_accel(sim_time, delta_t)
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
     # calculate vessel accelerations due to atmospheric drag
     for ad in atmospheric_drags:
-        v_idx = vessels.index(ad.vessel)
-        accel_vec = ad.calc_accel()
-        vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+        if ad.vessel in vessels:
+            v_idx = vessels.index(ad.vessel)
+            accel_vec = ad.calc_accel()
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
     # calculate vessel accelerations due to radiation pressure
     for rp in radiation_pressures:
-        v_idx = vessels.index(rp.vessel)
-        accel_vec = rp.calc_accel()
-        vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+        if rp.vessel in vessels:
+            v_idx = vessels.index(rp.vessel)
+            accel_vec = rp.calc_accel()
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
     # - - - POSITION UPDATE - - -
     for b in bodies:
@@ -117,21 +126,24 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
 
     # calculate vessel accelerations due to maneuvers
     for m in maneuvers:
-        v_idx = vessels.index(m.vessel)
-        accel_vec = m.get_accel((sim_time + delta_t), delta_t)
-        vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+        if m.vessel in vessels:
+            v_idx = vessels.index(m.vessel)
+            accel_vec = m.get_accel((sim_time + delta_t), delta_t)
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
     # calculate vessel accelerations due to atmospheric drag
     for ad in atmospheric_drags:
-        v_idx = vessels.index(ad.vessel)
-        accel_vec = ad.calc_accel()
-        vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+        if ad.vessels in vessels:
+            v_idx = vessels.index(ad.vessel)
+            accel_vec = ad.calc_accel()
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
     # calculate vessel accelerations due to radiation pressure
     for rp in radiation_pressures:
-        v_idx = vessels.index(rp.vessel)
-        accel_vec = rp.calc_accel()
-        vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+        if rp.vessel in vessels:
+            v_idx = vessels.index(rp.vessel)
+            accel_vec = rp.calc_accel()
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
     # - - - VELOCITY UPDATE - - -
     for b in bodies:

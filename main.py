@@ -816,7 +816,7 @@ def vessel_body_crash(v, b):
     for p in plots:
         if p.obj1 == v or p.obj2 == v:
             p.display()
-            delete_plot(p.name)
+            delete_plot(p.title)
 
     # orbit projections can stay since their calculation time is known
 
