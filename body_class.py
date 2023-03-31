@@ -79,7 +79,7 @@ class body():
         return self.vel - obj.vel
 
     def get_vel_mag(self):
-        return mag(self.vel)
+        return self.vel.mag()
 
     def get_vel_mag_rel_to(self, obj):
         return (self.vel - obj.vel).mag()

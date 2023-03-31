@@ -314,7 +314,6 @@ def drawVesselLabels(vs, cam, offset=0.05):
 def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
 
     for p in ps:
-        center = p.body.get_draw_pos()
         pe_adjusted = p.draw_pe + p.get_body().get_draw_pos()
         ap_adjusted = p.draw_ap + p.get_body().get_draw_pos()
         an_adjusted = p.draw_an + p.get_body().get_draw_pos()
@@ -369,7 +368,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)
 
-    if not active_cam.get_lock() and labels_visible:
+    if labels_visible:
         glEnable(GL_LINE_SMOOTH)
         drawBarycenterLabels(barycenters, active_cam)
         drawBodyLabels(bodies, active_cam)
@@ -377,14 +376,12 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
         drawVesselLabels(vessels, active_cam)
         glDisable(GL_LINE_SMOOTH)
 
+    drawProjections(projections)
+    if labels_visible:
+        drawProjectionLabels(projections, active_cam)
     # draw trajectory and predictions
     if show_trajectories:
-        
-        drawProjections(projections)
         glEnable(GL_LINE_SMOOTH)
-        if not active_cam.get_lock() and labels_visible:
-            drawProjectionLabels(projections, active_cam)
-            
         drawTrajectories(vessels, scene_lock)
         drawManeuvers(maneuvers, point_size, active_cam)
         glDisable(GL_LINE_SMOOTH)

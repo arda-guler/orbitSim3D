@@ -133,7 +133,7 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
 
     # calculate vessel accelerations due to atmospheric drag
     for ad in atmospheric_drags:
-        if ad.vessels in vessels:
+        if ad.vessel in vessels:
             v_idx = vessels.index(ad.vessel)
             accel_vec = ad.calc_accel()
             vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec

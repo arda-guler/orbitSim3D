@@ -72,7 +72,7 @@ class barycenter:
         return [sum_x/self.get_mass(), sum_y/self.get_mass(), sum_z/self.get_mass()]
 
     def get_vel_mag(self):
-        return mag(self.vel)
+        return self.vel.mag()
 
     def get_draw_pos(self):
         return self.get_pos() * visual_scaling_factor

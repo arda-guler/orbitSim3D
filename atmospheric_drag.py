@@ -42,8 +42,8 @@ class atmospheric_drag:
                 if m.type == "const_thrust" and m.t_start <= sim_time <= m.t_start + m.duration:
                     self.mass = m.mass
                 # maneuver finish update
-                elif m.type == "const_thrust" and m.t_start + m.duration >= sim_time and m.t_start + m.duration <= sim_time + dt:
-                    self.mass = m.mass_init - mass_flow * duration
+                elif m.type == "const_thrust" and sim_time <= m.t_start + m.duration <= sim_time + dt:
+                    self.mass = m.mass_init - m.mass_flow * m.duration
 
             # in case of a const-accel maneuver the user will have to update manaully
             # if siginificant propellant mass was spent
