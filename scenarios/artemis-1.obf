@@ -1,5 +1,6 @@
 create_projection luna-orbit Luna Earth
 lock_origin Earth
+lock_cam Orion
 clear traj_visuals
 output_rate 20
 show Orion alt Earth ALT_EARTH_M

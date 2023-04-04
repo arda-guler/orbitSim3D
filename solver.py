@@ -166,5 +166,106 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         v.update_traj_history()
         v.update_draw_traj_history()
 
+def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
+
+    # update masses and occultation calculations
+    for ad in atmospheric_drags:
+        ad.update_mass(maneuvers, sim_time, delta_t)
+
+    for rp in radiation_pressures:
+        rp.update_occultation(bodies)
+        rp.update_mass(maneuvers, sim_time, delta_t)
+
+    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+        vessel_accels = [vec3(0, 0, 0)] * len(vessels)
+        body_accels = [vec3(0, 0, 0)] * len(bodies)
+
+        # calculate celestial body accelerations due to gravity
+        for x in bodies:
+            for y in bodies:
+                if not x == y:
+                    b_idx = bodies.index(x)
+                    body_accels[b_idx] = body_accels[b_idx] + x.get_gravity_by(y)
+
+        # calculate vessel accelerations due to gravity
+        for v in vessels:
+            v_idx = vessels.index(v)
+            for b in bodies:
+                vessel_accels[v_idx] = vessel_accels[v_idx] + v.get_gravity_by(b)
+
+        # calculate vessel accelerations due to maneuvers
+        for m in maneuvers:
+            if m.vessel in vessels:
+                v_idx = vessels.index(m.vessel)
+                accel_vec = m.get_accel(sim_time, delta_t)
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to atmospheric drag
+        for ad in atmospheric_drags:
+            if ad.vessel in vessels:
+                v_idx = vessels.index(ad.vessel)
+                accel_vec = ad.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to radiation pressure
+        for rp in radiation_pressures:
+            if rp.vessel in vessels:
+                v_idx = vessels.index(rp.vessel)
+                accel_vec = rp.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        return vessel_accels, body_accels
+
+    def update_objs_pos(vessels, bodies, const, dt):
+        for v in vessels:
+            v.pos = v.pos + v.vel * const * dt
+
+        for b in bodies:
+            b.pos = b.pos + b.vel * const * dt
+
+    def update_objs_vel(vessels, bodies, const, vacc, bacc, dt):
+        for idx_v, v in enumerate(vessels):
+            v.vel = v.vel + vacc[idx_v] * const * dt
+
+        for idx_b, b in enumerate(bodies):
+            b.vel = b.vel + bacc[idx_b] * const * dt
+
+    # - - - CONSTANTS - - -
+    # w0 = -1.7024143839193153
+    # w1 = 1.3512071919596578
+    c1 = 0.6756035959798289
+    c2 = -0.17560359597982877
+    c3 = -0.17560359597982877
+    c4 = 0.6756035959798289
+    d1 = 1.3512071919596578
+    d2 = -1.7024143839193153
+    d3 = 1.3512071919596578
+
+    update_objs_pos(vessels, bodies, c1, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    update_objs_vel(vessels, bodies, d1, vacc, bacc, delta_t)
+
+    update_objs_pos(vessels, bodies, c2, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    update_objs_vel(vessels, bodies, d2, vacc, bacc, delta_t)
+
+    update_objs_pos(vessels, bodies, c3, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    update_objs_vel(vessels, bodies, d3, vacc, bacc, delta_t)
+
+    update_objs_pos(vessels, bodies, c4, delta_t)
+
+    # planet orientation update
+    for b in bodies:
+        b.update_orient(delta_t)
+
+    for sp in surface_points:
+        sp.update_state_vectors(delta_t)
+
+    # update graphics related things
+    for v in vessels:
+        v.update_traj_history()
+        v.update_draw_traj_history()
+
 # def RK89() ?
 # Maybe with a not-energy-conserving warning.

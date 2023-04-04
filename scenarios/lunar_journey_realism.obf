@@ -1,4 +1,5 @@
-lock_origin lunar-orbiter
+lock_origin Earth
+lock_cam lunar-orbiter
 clear traj_visuals
 create_projection luna-orbit Luna Earth
 ;

@@ -1826,10 +1826,12 @@ def main(scn_filename=None, start_time=0):
                 delta_t = maneuver_auto_dt
 
         # compute time step with the selected solver
-        if not solver_type == 1:
+        if solver_type == 0:
             SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
-        else:
+        elif solver_type == 1:
             VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+        else:
+            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
 
         # check collisions
         for v in vessels:
