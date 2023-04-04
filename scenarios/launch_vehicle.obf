@@ -8,8 +8,10 @@ show LV vel_mag pad VEL_SITE
 show drag params DRAG
 create_plot pl_alt alt LV Earth 0 600
 create_plot pl_vel vel_mag LV Earth 0 600
+create_plot Track groundtrack LV Earth 0 6000
 ;
-lock_origin pad
+lock_origin Earth
 clear traj_visuals
 delta_t 0.5
+lock_cam LV
 ;

@@ -154,6 +154,9 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         v_idx = vessels.index(v)
         v.set_vel(v.vel + (vessel_accels_1[v_idx] + vessel_accels_2[v_idx]) * 0.5 * delta_t)
 
+    for m in maneuvers:
+        m.update_mass(sim_time, delta_t)
+
     # planet orientation update
     for b in bodies:
         b.update_orient(delta_t)
@@ -254,6 +257,10 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     update_objs_vel(vessels, bodies, d3, vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, c4, delta_t)
+
+    # this has to be done separately
+    for m in maneuvers:
+        m.update_mass(sim_time, delta_t)
 
     # planet orientation update
     for b in bodies:

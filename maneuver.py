@@ -48,6 +48,9 @@ class maneuver_impulsive(maneuver):
 
         return vec3(0, 0, 0)
 
+    def update_mass(self, dummy1, dummy2):
+        pass
+
     def is_performing(self, current_time):
         return False
 
@@ -136,6 +139,9 @@ class maneuver_const_accel(maneuver):
             self.done = True
 
         return accel_vec
+
+    def update_mass(self, dummy1, dummy2):
+        pass
 
     def is_performing(self, current_time):
         if not self.done and current_time >= self.t_start:
@@ -245,7 +251,6 @@ class maneuver_const_thrust(maneuver):
                 return
 
             accel = self.thrust / self.mass
-            self.mass -= self.mass_flow * delta_t
 
             accel_vec = self.orientation * accel
             self.draw_vertices.append(self.vessel.get_draw_pos())
@@ -259,6 +264,10 @@ class maneuver_const_thrust(maneuver):
             self.done = True
 
         return accel_vec
+
+    def update_mass(self, current_time, delta_t):
+        if (not self.done) and current_time >= self.t_start:
+            self.mass -= self.mass_flow * delta_t
 
     def is_performing(self, current_time):
         if not self.done and current_time >= self.t_start:
