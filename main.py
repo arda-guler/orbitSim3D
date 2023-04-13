@@ -287,15 +287,16 @@ def import_scenario(scn_filename):
             
     main(scn_filename, start_time)
 
-def export_scenario(scn_filename):
+def export_scenario(scn_filename, verbose=True):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, sim_time
     
     scn_filename = "scenarios/" + scn_filename
     if not scn_filename.endswith(".osf"):
         scn_filename += ".osf"
 
-    clear_cmd_terminal()
-    print("Saving scenario into " + scn_filename)
+    if verbose:
+        clear_cmd_terminal()
+        print("Saving scenario into " + scn_filename)
         
     with open(scn_filename, "w") as scn_file:
         print("Writing header...")
@@ -307,13 +308,15 @@ def export_scenario(scn_filename):
                          
         scn_file.write(header_string)
 
-        print("Writing simulation time...")
+        if verbose:
+            print("Writing simulation time...")
         time_save_string = "T|" + str(sim_time) + "\n"
         scn_file.write(time_save_string)
 
         scn_file.write("\n")
 
-        print("Writing bodies...")
+        if verbose:
+            print("Writing bodies...")
         for b in bodies:
             body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
                                str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos().tolist()) + "|" +\
@@ -324,7 +327,8 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Writing vessels...")
+        if verbose:
+            print("Writing vessels...")
         for v in vessels:
             vessel_save_string = "V|" + v.get_name() + "|" + v.get_model_path() + "|" + str(v.get_color()) + "|" +\
                                  str(v.get_pos().tolist()) + "|" + str(v.get_vel().tolist()) + "\n"
@@ -332,7 +336,8 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Writing maneuvers...")
+        if verbose:
+            print("Writing maneuvers...")
         for m in maneuvers:
             maneuver_save_string = "M|" + m.get_name() + "|"
             if m.get_type() == "const_accel":
@@ -350,14 +355,16 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Writing surface points...")
+        if verbose:
+            print("Writing surface points...")
         for s in surface_points:
             sp_save_string = "S|" + s.get_name() + "|" + s.get_body().get_name() + "|" + str(s.get_color()) + "|" + str(s.get_gpos()) + "\n"
             scn_file.write(sp_save_string)
 
         scn_file.write("\n")
 
-        print("Writing barycenters...")
+        if verbose:
+            print("Writing barycenters...")
         for bc in barycenters:
             bc_save_string = "C|" + bc.get_name() + "|"
             for b in bc.get_bodies():
@@ -367,7 +374,8 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Writing radiation pressures...")
+        if verbose:
+            print("Writing radiation pressures...")
         for rp in radiation_pressures:
             rp_save_string = "R|" + rp.get_name() + "|" + rp.vessel.get_name() + "|" + rp.body.get_name() + "|" + str(rp.get_area()) +\
                              "|" + rp.orientation_frame.get_name() + "|" + str(rp.direction_input) + "|" + str(rp.mass) + "|" + str(rp.mass_auto_update) + "\n"
@@ -375,7 +383,8 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Writing atmospheric drags...")
+        if verbose:
+            print("Writing atmospheric drags...")
         for ad in atmospheric_drags:
             ad_save_string = "A|" + ad.get_name() + "|" + ad.vessel.get_name() + "|" + ad.body.get_name() + "|" + str(ad.get_area()) +\
                              "|" + str(ad.get_drag_coeff()) + "|" + str(ad.get_mass()) + "|" + str(ad.mass_auto_update) + "\n"
@@ -383,8 +392,9 @@ def export_scenario(scn_filename):
 
         scn_file.write("\n")
 
-        print("Scenario export complete!")
-        time.sleep(2)
+        if verbose:
+            print("Scenario export complete!")
+            time.sleep(2)
 
 def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
                                 mnv_duration):
@@ -1827,11 +1837,11 @@ def main(scn_filename=None, start_time=0):
 
         # compute time step with the selected solver
         if solver_type == 0:
-            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
         elif solver_type == 1:
-            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
         else:
-            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt)
+            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
 
         # check collisions
         for v in vessels:
@@ -1976,6 +1986,9 @@ def main(scn_filename=None, start_time=0):
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
 
+    # save latest simulation state
+    export_scenario("_latest", verbose=False)
+
     # destroy OpenGL window and return to menu
     glfw.destroy_window(window)
     init_sim()
@@ -2065,11 +2078,20 @@ def init_sim():
     initial_run = False
     
     print("\n\nOrbitSim3D Initialization\n")
+    print("0) (R)esume Latest Simulation")
     print("1) (L)oad Scenario")
     print("2) (S)tart Empty Scene")
     print("3) (C)onfigure OrbitSim3D")
 
     menu_select = input("\n > ")
+
+    if menu_select == "0" or menu_select.lower() == "r":
+        try:
+            import_scenario("scenarios/_latest.osf")
+        except FileNotFoundError:
+            print("Could not find latest scenario state 'scenarios/_latest.osf'.")
+            time.sleep(2)
+            init_sim()
 
     if menu_select == "1" or menu_select.lower() == "l":
         scn_path = pick_scenario()
@@ -2080,6 +2102,7 @@ def init_sim():
             init_sim()
             
     elif menu_select == "2" or menu_select.lower() == "s":
+        clear_scene()
         main()
 
     elif menu_select == "3" or menu_select.lower() == "c":

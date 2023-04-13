@@ -1,6 +1,6 @@
 from vector3 import *
 
-def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
+def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
     # update physics
     for rp in radiation_pressures:
         rp.update_occultation(bodies)
@@ -50,7 +50,7 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
 
-def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
+def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
     
     # update masses and occultation calculations
     for ad in atmospheric_drags:
@@ -169,7 +169,7 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         v.update_traj_history()
         v.update_draw_traj_history()
 
-def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t, maneuver_auto_dt):
+def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
 
     # update masses and occultation calculations
     for ad in atmospheric_drags:
