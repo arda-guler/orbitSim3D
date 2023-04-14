@@ -923,6 +923,7 @@ def main(scn_filename=None, start_time=0):
     scene_lock = None
     accept_keyboard_input = True
     speed_input_locked = False
+    cycle_dt = 1
 
     sim_time = start_time
 
@@ -972,23 +973,23 @@ def main(scn_filename=None, start_time=0):
 
                 # don't allow rotation on multiple axes at once because the orientation matrix screws up
                 if keyboard.is_pressed(cam_pitch_down):
-                    get_active_cam().rotate([cam_rotate_speed/output_rate,0,0])
+                    get_active_cam().rotate([cam_rotate_speed*cycle_dt,0,0])
                 elif keyboard.is_pressed(cam_pitch_up):
-                    get_active_cam().rotate([-cam_rotate_speed/output_rate,0,0])
+                    get_active_cam().rotate([-cam_rotate_speed*cycle_dt,0,0])
 
                 elif keyboard.is_pressed(cam_yaw_left):
-                    get_active_cam().rotate([0, cam_rotate_speed/output_rate,0])
+                    get_active_cam().rotate([0, cam_rotate_speed*cycle_dt,0])
                 elif keyboard.is_pressed(cam_yaw_right):
-                    get_active_cam().rotate([0, -cam_rotate_speed/output_rate,0])
+                    get_active_cam().rotate([0, -cam_rotate_speed*cycle_dt,0])
 
                 elif keyboard.is_pressed(cam_roll_ccw):
-                    get_active_cam().rotate([0,0,cam_rotate_speed/output_rate])
+                    get_active_cam().rotate([0,0,cam_rotate_speed*cycle_dt])
                 elif keyboard.is_pressed(cam_roll_cw):
-                    get_active_cam().rotate([0,0,-cam_rotate_speed/output_rate])
+                    get_active_cam().rotate([0,0,-cam_rotate_speed*cycle_dt])
 
-                get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed / output_rate,
-                                                (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed / output_rate,
-                                                (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed / output_rate]))
+                get_active_cam().move(vec3(lst=[(keyboard.is_pressed(cam_strafe_left) - keyboard.is_pressed(cam_strafe_right)) * cam_strafe_speed * cycle_dt,
+                                                (keyboard.is_pressed(cam_strafe_down) - keyboard.is_pressed(cam_strafe_up)) * cam_strafe_speed * cycle_dt,
+                                                (keyboard.is_pressed(cam_strafe_forward) - keyboard.is_pressed(cam_strafe_backward)) * cam_strafe_speed * cycle_dt]))
 
                 # adjust camera speed via hotkey
                 if not speed_input_locked and keyboard.is_pressed(cam_increase_speed):

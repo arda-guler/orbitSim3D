@@ -1,0 +1,8 @@
+lock_origin Jupiter
+lock_cam Jupiter
+output_rate 1000
+delta_t 50
+solver_type 2
+cam_strafe_speed 1e5
+show voyager-1 alt Jupiter DIST_JPT
+show voyager-1 vel_mag Jupiter VEL_JPT
