@@ -93,6 +93,8 @@ There are only two configuration files;
 
 - atmospheric_drag.py: The 'atmospheric_drag' class used to simulate the effects of atmospheric drag on spacecraft.
 
+- proximity.py: The 'proximity_zone' class used to check for vessel-to-vessel close passes and collisions.
+
 - math_utils.py: General mathematical functions that are not provided by the math library.
 
 - orbit.py: 2-body Keplerian orbit class that is used for making quick trajectory projections into the future.

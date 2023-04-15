@@ -48,7 +48,8 @@ The list of special characters is given below;
 - Lines starting in S are for surface points,
 - Lines starting in C are for barycenters,
 - Lines starting in R are for radiation pressure effects,
-- Lines starting in A are for atmospheric drag effects.
+- Lines starting in A are for atmospheric drag effects,
+- Lines starting in P are for proximity zones.
 
 Although exporting scenarios through OS3D is usually convenient, sometimes, you might want to make quick little changes to a scenario or engineer all the little details of your digital universe; for which you might want to modify scenario files by hand. For this, the necessary information is given below.
 
@@ -108,3 +109,9 @@ The syntax for denoting the effects of atmospheric drag is as follows;
 A|effect_name|vessel|body|drag_area(m2)|drag_coeff|vessel_mass(kg)|mass_auto_update_option
 ```
 The mass auto-update option automatically reduces vessel mass in case of a constant thrust maneuver, since propellant will be spent.
+
+### Proximity Zone
+The syntax for denoting proximity zones is as follows;
+```
+P|zone_name|vessel|vessel_size(m, radius)|zone_size(m, radius)
+```

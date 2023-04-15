@@ -1,0 +1,8 @@
+auto_dt 1386 0.02
+auto_dt 1386.7 0.002
+auto_dt 1387.1275 0.0002
+auto_dt 1387.1492 0.00002
+auto_dt 1387.15698 1
+show Polyport dist Lance DIST
+show Polyport vel_mag Lance RVEL
+output_rate 5

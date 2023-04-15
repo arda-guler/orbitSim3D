@@ -1,0 +1,23 @@
+;  HYPERVELOCITY.OSF
+;  Author: arda-guler
+;
+; Two vessels on out-of-plane orbits are on a collision course.
+;
+; You can either perform a collision avoidance maneuver or
+; let them do the fireworks in the name of science! Insurance may
+; cover the station, but it sure as hell won't cover the resulting 
+; Kessler syndrome. You will get lynched by the space community.
+; Rightfully so. You've been warned.
+
+;Celestial bodies
+
+B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
+
+;Vessels
+
+V|Lance|data/models/minisat.obj|[1.0,0.0,1.0]|[0,0,6771000]|[7671,0,0]
+V|Polyport|data/models/ministation.obj|[0.0,1.0,1.0]|[0,6771000,0]|[7671,0,0]
+
+; Proximity Zones
+
+P|pzone|Polyport|15|150

@@ -28,6 +28,7 @@ from radiation_pressure import *
 from atmospheric_drag import *
 # from vector3 import *
 from solver import *
+from proximity import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -49,6 +50,7 @@ cameras = []
 maneuvers = []
 radiation_pressures = []
 atmospheric_drags = []
+proximity_zones = []
 
 batch_commands = []
 
@@ -124,7 +126,7 @@ def clear_scene():
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, proximity_zones, sim_time
 
     clear_scene()
 
@@ -284,11 +286,17 @@ def import_scenario(scn_filename):
 
             atmospheric_drags.append(new_ad)
             print("Loading atmospheric drag:", new_ad.get_name())
+
+        # import proximity zone data
+        elif line[0] == "P":
+            new_pz = proximity_zone(line[1], find_obj_by_name(line[2]), float(line[3]), float(line[4]))
+            proximity_zones.append(new_pz)
+            print("Loading proximity zone:", new_pz.name)
             
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, proximity_zones, sim_time
     
     scn_filename = "scenarios/" + scn_filename
     if not scn_filename.endswith(".osf"):
@@ -389,6 +397,14 @@ def export_scenario(scn_filename, verbose=True):
             ad_save_string = "A|" + ad.get_name() + "|" + ad.vessel.get_name() + "|" + ad.body.get_name() + "|" + str(ad.get_area()) +\
                              "|" + str(ad.get_drag_coeff()) + "|" + str(ad.get_mass()) + "|" + str(ad.mass_auto_update) + "\n"
             scn_file.write(ad_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing proximity zones...")
+        for pz in proximity_zones:
+            pz_save_string = "P|" + pz.name + "|" + pz.vessel.get_name() + "|" + str(pz.vessel_size) + "|" + str(pz.zone_size) + "\n"
+            scn_file.write(pz_save_string)
 
         scn_file.write("\n")
 
@@ -581,14 +597,18 @@ def fragment(vessel_name, num_of_frags, vel_of_frags):
         create_vessel(vessel_name + "_frag_" + str(i), "fragment", vessel.get_color(), fragment_pos, fragment_vel)
 
 def delete_vessel(name):
-    global vessels, objs
+    global vessels, objs, proximity_zones
     vessel_tbd = find_obj_by_name(name)
 
     if not vessel_tbd:
         print("Object not found!")
         time.sleep(2)
         return
-    
+
+    for pz in proximity_zones:
+        if vessel_tbd == pz.vessel:
+            delete_proximity_zone(pz.name)
+
     vessels.remove(vessel_tbd)
     objs.remove(vessel_tbd)
     del vessel_tbd
@@ -813,11 +833,46 @@ def create_surface_point(name, b, color, coords):
     except:
         print("Could not create new surface point:", name)
 
+def find_proximity_zone_by_name(pz_name):
+    global proximity_zones
+
+    for pz in proximity_zones:
+        if pz.name == pz_name:
+            return pz
+
+    return None
+
+def create_proximity_zone(pz_name, vessel, vessel_size, zone_size):
+    global proximity_zones
+
+    if find_proximity_zone_by_name(pz_name):
+        print("A proximity zone with this name already exists. Please pick another name for the new proximity zone.\n")
+        input("Press Enter to continue...")
+        return
+
+    try:
+        new_pz = proximity_zone(pz_name, vessel, vessel_size, zone_size)
+        proximity_zones.append(new_pz)
+    except:
+        print("Could not create new proximity zone:", pz_name)
+
+def delete_proximity_zone(pz_name):
+    global proximity_zones
+    pz_tbd = find_proximity_zone_by_name(pz_name)
+
+    if not pz_tbd:
+        print("Proximity zone not found!")
+        time.sleep(2)
+        return
+
+    proximity_zones.remove(pz_tbd)
+    del pz_tbd
+
 def vessel_body_crash(v, b):
     # a vessel has crashed into a celestial body. We will convert the vessel object
     # into a surface point on the body (a crash site) and remove all references to
     # the vessel object
-    global maneuvers, surface_points, plots, batch_commands
+    global maneuvers, surface_points, plots, proximity_zones, batch_commands
 
     for m in maneuvers:
         if m.vessel == v or m.frame_body == v:
@@ -827,6 +882,10 @@ def vessel_body_crash(v, b):
         if p.obj1 == v or p.obj2 == v:
             p.display()
             delete_plot(p.title)
+
+    for pz in proximity_zones:
+        if pz.vessel == v:
+            delete_proximity_zone(pz.name)
 
     # orbit projections can stay since their calculation time is known
 
@@ -883,7 +942,7 @@ def get_active_cam():
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, cameras, barycenters, radiation_pressures, atmospheric_drags,\
-           gvar_fov, gvar_near_clip, gvar_far_clip
+           proximity_zones, gvar_fov, gvar_near_clip, gvar_far_clip
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
@@ -1008,9 +1067,9 @@ def main(scn_filename=None, start_time=0):
                     frame_command = True
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
-                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, projections, plots,
-                                                       auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer,
-                                                       scene_lock)
+                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, proximity_zones,
+                                                       projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
+                                                       rapid_compute_buffer, scene_lock)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1379,6 +1438,31 @@ def main(scn_filename=None, start_time=0):
                 elif command[0] == "delete_barycenter":
                     delete_barycenter(command[1])
 
+                # CREATE_PROXIMITY_ZONE
+                elif command[0] == "create_proximity_zone":
+                    if len(command) == 5:
+                        create_proximity_zone(command[1], find_obj_by_name(command[2]), float(command[3]), float(command[4]))
+                    elif len(command) == 4:
+                        create_proximity_zone(command[1], find_obj_by_name(command[2]), float(command[3]), float(command[3]) * 10)
+                    elif len(command) == 3:
+                        create_proximity_zone(command[1], find_obj_by_name(command[2]), 10, 100)
+                    else:
+                        print("Wrong number of arguments for command 'create_proximity_zone'.\n")
+                        time.sleep(2)
+
+                # DELETE_PROXIMITY_ZONE
+                elif command[0] == "delete_proximity_zone":
+                    delete_proximity_zone(command[1])
+
+                # GET_PROXIMITY_ZONES
+                elif command[0] == "get_proximity_zones":
+                    print("\nProximity zones currently in simulation:\n")
+                    for pz in proximity_zones:
+                        print("PROX ZONE:", pz.name, "around VESSEL:", pz.vessel.name)
+                        print("Zone size:", pz.zone_size, "Vessel size:", pz.vessel_size, "\n")
+
+                    input("Press Enter to continue...")
+
                 # GET_OBJECTS command
                 elif command[0] == "get_objects":
                     print("Objects currently in simulation:\n")
@@ -1544,7 +1628,8 @@ def main(scn_filename=None, start_time=0):
                         print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
                         print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
-                        print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin\n")
+                        print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin")
+                        print("create_proximity_zone, delete_proximity_zone, get_proximity_zones\n")
                         print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                         print("Simulation is paused while typing a command or using the command panel interface.\n")
                         print("Type help <command> to learn more about a certain command.\n")
@@ -1597,6 +1682,20 @@ def main(scn_filename=None, start_time=0):
                             print("Syntax Option 1: fragment <object_name> <num_of_fragments> <velocity of fragments>\n")
                             print("Syntax Option 2: fragment <object_name> <num_of_fragments>\n")
                             print("Syntax Option 3: fragment <object_name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_proximity_zone":
+                            print("\n'create_proximity_zone' command creates a proximity zone around a vessel that keeps track of close passes and collisions with other vessels.\n")
+                            print("Syntax Option 1: create_proximity_zone <zone_name> <vessel_name> <vessel_size> <zone_size>")
+                            print("Syntax Option 2: create_proximity_zone <zone_name> <vessel_name> <vessel_size>")
+                            print("Syntax Option 3: create_proximity_zone <zone_name> <vessel_name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_proximity_zone":
+                            print("\n'delete_promixity_zone' command removes a proximity zone from the simulation.\n")
+                            print("Syntax: delete_proximity_zone <zone_name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_proximity_zones":
+                            print("\n'get_proximity_zones' command prints a list of proximity zones and their properties.\n")
+                            print("Syntax: get_proximity_zones")
                             input("Press Enter to continue...")
                         elif command[1] == "create_maneuver":
                             print("\n'create_maneuver' command adds a new maneuver to be performed by a space vessel.\n")
@@ -1850,6 +1949,43 @@ def main(scn_filename=None, start_time=0):
                 if vessel_body_collision and v.get_alt_above(b) <= 0:
                     vessel_body_crash(v, b)
 
+        proximity_zone_violations = []
+        colliding_vessels = []
+        for prox in proximity_zones:
+            violators, colliders = prox.check_violations(vessels)
+            proximity_zone_violations.append([prox.vessel, violators])
+            if colliders:
+                colliding_vessels.append([prox.vessel, colliders])
+
+        for collision_set in colliding_vessels:
+            prox_vessel = collision_set[0]
+            violating_colliders = collision_set[1]
+            rel_vel_max = 0
+            for vc in violating_colliders:
+                rel_vel = vc.get_vel_rel_to(prox_vessel)
+                rel_vel_mag = rel_vel.mag()
+
+                if rel_vel_mag > 0.282842712474619: # more energy than 40 J/g
+                    fragment(vc.name, 5, rel_vel_mag**0.5)
+                    output_buffer.append([vc.name + "_ALERT", "note", vc.name + " has broken-up after a collision with " + prox_vessel.name + "!"])
+                    delete_vessel(vc.name)
+                else:
+                    if not [vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + "!"] in output_buffer:
+                        output_buffer.append([vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + "!"])
+
+                if rel_vel_mag > rel_vel_max:
+                    rel_vel_max = rel_vel_mag
+
+            if rel_vel_max > 0.282842712474619: # more energy than 40 J/g
+                fragment(prox_vessel.name, 5, rel_vel_max**0.5)
+                delete_vessel(prox_vessel.name)
+
+        for violation_set in proximity_zone_violations:
+            prox_vessel = violation_set[0]
+            for vl in violation_set[1]:
+                if not [vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"] in output_buffer:
+                    output_buffer.append([vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"])
+
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -1886,90 +2022,95 @@ def main(scn_filename=None, start_time=0):
 
             for element in output_buffer:
 
-                # relative pos and vel
-                if element[1] == "pos_rel":
-                    print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
-                elif element[1] == "vel_rel":
-                    print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
+                try:
+                    # relative pos and vel
+                    if element[1] == "pos_rel":
+                        print(element[0], element[2].get_pos_rel_to(find_obj_by_name(element[3])))
+                    elif element[1] == "vel_rel":
+                        print(element[0], element[2].get_vel_rel_to(find_obj_by_name(element[3])))
 
-                # relative pos and vel magnitude
-                elif element[1] == "pos_mag_rel":
-                    print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
-                elif element[1] == "vel_mag_rel":
-                    print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
+                    # relative pos and vel magnitude
+                    elif element[1] == "pos_mag_rel":
+                        print(element[0], element[2].get_dist_to(find_obj_by_name(element[3])))
+                    elif element[1] == "vel_mag_rel":
+                        print(element[0], element[2].get_vel_mag_rel_to(find_obj_by_name(element[3])))
 
-                # absolute pos and vel
-                elif element[1] == "pos":
-                    print(element[0], element[2].get_pos())
-                elif element[1] == "vel":
-                    print(element[0], element[2].get_vel())
+                    # absolute pos and vel
+                    elif element[1] == "pos":
+                        print(element[0], element[2].get_pos())
+                    elif element[1] == "vel":
+                        print(element[0], element[2].get_vel())
 
-                # absolute pos and vel magnitude
-                elif element[1] == "pos_mag":
-                    print(element[0], (element[2].get_pos().mag()))
-                elif element[1] == "vel_mag":
-                    print(element[0], (element[2].get_vel().mag()))
+                    # absolute pos and vel magnitude
+                    elif element[1] == "pos_mag":
+                        print(element[0], (element[2].get_pos().mag()))
+                    elif element[1] == "vel_mag":
+                        print(element[0], (element[2].get_vel().mag()))
 
-                # altitude
-                elif element[1] == "alt":
-                    print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
+                    # altitude
+                    elif element[1] == "alt":
+                        print(element[0], element[2].get_alt_above(find_obj_by_name(element[3])))
 
-                # ground pos
-                elif element[1] == "gpos":
-                    print(element[0] +
-                          "\nLat: " + str(element[2].get_gpos()[0]) + " deg" +
-                          "\nLong: " + str(element[2].get_gpos()[1]) + " deg" +
-                          "\nAlt: " + str(element[2].get_gpos()[2]) + " m")
+                    # ground pos
+                    elif element[1] == "gpos":
+                        print(element[0] +
+                              "\nLat: " + str(element[2].get_gpos()[0]) + " deg" +
+                              "\nLong: " + str(element[2].get_gpos()[1]) + " deg" +
+                              "\nAlt: " + str(element[2].get_gpos()[2]) + " m")
 
-                # angle above horizon
-                elif element[1] == "horizon_angle":
-                    print(element[0] + " " + str(element[2].get_obj_angle_above_horizon(element[3])) + " deg")
+                    # angle above horizon
+                    elif element[1] == "horizon_angle":
+                        print(element[0] + " " + str(element[2].get_obj_angle_above_horizon(element[3])) + " deg")
 
-                # maneuver state and parameters
-                elif element[1] == "active":
-                    print(element[0], element[2].is_performing(sim_time))
-                elif element[1] == "state":
-                    print(element[0], element[2].get_state(sim_time))
-                elif element[1] == "params" and element[3] == "m":
-                    print(element[0], "\n" + element[2].get_params_str())
+                    # maneuver state and parameters
+                    elif element[1] == "active":
+                        print(element[0], element[2].is_performing(sim_time))
+                    elif element[1] == "state":
+                        print(element[0], element[2].get_state(sim_time))
+                    elif element[1] == "params" and element[3] == "m":
+                        print(element[0], "\n" + element[2].get_params_str())
 
-                # radiation pressure params
-                elif element[1] == "params" and element[3] == "rp":
-                    print(element[0], "\n" + element[2].get_params_str())
+                    # radiation pressure params
+                    elif element[1] == "params" and element[3] == "rp":
+                        print(element[0], "\n" + element[2].get_params_str())
 
-                # atmospheric drag params
-                elif element[1] == "params" and element[3] == "ad":
-                    print(element[0], "\n" + element[2].get_params_str())
+                    # atmospheric drag params
+                    elif element[1] == "params" and element[3] == "ad":
+                        print(element[0], "\n" + element[2].get_params_str())
 
-                # orbit projection parameters
-                elif element[1] == "apoapsis":
-                    print(element[0], proj.get_apoapsis_alt())
-                elif element[1] == "apoapsis_r":
-                    print(element[0], proj.get_apoapsis())
-                elif element[1] == "periapsis":
-                    print(element[0], proj.get_periapsis_alt())
-                elif element[1] == "periapsis_r":
-                    print(element[0], proj.get_periapsis())
-                elif element[1] == "period":
-                    print(element[0], proj.get_period())
-                elif element[1] == "body":
-                    print(element[0], proj.get_body())
-                elif element[1] == "vessel":
-                    print(element[0], proj.get_vessel())
-                elif element[1] == "semimajor_axis":
-                    print(element[0], proj.get_semimajor_axis())
-                elif element[1] == "eccentricity":
-                    print(element[0], proj.eccentricity)
-                elif element[1] == "energy":
-                    print(element[0], proj.get_energy())
-                elif element[1] == "params" and element[3] == "p":
-                    print(element[0], "\n" + element[2].get_params_str())
-                    
-                # note taking
-                elif element[1] == "note":
-                    print(element[0], element[2])
+                    # orbit projection parameters
+                    elif element[1] == "apoapsis":
+                        print(element[0], proj.get_apoapsis_alt())
+                    elif element[1] == "apoapsis_r":
+                        print(element[0], proj.get_apoapsis())
+                    elif element[1] == "periapsis":
+                        print(element[0], proj.get_periapsis_alt())
+                    elif element[1] == "periapsis_r":
+                        print(element[0], proj.get_periapsis())
+                    elif element[1] == "period":
+                        print(element[0], proj.get_period())
+                    elif element[1] == "body":
+                        print(element[0], proj.get_body())
+                    elif element[1] == "vessel":
+                        print(element[0], proj.get_vessel())
+                    elif element[1] == "semimajor_axis":
+                        print(element[0], proj.get_semimajor_axis())
+                    elif element[1] == "eccentricity":
+                        print(element[0], proj.eccentricity)
+                    elif element[1] == "energy":
+                        print(element[0], proj.get_energy())
+                    elif element[1] == "params" and element[3] == "p":
+                        print(element[0], "\n" + element[2].get_params_str())
+
+                    # note taking
+                    elif element[1] == "note":
+                        print(element[0], element[2])
                 
-                print("")
+                    print("")
+
+                except:
+                    output_buffer.remove(element)
+                    del element
                     
             # clear stuff from last frame
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
