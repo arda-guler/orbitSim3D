@@ -1940,8 +1940,10 @@ def main(scn_filename=None, start_time=0):
             SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
         elif solver_type == 1:
             VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
-        else:
+        elif solver_type == 2:
             Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+        else:
+            Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
 
         # check collisions
         for v in vessels:

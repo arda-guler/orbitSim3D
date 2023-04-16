@@ -1,7 +1,7 @@
 from vector3 import *
 
 def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
-    # update physics
+
     for rp in radiation_pressures:
         rp.update_occultation(bodies)
         rp.update_mass(maneuvers, sim_time, delta_t)
@@ -257,6 +257,115 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     update_objs_vel(vessels, bodies, d3, vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, c4, delta_t)
+
+    # this has to be done separately
+    for m in maneuvers:
+        m.update_mass(sim_time, delta_t)
+
+    # planet orientation update
+    for b in bodies:
+        b.update_orient(delta_t)
+
+    for sp in surface_points:
+        sp.update_state_vectors(delta_t)
+
+    # update graphics related things
+    for v in vessels:
+        v.update_traj_history()
+        v.update_draw_traj_history()
+
+def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+    # update masses and occultation calculations
+    for ad in atmospheric_drags:
+        ad.update_mass(maneuvers, sim_time, delta_t)
+
+    for rp in radiation_pressures:
+        rp.update_occultation(bodies)
+        rp.update_mass(maneuvers, sim_time, delta_t)
+
+    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+        vessel_accels = [vec3(0, 0, 0)] * len(vessels)
+        body_accels = [vec3(0, 0, 0)] * len(bodies)
+
+        # calculate celestial body accelerations due to gravity
+        for x in bodies:
+            for y in bodies:
+                if not x == y:
+                    b_idx = bodies.index(x)
+                    body_accels[b_idx] = body_accels[b_idx] + x.get_gravity_by(y)
+
+        # calculate vessel accelerations due to gravity
+        for v in vessels:
+            v_idx = vessels.index(v)
+            for b in bodies:
+                vessel_accels[v_idx] = vessel_accels[v_idx] + v.get_gravity_by(b)
+
+        # calculate vessel accelerations due to maneuvers
+        for m in maneuvers:
+            if m.vessel in vessels:
+                v_idx = vessels.index(m.vessel)
+                accel_vec = m.get_accel(sim_time, delta_t)
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to atmospheric drag
+        for ad in atmospheric_drags:
+            if ad.vessel in vessels:
+                v_idx = vessels.index(ad.vessel)
+                accel_vec = ad.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to radiation pressure
+        for rp in radiation_pressures:
+            if rp.vessel in vessels:
+                v_idx = vessels.index(rp.vessel)
+                accel_vec = rp.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        return vessel_accels, body_accels
+
+    def update_objs_pos(vessels, bodies, const, dt):
+        for v in vessels:
+            v.pos = v.pos + v.vel * const * dt
+
+        for b in bodies:
+            b.pos = b.pos + b.vel * const * dt
+
+    def update_objs_vel(vessels, bodies, const, vacc, bacc, dt):
+        for idx_v, v in enumerate(vessels):
+            v.vel = v.vel + vacc[idx_v] * const * dt
+
+        for idx_b, b in enumerate(bodies):
+            b.vel = b.vel + bacc[idx_b] * const * dt
+
+    # - - - CONSTANTS - - -
+    w1 = 0.311790812418427e0
+    w2 = -0.155946803821447e1
+    w3 = -0.167896928259640e1
+    w4 = 0.166335809963315e1
+    w5 = -0.106458714789183e1
+    w6 = 0.136934946416871e1
+    w7 = 0.629030650210433e0
+    w0 = 1.65899088454396 # (1 - 2 * (w1 + w2 + w3 + w4 + w5 + w6 + w7))
+
+    ds = [w7, w6, w5, w4, w3, w2, w1, w0, w1, w2, w3, w4, w5, w6, w7]
+
+    # cs = [w7 / 2, (w7 + w6) / 2, (w6 + w5) / 2, (w5 + w4) / 2,
+    #           (w4 + w3) / 2, (w3 + w2) / 2, (w2 + w1) / 2, (w1 + w0) / 2,
+    #           (w1 + w0) / 2, (w2 + w1) / 2, (w3 + w2) / 2, (w4 + w3) / 2,
+    #           (w5 + w4) / 2, (w6 + w5) / 2, (w7 + w6) / 2, w7 / 2]
+
+    cs = [0.3145153251052165, 0.9991900571895715, 0.15238115813844, 0.29938547587066, -0.007805591481624963,
+          -1.619218660405435, -0.6238386128980216, 0.9853908484811935, 0.9853908484811935, -0.6238386128980216,
+          -1.619218660405435, -0.007805591481624963, 0.29938547587066, 0.15238115813844, 0.9991900571895715,
+          0.3145153251052165]
+
+    for i in range(15):
+        update_objs_pos(vessels, bodies, cs[i], delta_t)
+        vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures,
+                                             sim_time, delta_t)
+        update_objs_vel(vessels, bodies, ds[i], vacc, bacc, delta_t)
+
+    update_objs_pos(vessels, bodies, cs[15], delta_t)
 
     # this has to be done separately
     for m in maneuvers:
