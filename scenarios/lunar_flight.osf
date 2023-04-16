@@ -1,0 +1,23 @@
+;  LUNAR_FLIGHT.OSF
+;  Author: arda-guler
+;
+; This is basically a copy of the Ex_LunarTransfer scenario,
+; an example scenario in NASA's GMAT.
+;
+; Showcases n-body gravity model, impulsive maneuvers,
+; out-of-plane transfer.
+;
+
+; Celestial bodies
+B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
+B|Luna|data/models/miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[349792.3033081594e3, 124291.1992883908e3, 137633.9092677312e3,]|[0.3750805314463571e3, 0.0943667821404095e3, -0.91379894576409e3]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0|0|0|0
+
+; Vessels
+V|lunar-orbiter|data/models/miniprobe.obj|[0.0,0.8,0.7]|[75679.87867537055e3, 21487.63875187856e3, -137380.1984338506e3]|[-0.4462753967758019e3, 0.08561205662877103e3, -0.2324532014235503e3]
+
+; Maneuvers
+M|mnv_toiV|impulsive|lunar-orbiter|Earth|[0.8750263, -0.1674253, 0.4541999]|0.14676929889e3|119984
+M|mnv_toiN|impulsive|lunar-orbiter|Earth|[0.4754356, 0.1362572, -0.8691345]|0.046042675892e3|119984
+M|mnv_toiB|impulsive|lunar-orbiter|Earth|[0.08362709, 0.9764583, 0.1988286]|0.090223244097e3|119984
+
+M|mnv_loi|impulsive|lunar-orbiter|Luna|retrograde|652|567520

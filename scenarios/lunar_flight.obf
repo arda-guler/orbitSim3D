@@ -1,0 +1,6 @@
+solver_type 3
+delta_t 10
+output_rate 1000
+create_projection p1 Luna Earth
+create_plot RMAG dist lunar-orbiter Earth 10 600000
+;
