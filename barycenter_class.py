@@ -23,6 +23,9 @@ class barycenter:
     def get_color(self):
         return self.color
 
+    def get_radius(self):
+        return 0
+
     def calc_color(self):
 
         num_of_bodies = len(self.get_bodies())
@@ -69,7 +72,7 @@ class barycenter:
             sum_y += b.get_mass() * b.get_vel().y
             sum_z += b.get_mass() * b.get_vel().z
 
-        return [sum_x/self.get_mass(), sum_y/self.get_mass(), sum_z/self.get_mass()]
+        return vec3(sum_x/self.get_mass(), sum_y/self.get_mass(), sum_z/self.get_mass())
 
     def get_vel_mag(self):
         return self.vel.mag()

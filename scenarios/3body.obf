@@ -1,0 +1,4 @@
+lock_origin Trisolaris
+solver_type 3
+delta_t 15000
+create_projection ProxOrbit AlphaC AlphaAB

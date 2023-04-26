@@ -1,22 +1,15 @@
-;  3BODY.OSF
-;  Author: arda-guler
+; 3BODY.OSF
+; Author: arda-guler
 ;
-;A planet orbiting not one, not two but three 
-;stars - and a civilization trying to blossom.
-;Their Kepler will surely have a great time trying
-;to work out the mechanics of motion of heavenly
-;bodies. 
-;
-;Bodies
-;
-B|Heart|data/models/minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[0,0,-75000000000]|[-39259.556,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
-B|Mind|data/models/minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[-64951905280,0,30000000000]|[19629.778,0,33999.773]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
-B|Soul|data/models/minisol.obj|2e+30|695700000|[1.0,0.94,0.12]|[64951905280,0,30000000000]|[19629.778,0,-33999.773]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
-;
-B|Trisolaris|data/models/miniearth.obj|6e+24|6500000|[0.04,0.15,0.85]|[0,0,15e+13]|[5166.848,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
-B|Minisolaris|data/models/miniluna.obj|7e+22|1737000|[0.8, 0.8, 0.8]|[-500000000,0,15e+13]|[5166.848,0,894.924]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
-;
-;Barycenters
-;
-C|StellarBC|Heart,Mind,Soul
-;
+; A model of the Alpha Centauri system, created from astronomical observation (astrometry) data available online.
+; Trisolaris is a fictional planet from Cixin Liu's famous work "Three Body Problem".
+; Dehydrate or rehydrate? It is all up to you.
+
+B|AlphaA|data/models/minisol.obj|2.145161436e30|847014750|[1.0,0.94,0.12]|[40572583763248.0, -351363711140060.0, -245979242566068.0]|[-9607.642993244011, 7486.6775139218225, 1532.8629543898894]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+B|AlphaB|data/models/minisol.obj|1.807916924e30|597675870|[1.0,0.84,0.12]|[37496334181618.0, -351078499778094.0, -244679601251976.0]|[-10842.580317847222, 6182.595856640749, 2598.809964995366]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+B|AlphaC|data/models/minisol.obj|2.42792187e29|107276940|[1.0,0.2,0.12]|[-78068917944868.0,702442210918152.0,490658843818048.0]|[-10481.67938454393, 6974.881212341345, 2423.192452081036]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+
+B|Trisolaris|data/models/miniearth.obj|6e+24|6500000|[0.04,0.15,0.85]|[0,0,15e+13]|[9166.848,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
+;B|Minisolaris|data/models/miniluna.obj|7e+22|1737000|[0.8, 0.8, 0.8]|[-500000000,0,15e+13]|[9166.848,0,894.924]|[[1,0,0],[0,1,0],[0,0,1]]|0|0|0|0|0
+
+C|AlphaAB|AlphaA,AlphaB
