@@ -1,4 +1,5 @@
 lock_origin Trisolaris
 solver_type 3
-delta_t 15000
+delta_t 150000
+output_rate 15000000
 create_projection ProxOrbit AlphaC AlphaAB
