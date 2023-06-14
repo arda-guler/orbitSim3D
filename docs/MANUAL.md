@@ -52,6 +52,10 @@ OS3D is quite configurable and extendable, so much so that it will let the user 
 
 Relativistic effects are not taken into account whatsoever.
 
+## Validation
+
+The documentation of how a particular solver setup can be validated, as well as an example case, is given in the [validation documentation](https://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md).
+
 ## Scenarios (.osf)
 
 There are some scenario files provided in the /scenarios directory. These scenarios act as an initial state for a simulation. To learn more, read the [detailed manual on OS3D scenarios](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL_SCENARIOS.md "detailed manual on OS3D scenarios") and check out any of the provided .osf files and read the scenario comments for more information about individual scenarios.
@@ -108,3 +112,5 @@ There are only two configuration files;
 - ui.py: Includes functions to print alphanumeric characters on 3D viewport to help out graphics.py.
 
 - vector3.py: 3D vector class to handle vector math/operations.
+
+- matrix3x3.py: 3x3 matrix class to handle matrix operations.
