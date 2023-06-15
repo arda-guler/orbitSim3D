@@ -14,6 +14,8 @@
   - matplotlib
   - numpy
 
+See [requirements.txt](https://github.com/arda-guler/orbitSim3D/blob/master/requirements.txt) for a list of packages that are known to work along with **Python 3.10**.
+
 ## Quickstart
 
 Run main.py through the command line/terminal to start.
