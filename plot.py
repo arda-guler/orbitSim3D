@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import csv
+import os
 
 from math_utils import *
 
@@ -45,6 +47,24 @@ class plot:
                 lon = gpos[1]
                 self.x_list.append(lon)
                 self.y_list.append(lat)
+            elif self.var == "pos_x":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.pos - self.obj2.pos).x)
+            elif self.var == "pos_y":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.pos - self.obj2.pos).y)
+            elif self.var == "pos_z":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.pos - self.obj2.pos).z)
+            elif self.var == "vel_x":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.vel - self.obj2.vel).x)
+            elif self.var == "vel_y":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.vel - self.obj2.vel).y)
+            elif self.var == "vel_z":
+                self.x_list.append(time)
+                self.y_list.append((self.obj1.vel - self.obj2.vel).z)
 
     def display(self):
         if self.var != "groundtrack":
@@ -64,3 +84,11 @@ class plot:
         plt.ylabel(self.y_axis)
         plt.title(self.title)
         plt.show()
+
+    def export_to_file(self):
+        os.makedirs("exported_data/", exist_ok=True)
+        with open("exported_data/" + self.title + ".csv", "w+") as f:
+            csvwriter = csv.writer(f, lineterminator='\n')
+            csvwriter.writerow([self.x_axis, self.y_axis])
+            for d1, d2 in zip(self.x_list, self.y_list):
+                csvwriter.writerow([d1, d2])

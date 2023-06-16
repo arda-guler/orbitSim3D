@@ -297,7 +297,9 @@ def import_scenario(scn_filename):
 
 def export_scenario(scn_filename, verbose=True):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, proximity_zones, sim_time
-    
+
+    os.makedirs("scenarios/", exist_ok=True)
+
     scn_filename = "scenarios/" + scn_filename
     if not scn_filename.endswith(".osf"):
         scn_filename += ".osf"
@@ -733,11 +735,13 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
         obj2 = find_obj_by_name(obj2_name)
         new_plot = plot(name, "Time", [], "Altitude of " + obj1_name + " above " + obj2_name, [],
                         obj1, obj2, "alt", start_time, end_time)
+
     elif variable == "dist":
         obj1 = find_obj_by_name(obj1_name)
         obj2 = find_obj_by_name(obj2_name)
         new_plot = plot(name, "Time", [], "Distance between " + obj1_name + " and " + obj2_name, [],
                         obj1, obj2, "dist", start_time, end_time)
+
     elif variable == "vel_mag":
         obj1 = find_obj_by_name(obj1_name)
         obj2 = find_obj_by_name(obj2_name)
@@ -749,6 +753,42 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
         obj2 = find_obj_by_name(obj2_name)
         new_plot = plot(name, "Longitude", [], "Latitude", [], obj1, obj2, "groundtrack",
                         start_time, end_time)
+
+    elif variable == "pos_x":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "X Position of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "pos_x", start_time, end_time)
+
+    elif variable == "pos_y":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Y Position of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "pos_y", start_time, end_time)
+
+    elif variable == "pos_z":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Z Position of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "pos_z", start_time, end_time)
+
+    elif variable == "vel_x":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "X Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "vel_x", start_time, end_time)
+
+    elif variable == "vel_y":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Y Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "vel_y", start_time, end_time)
+
+    elif variable == "vel_z":
+        obj1 = find_obj_by_name(obj1_name)
+        obj2 = find_obj_by_name(obj2_name)
+        new_plot = plot(name, "Time", [], "Z Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                        obj1, obj2, "vel_z", start_time, end_time)
 
     plots.append(new_plot)
 
@@ -968,7 +1008,7 @@ def main(scn_filename=None, start_time=0):
     glEnable(GL_CULL_FACE)
     glPointSize(point_size)
 
-    main_cam = camera("main_cam", vec3(cam_pos_x,cam_pos_y,cam_pos_z), matrix3x3(), True)
+    main_cam = camera("main_cam", vec3(cam_pos_x, cam_pos_y, cam_pos_z), matrix3x3(), True)
     cameras = [main_cam]
     # put "camera" in starting position
     glTranslate(main_cam.get_pos().x, main_cam.get_pos().y, main_cam.get_pos().z)
@@ -1995,6 +2035,12 @@ def main(scn_filename=None, start_time=0):
             # going to display any of the plots?
             if sim_time >= p.get_end_time() > (sim_time - delta_t):
                 p.display()
+                
+                clear_cmd_terminal()
+                print("Exporting plot data to /exported_data/" + p.title + ".csv...")
+                p.export_to_file()
+                print("Done!")
+                time.sleep(2)
 
         # update cameras
         for cam in cameras:

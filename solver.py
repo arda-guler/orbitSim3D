@@ -45,6 +45,7 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
 
         # planets rotate!
         x.update_orient(delta_t)
+        x.update_traj_history()
 
     # update surface point positions
     for sp in surface_points:
@@ -160,6 +161,7 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
     # planet orientation update
     for b in bodies:
         b.update_orient(delta_t)
+        b.update_traj_history()
 
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
@@ -265,6 +267,7 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     # planet orientation update
     for b in bodies:
         b.update_orient(delta_t)
+        b.update_traj_history()
 
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
@@ -374,6 +377,7 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     # planet orientation update
     for b in bodies:
         b.update_orient(delta_t)
+        b.update_traj_history()
 
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
