@@ -11,14 +11,57 @@ def drawOrigin():
     glBegin(GL_LINES)
     glColor(1,0,0)
     glVertex3f(0,0,0)
-    glVertex3f(0,1000,0)
+    glVertex3f(1000,0,0)
     glColor(0,1,0)
     glVertex3f(0,0,0)
-    glVertex3f(1000,0,0)
+    glVertex3f(0,1000,0)
     glColor(0,0,1)
     glVertex3f(0,0,0)
     glVertex3f(0,0,1000)
     glEnd()
+
+def drawGridPlane(cam, bodies, vessels):
+    if cam.pos.y != 0:
+        spacing = 10**(int(math.log(abs(cam.pos.y), 10)) + 3)
+        scene_spacing = spacing * visual_scaling_factor
+        size = abs(cam.pos.y) * 10
+
+        N = 50
+        corner_x = (-cam.pos.x - N * 0.5 * scene_spacing) + cam.pos.x % (scene_spacing)
+        corner_z = (-cam.pos.z - N * 0.5 * scene_spacing) + cam.pos.z % (scene_spacing)
+
+        glColor(0.3, 0.3, 0.3)
+        glBegin(GL_LINES)
+        for i in range(N + 1):
+            cx = corner_x + i * scene_spacing
+            z0 = corner_z
+            z1 = corner_z + N * scene_spacing
+            glVertex3f(cx, 0, z0)
+            glVertex3f(cx, 0, z1)
+
+        for i in range(N + 1):
+            x0 = corner_x
+            x1 = corner_x + N * scene_spacing
+            cz = corner_z + i * scene_spacing
+            glVertex3f(x0, 0, cz)
+            glVertex3f(x1, 0, cz)
+        glEnd()
+    else:
+        spacing = 0
+
+    glBegin(GL_LINES)
+    for b in bodies:
+        glColor(b.get_color()[0] * 0.9, b.get_color()[1] * 0.9, b.get_color()[2] * 0.9)
+        glVertex3f(b.get_draw_pos().x, 0, b.get_draw_pos().z)
+        glVertex3f(b.get_draw_pos().x, b.get_draw_pos().y, b.get_draw_pos().z)
+
+    for v in vessels:
+        glColor(v.get_color()[0] * 0.9, v.get_color()[1] * 0.9, v.get_color()[2] * 0.9)
+        glVertex3f(v.get_draw_pos().x, 0, v.get_draw_pos().z)
+        glVertex3f(v.get_draw_pos().x, v.get_draw_pos().y, v.get_draw_pos().z)
+    glEnd()
+
+    return spacing
 
 def drawBodies(bodies, active_cam, draw_mode):
 
@@ -178,10 +221,11 @@ def drawProjections(projections):
         vertex_groups = []
 
         i = 0
-        while i+500 < len(vertices):
+        dash_skip_size = 20
+        while i+dash_skip_size < len(vertices):
             vertex_groups.append([vertices[i] + p.get_body().get_pos() * visual_scaling_factor,
-                                  vertices[i+500] + p.get_body().get_pos() * visual_scaling_factor])
-            i += 500
+                                  vertices[i+dash_skip_size] + p.get_body().get_pos() * visual_scaling_factor])
+            i += dash_skip_size
 
         for i in range(1, len(vertex_groups)-1, 2):
             glBegin(GL_LINES)
@@ -352,7 +396,7 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None, point_size=2):
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None, point_size=2, grid_active=False):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -360,6 +404,9 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     bodies.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
     vessels.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
     surface_points.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
+
+    if grid_active:
+        spacing = drawGridPlane(active_cam, bodies, vessels)
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
@@ -385,4 +432,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
         drawTrajectories(vessels, scene_lock)
         drawManeuvers(maneuvers, point_size, active_cam)
         glDisable(GL_LINE_SMOOTH)
-        
+
+    if grid_active and spacing:
+        spacing_exp = int(math.log(spacing, 10) + 0.5)
+        render_AN("GRID SPACING 1e" + str(spacing_exp) + " M", (1, 0, 0), [-11.5, 5.5], active_cam, 0.1)

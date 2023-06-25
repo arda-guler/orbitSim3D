@@ -1022,6 +1022,7 @@ def main(scn_filename=None, start_time=0):
     scene_lock = None
     accept_keyboard_input = True
     speed_input_locked = False
+    grid_active = False
     cycle_dt = 1
 
     sim_time = start_time
@@ -1226,6 +1227,8 @@ def main(scn_filename=None, start_time=0):
                             show_trajectories = True
                         elif command[1] == "labels":
                             labels_visible = 1
+                        elif command[1] == "grid":
+                            grid_active = True
 
                     else:
                         print("Wrong number of arguments for command 'show'.")
@@ -1237,6 +1240,8 @@ def main(scn_filename=None, start_time=0):
                         show_trajectories = False
                     elif command[1] == "labels":
                         labels_visible = 0
+                    elif command[1] == "grid":
+                        grid_active = False
                     else:
                         for i in range(len(output_buffer)):
                             if output_buffer[i][0] == command[1]:
@@ -1684,11 +1689,13 @@ def main(scn_filename=None, start_time=0):
                             print("Syntax Option 5: show <atmospheric_drag_name> params <display_label>\n")
                             print("Syntax Option 6: show <projection_name> <(attrib_name/params)> <display_label>\n")
                             print("Syntax Option 7: show traj (enables trajectory trails)\n")
+                            print("Syntax Option 8: show grid (enables xz plane grid)\n")
                             input("Press Enter to continue...")
                         elif command[1] == "hide":
                             print("\n'hide' command removes an output element from the command prompt/terminal.\n")
                             print("Syntax Option 1: hide <display_label>\n")
                             print("Syntax Option 2: hide traj (disables trajectory trails)\n")
+                            print("Syntax Option 3: hide grid (disables xz plane grid)\n")
                             input("Press Enter to continue...")
                         elif command[1] == "clear":
                             print("\n'clear' command removes all output element from the command prompt/terminal.\n")
@@ -2166,7 +2173,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size, grid_active)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

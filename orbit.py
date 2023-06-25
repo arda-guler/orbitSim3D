@@ -17,6 +17,10 @@ class kepler_projection():
 
         # mu = standard gravitational parameter
         self.mu = body.get_mass() * grav_const
+        
+        self.vertices, self.draw_vertices, self.draw_ap, self.draw_pe, self.draw_an, self.draw_dn, self.inclination = self.generate_projection()
+
+        self.body_draw_pos_prev = self.body.get_draw_pos()
 
         self.angular_momentum = self.pos0.cross(self.vel0)
 
@@ -28,10 +32,6 @@ class kepler_projection():
         self.apoapsis = self.get_apoapsis()
 
         self.period = self.get_period()
-        
-        self.vertices, self.draw_vertices, self.draw_ap, self.draw_pe, self.draw_an, self.draw_dn, self.inclination = self.generate_projection()
-
-        self.body_draw_pos_prev = self.body.get_draw_pos()
 
         if type(self.period) == complex:
             self.apoapsis = float("inf")
@@ -47,55 +47,38 @@ class kepler_projection():
         return self.vessel
 
     def get_eccentricity_vector(self):
-        r_scaler = self.vessel.get_vel_mag_rel_to(self.body)**2 - (self.mu/self.vessel.get_dist_to(self.body))
-        v_scaler = self.pos0.dot(self.vel0)
-
-        scaled_r = self.pos0 * r_scaler
-        scaled_v = self.vel0 * v_scaler
-
-        e_vec = (scaled_r - scaled_v)/self.mu
-
-        return e_vec
+        return self.e_vec
 
     def get_eccentricity(self):
-        return self.get_eccentricity_vector().mag()
+        return self.e
 
     def get_energy(self):
         return (self.vel0.mag()**2)/2 - self.mu/self.pos0.mag()
     
     def get_semimajor_axis(self):
-        if not self.eccentricity >= 1:
-            smj = (-self.mu)/(2*self.energy)
-        else:
-            smj = float("inf")
-
-        return smj
+        return self.sma
 
     def get_periapsis(self):
-        if not self.semimajor_axis == float("inf"):
-            p = self.semimajor_axis * (1 - (self.eccentricity**2))
-        else:
-            p = self.angular_momentum.mag()**2/self.mu
-
-        return p
+        #if not self.semimajor_axis == float("inf"):
+        #    p = self.semimajor_axis * (1 - (self.eccentricity**2))
+        #else:
+        #    p = self.angular_momentum.mag()**2/self.mu
+        #
+        #return p
+        return self.periapsis
 
     def get_periapsis_alt(self):
-        return self.get_periapsis() - self.body.get_radius()
+        return self.periapsis_alt
 
     def get_apoapsis(self):
-        if not self.semimajor_axis == float("inf"):
-            a = self.semimajor_axis * (1 + (self.eccentricity**2))
-        else:
-            a = float("inf")
-
-        return a
+        return self.apoapsis
 
     def get_apoapsis_alt(self):
-        return self.get_apoapsis() - self.body.get_radius()
+        return self.apoapsis_alt
 
     def get_period(self):
-        if not self.semimajor_axis == float("inf"):
-            return 2*3.141*((self.semimajor_axis**3)/self.mu)**0.5
+        if not self.sma == float("inf"):
+            return 2*3.141*((self.sma**3)/self.mu)**0.5
         else:
             return float("inf")
 
@@ -103,83 +86,120 @@ class kepler_projection():
         return self.inclination
 
     def generate_projection(self):
-        vertices = []
+        r_vec = self.vessel.pos - self.body.pos
+        v_vec = self.vessel.vel - self.body.vel
+        r = r_vec.mag()
+        v = v_vec.mag()
+        mu = self.mu
 
-        if not self.period:
-            end_time = 10000
+        # = = = DETERMINE KEPLER ELEMENTS = = =
+        # sma: semi-major axis
+        # e: eccentricity
+        # argper: argument of periapsis
+        # inc: inclination
+        # lonasc: longitude/right ascension of ascending node
+
+        v_r = v_vec.dot(r_vec / r)
+        v_t = (v**2 - v_r**2)**0.5
+
+        sma = 1/(2/r - v**2/mu)
+        self.sma = sma
+
+        h_vec = r_vec.cross(v_vec)
+        h = h_vec.mag()
+
+        inc = math.acos(h_vec.z / h)
+
+        K = vec3(0, 0, 1)
+        N_vec = K.cross(h_vec)
+        N = N_vec.mag()
+
+        if not N:
+            if (r_vec.y > 0 and v_vec.x > 0) or (r_vec.y < 0 and v_vec.x < 0):
+                lon_asc = math.pi * 1.5
+            else:
+                lon_asc = math.pi * 0.5
+
         else:
-            end_time = self.period
+            lon_asc = math.acos(N_vec.x / N)
+            if N_vec.y < 0:
+                lon_asc = 2 * math.pi - lon_asc
 
-        if type(end_time) == complex:
-            end_time = min(max((end_time.real**2 + end_time.imag**2)**0.5, 10000), 100000)
+        e_vec = v_vec.cross(h_vec) / mu - r_vec / r
+        e = e_vec.mag()
+        self.e = e
 
-        if self.period == float("inf"):
-            end_time = max(min(self.mu, 300000), 10000)
-        
-        current_pos = self.pos0
-        current_vel = self.vel0
+        if (N * e):
+            arg_peri = math.acos(N_vec.dot(e_vec) / (N * e))
+            if e_vec.z < 0:
+                arg_peri = 2 * math.pi - arg_peri
+        else:
+            arg_peri = math.pi * 0.5
 
-        inclination = None
+        # all orbital elements determined, now visualise it
+        resolution = 1000
 
+        vertices = []
         draw_vertices = []
-        Rs = []
-        Ys = []
+        max_ap = None
+        min_pe = None
+        prev_y = -1
+        draw_ap, draw_pe, draw_an, draw_dn = vec3(), vec3(), vec3(), vec3()
 
-        time_step = 0.1
-        t = 0
-        while t <= end_time:
-            # update gravity
-            current_grav = current_pos*(-1) * self.mu / current_pos.mag()**3
-            
-            # update velocity
-            current_vel = current_vel + current_grav * time_step
+        for i_nu in range(0, int(2 * math.pi * resolution * 1.1)):
+            nu = i_nu / resolution
 
-            # update position
-            current_pos = current_pos + current_vel * time_step
-            
-            vertices.append(current_pos)
-            draw_vertices.append(current_pos * visual_scaling_factor)
-            Rs.append(current_pos.mag())
-            Ys.append(abs2frame_coords((current_pos + self.get_body().get_pos()), self.get_body()).y)
+            vis_r = vec3(math.cos(nu), math.sin(nu), 0) * h**2 / mu / (1 + e * math.cos(nu))
+            vis_r_mag = vis_r.mag()
 
-            t += time_step
-            time_step = min((self.mu/current_grav.mag() * 1e-15), end_time/1e5)
+            R1 = matrix3x3(math.cos(-arg_peri), -math.sin(-arg_peri), 0,
+                           math.sin(-arg_peri), math.cos(-arg_peri), 0,
+                           0, 0, 1)
 
-            current_rel_pos = abs2frame_coords(current_pos + self.get_body().get_pos(), self.get_body())
-            
-            try:
-                current_lat = math.degrees(math.atan(current_rel_pos.y/math.sqrt(current_rel_pos.x**2 + current_rel_pos.z**2)))
-            except ZeroDivisionError:
-                current_lat = 90
-                
-            if not inclination or inclination < current_lat:
-                inclination = current_lat
+            R2 = matrix3x3(1, 0, 0,
+                           0, math.cos(-inc), -math.sin(-inc),
+                           0, math.sin(-inc), math.cos(-inc))
 
-        ap_index = Rs.index(max(Rs))
-        pe_index = Rs.index(min(Rs))
+            R3 = matrix3x3(math.cos(-lon_asc), -math.sin(-lon_asc), 0,
+                           math.sin(-lon_asc), math.cos(-lon_asc), 0,
+                           0, 0, 1)
 
-        # the below two lines are just a failsafe, because
-        # the usual way can fail when an object is on a perfect
-        # equatorial orbit - so just assign arbitrary
-        # ascending and descending nodes at the beginning in
-        # case it does fail
-        an_index = 0
-        dn_index = int(len(Rs)/2)
+            rmx = R1 * R2 * R3
 
-        for i in range(len(Ys)-1):
-            if not sign(Ys[i]) == sign(Ys[i+1]):
-                if sign(Ys[i+1]) > 0:
-                    an_index = i+1
+            r_trans = vec3(vis_r.x * rmx.m11 + vis_r.y * rmx.m21 + vis_r.z * rmx.m31,
+                           vis_r.x * rmx.m12 + vis_r.y * rmx.m22 + vis_r.z * rmx.m32,
+                           vis_r.x * rmx.m13 + vis_r.y * rmx.m23 + vis_r.z * rmx.m33)
+
+            cpos = r_trans
+            vertices.append(cpos)
+            draw_vertices.append(cpos * visual_scaling_factor)
+
+            if not max_ap or vis_r_mag > max_ap:
+                draw_ap = cpos * visual_scaling_factor
+                max_ap = vis_r_mag
+
+            if not min_pe or vis_r_mag < min_pe:
+                draw_pe = cpos * visual_scaling_factor
+                min_pe = vis_r_mag
+
+            if prev_y * r_trans.y < 0:
+                if r_trans.y < 0:
+                    draw_an = cpos * visual_scaling_factor
                 else:
-                    dn_index = i+1
-            
-        draw_an = draw_vertices[an_index]
-        draw_dn = draw_vertices[dn_index]
+                    draw_dn = cpos * visual_scaling_factor
 
-        draw_ap = draw_vertices[ap_index]
-        draw_pe = draw_vertices[pe_index]
+            prev_y = r_trans.y
 
-        return vertices, draw_vertices, draw_ap, draw_pe, draw_an, draw_dn, inclination
+        # compute additional parameters
+        self.apoapsis = sma * (1 + (e**2))
+        self.apoapsis_alt = self.apoapsis - self.body.get_radius()
+        self.periapsis = self.sma * (1 - (e**2))
+        self.periapsis_alt = self.periapsis - self.body.get_radius()
+
+        # correct coordinate sys.
+        self.inc = math.acos(h_vec.y / h)
+
+        return vertices, draw_vertices, draw_ap, draw_pe, draw_an, draw_dn, math.degrees(self.inc)
 
     def get_draw_vertices(self):
         return self.draw_vertices
