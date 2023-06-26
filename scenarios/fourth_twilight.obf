@@ -1,0 +1,3 @@
+create_projection p1 Regula-1 Earth
+create_projection p2 Enterprise Earth
+create_projection p3 Reliant Earth

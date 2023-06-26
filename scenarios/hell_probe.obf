@@ -1,8 +1,9 @@
 ;.obf -- orbitSim3D batch format
 ;
 solver_type 0
-lock_origin akaito
+lock_origin Earth
 clear traj_visuals
+lock_cam akaito
 ;
 create_projection venus-orbit Venus Sol
 create_projection earth-orbit Earth Sol
@@ -18,13 +19,24 @@ rapid_compute 15000 2500000
 auto_dt 2500000 10000
 ;
 ;
-show akaito dist Venus DIST_TO_VENUS
-show akaito vel_mag Venus VEL_WRT_VENUS
+show akaito dist Earth DIST_TO_EARTH
+show akaito vel_mag Earth VEL_WRT_EARTH
+t=50000 lock_origin akaito
+t=50000 clear traj_visuals
+t=50000 show akaito dist Sol DIST_TO_SOL
+t=50000 show akaito vel_mag Sol VEL_WRT_SOL
+t=50000 show akaito dist Venus DIST_TO_VENUS
+t=50000 show akaito vel_mag Venus VEL_WRT_VENUS
+t=5920000 hide DIST_TO_EARTH
+t=5920000 hide VEL_WRT_EARTH
+t=14291250 lock_origin Venus
+t=14291250 clear traj_visuals
 ;
 show mnv_escape state ESC
 show mnv_align state ALIGN
 show mnv_sync state SYNC
 show mnv_inject state INJECT
+t=14311483 create_projection final-orbit akaito Venus
 ;
 auto_dt 5920000 1000
 auto_dt 5929000 100

@@ -5,4 +5,6 @@ auto_dt 1387.1492 0.00002
 auto_dt 1387.15698 1
 show Polyport dist Lance DIST
 show Polyport vel_mag Lance RVEL
+create_projection p1 Polyport Earth
+create_projection p2 Lance Earth
 output_rate 5

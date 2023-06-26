@@ -4,5 +4,7 @@ create_projection leonov_orbit Leonov Jupiter
 ;create_projection discovery_orbit Discovery Io
 note INTRO You are in command of the spaceship Leonov, tasked with rendezvousing with the disabled exploration ship Discovery, which is in orbit of Io. Do it spending the least Delta-v possible.
 note HELP If you feel stuck, you can run the command 'batch OdysseyII_help'. This will load OdysseyII_help.obf batch file, which includes a few maneuvers to get Leonov into an Io orbit.
-note TEXT To get rid of all the text you currently see on screen, you can use the command 'clear output'.
+note TEXT This text will disappear at T=200.
+t=200 hide INTRO
+t=200 hide HELP
 ;

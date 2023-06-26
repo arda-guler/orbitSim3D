@@ -6,18 +6,26 @@
 ;the ascent.osf scenario.
 ;
 ;
+lock_cam Luna
 show ascent-module alt Luna LUNA_ALT
 show ascent-module vel_mag Luna LUNA_VEL
 ;
 show liftoff params LIFTOFF
 show liftoff state LIFTOFF_STATE
 ;
-show gturn1 params GRAV_TURN_1
-show gturn1 state GRAV_TURN_1_STATE
+t=70 show gturn1 params GRAV_TURN_1
+t=70 show gturn1 state GRAV_TURN_1_STATE
 ;
-show gturn2 params GRAV_TURN_2
-show gturn2 state GRAV_TURN_2_STATE
+t=170 show gturn2 params GRAV_TURN_2
+t=170 show gturn2 state GRAV_TURN_2_STATE
 ;
-show circular params CIRCULARIZATION
-show circular state CIRCULARIZATION_STATE
+t=210 hide GRAV_TURN_1
+t=210 hide GRAV_TURN_1_STATE
+;
+t=450 show circular params CIRCULARIZATION
+t=450 show circular state CIRCULARIZATION_STATE
+t=450 hide GRAV_TURN_2
+t=450 hide GRAV_TURN_2_STATE
+;
+t=600 create_projection p1 ascent-module Luna
 ;
