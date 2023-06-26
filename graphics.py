@@ -24,9 +24,9 @@ def drawGridPlane(cam, bodies, vessels):
     if cam.pos.y != 0:
         spacing = 10**(int(math.log(abs(cam.pos.y), 10)) + 3)
         scene_spacing = spacing * visual_scaling_factor
-        size = abs(cam.pos.y) * 10
+        # size = abs(cam.pos.y) * 10
 
-        N = 50
+        N = 150
         corner_x = (-cam.pos.x - N * 0.5 * scene_spacing) + cam.pos.x % (scene_spacing)
         corner_z = (-cam.pos.z - N * 0.5 * scene_spacing) + cam.pos.z % (scene_spacing)
 

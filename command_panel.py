@@ -96,6 +96,15 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             command_buffer.remove(command_buffer[cmd_index])
             set_buffer_field()
 
+    def time_command_on_buffer(cmd_idx, assigned_time):
+        if len(command_buffer):
+            cmd_idx = int(cmd_idx)
+
+            cmd_idx = min(cmd_idx, len(command_buffer)-1)
+            untimed_cmd = command_buffer[cmd_idx]
+            command_buffer[cmd_idx] = "t=" + assigned_time + " " + untimed_cmd
+            set_buffer_field()
+
     def use_command_delete_window():
 
         if len(command_buffer):
@@ -111,6 +120,30 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
             deletion_button = tk.Button(deletion_window, text="Delete", command=lambda:remove_from_buffer(deletion_input.get("1.0","end-1c")))
             deletion_button.grid(row=2, column=4)
+
+    def assign_cmd_time():
+
+        if len(command_buffer):
+
+            cmd_time_window = tk.Tk()
+            cmd_time_window.title("Assign Command Execution Time")
+
+            cmd_time_idx_label = tk.Label(cmd_time_window, text="Cmd. Index:")
+            cmd_time_idx_label.grid(row=0, column=0)
+
+            cmd_time_asgn_label = tk.Label(cmd_time_window, text="Exec. Time:")
+            cmd_time_asgn_label.grid(row=0, column=1)
+
+            cmd_time_idx_input = tk.Text(cmd_time_window, width=20, height=1)
+            cmd_time_idx_input.grid(row=1, column=0)
+
+            cmd_time_asgn_input = tk.Text(cmd_time_window, width=20, height=1)
+            cmd_time_asgn_input.grid(row=1, column=1)
+
+            cmd_time_asgn_button = tk.Button(cmd_time_window, text="Assign Time",
+                                             command=lambda:time_command_on_buffer(cmd_time_idx_input.get("1.0","end-1c"),
+                                                                                   cmd_time_asgn_input.get("1.0","end-1c")))
+            cmd_time_asgn_button.grid(row=2, column=0, columnspan=2)
 
     def use_command_window():
 
@@ -1553,20 +1586,23 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
     command_button = tk.Button(root, text="Enter Command", command=lambda:use_command_window())
     command_button.config(width=25, height=1)
     command_button.grid(row=1, column=2)
+    time_command_button = tk.Button(root, text="Asgn. Exec. Time", command=lambda:assign_cmd_time())
+    time_command_button.config(width=25, height=1)
+    time_command_button.grid(row=2, column=2)
     delete_command_button = tk.Button(root, text="Delete Command", command=lambda:use_command_delete_window())
     delete_command_button.config(width=25, height=1)
-    delete_command_button.grid(row=2, column=2)
+    delete_command_button.grid(row=3, column=2)
     confirm_and_close_button = tk.Button(root, text="Confirm Commands and Close", command=on_panel_close)
     confirm_and_close_button.config(width=25, height=1)
-    confirm_and_close_button.grid(row=3, column=2)
+    confirm_and_close_button.grid(row=4, column=2)
     clear_button = tk.Button(root, text="Clear Command Buffer", command=clear_command_buffer)
     clear_button.config(width=25, height=1)
-    clear_button.grid(row=4, column=2)
+    clear_button.grid(row=5, column=2)
 
     sim_variables_field_label = tk.Label(root, text="Simulation Variables")
-    sim_variables_field_label.grid(row=5, column=2)
-    sim_variables_field = tk.Text(root, width=25, height=7)
-    sim_variables_field.grid(row=6, column=2, rowspan=5)
+    sim_variables_field_label.grid(row=6, column=2)
+    sim_variables_field = tk.Text(root, width=25, height=6)
+    sim_variables_field.grid(row=7, column=2, rowspan=5)
 
     set_vars_field()
 

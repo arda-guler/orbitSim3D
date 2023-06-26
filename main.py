@@ -1014,6 +1014,7 @@ def main(scn_filename=None, start_time=0):
     glTranslate(main_cam.get_pos().x, main_cam.get_pos().y, main_cam.get_pos().z)
 
     batch_commands = []
+    timed_commands = []
     output_buffer = []
     auto_dt_buffer = []
     rapid_compute_buffer = []
@@ -1116,7 +1117,7 @@ def main(scn_filename=None, start_time=0):
                             panel_command = panel_command.split(" ")
                             batch_commands.append(panel_command)
 
-            if frame_command or len(batch_commands) > 0:
+            if frame_command or len(batch_commands) > 0 or len(timed_commands) > 0:
                 flush_input()
 
                 if frame_command:
@@ -1125,13 +1126,21 @@ def main(scn_filename=None, start_time=0):
                     command[0] = command[0].lower()
 
                 # --- COMMAND INTERPRETER ---
+                if len(timed_commands) > 0 and timed_commands[0][0] <= sim_time:
+                    command = timed_commands[0][1]
+                    timed_commands.remove(timed_commands[0])
 
-                if len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
+                elif len(batch_commands) > 0 and (not frame_command or command[0] == "batch"):
                     command = batch_commands[0]
                     batch_commands.remove(command)
 
+                # timed command
+                if command[0].startswith("t="):
+                    timed_commands.append([float(command[0][2:]), command[1:]])
+                    timed_commands = sorted(timed_commands)
+
                 # BATCH command
-                if command[0] == "batch":
+                elif command[0] == "batch":
                     batch_commands = read_batch(command[1])
                 
                 # SHOW command
@@ -1570,11 +1579,25 @@ def main(scn_filename=None, start_time=0):
                 # GET_AUTO_DT_BUFFER command
                 elif command[0] == "get_auto_dt_buffer":
                     print(auto_dt_buffer)
-                    input("Press enter to continue...")
+                    input("Press Enter to continue...")
 
                 # AUTO_DT_CLEAR command
                 elif command[0] == "auto_dt_clear":
                     auto_dt_buffer = []
+
+                # GET_TIMED_COMMANDS command
+                elif command[0] == "get_timed_commands":
+                    print(timed_commands)
+                    input("Press Enter to continue...")
+
+                # TIMED_COMMANDS_REMOVE command
+                elif command[0] == "timed_commands_remove":
+                    if len(command) == 2:
+                        timed_commands.remove(timed_commands[int(command[1])])
+
+                # TIMED_COMMANDS_CLEAR command
+                elif command[0] == "timed_commands_clear":
+                    timed_commands = []
 
                 # RAPID_COMPUTE command
                 elif command[0] == "rapid_compute":
@@ -1674,7 +1697,10 @@ def main(scn_filename=None, start_time=0):
                         print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
                         print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin")
-                        print("create_proximity_zone, delete_proximity_zone, get_proximity_zones\n")
+                        print("create_proximity_zone, delete_proximity_zone, get_proximity_zones,")
+                        print("get_timed_commands, timed_commands_remove, timed_commands_clear\n")
+                        print("Commands can be buffered to run at specific simulation times by adding 't=<execution_time> '")
+                        print("in front of them.\n")
                         print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
                         print("Simulation is paused while typing a command or using the command panel interface.\n")
                         print("Type help <command> to learn more about a certain command.\n")
@@ -1926,6 +1952,8 @@ def main(scn_filename=None, start_time=0):
                 else:
                     print("\nUnrecognized command: " + str(command[0]))
                     input("Press Enter to continue...")
+
+                command = [""]
 
             if keyboard.is_pressed("CTRL+K"):
                 accept_keyboard_input = False
