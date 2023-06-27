@@ -1,48 +1,49 @@
-;.obf -- orbitSim3D batch format
-;
-; This obf is a full solution to the two_mirrors scenario.
-;
-; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-;
-solver_type 0
-rapid_compute 100 2650
-rapid_compute 2950 3990
-rapid_compute 4130 7630
-rapid_compute 7665 11370
-rapid_compute 11450 11910
-rapid_compute 11930 12050
-rapid_compute 12070 13900
-rapid_compute 13930 16100
-rapid_compute 16190 16800
-rapid_compute 16830 17130
-rapid_compute 17180 24530
-auto_dt 24780 0.25
-;
-;	NOTES
-;
-clear output
-;
-;	SETTING UP OUTPUT
-;
-show Yang dist Yin TARGET_DIST
-show Yang vel_mag Yin REL_VEL
-;
-show mnv_align1 state MNV_ALIGN1
-show mnv_align2 state MNV_ALIGN2
-;
-show mnv_sync1 state MNV_SYNC1
-show mnv_sync2 state MNV_SYNC2
-show mnv_sync3 state MNV_SYNC3
-show mnv_sync4 state MNV_SYNC4
-show mnv_sync5 state MNV_SYNC5
-show mnv_sync6 state MNV_SYNC6
-show mnv_sync7 state MNV_SYNC7
-show mnv_sync8 state MNV_SYNC8
-show mnv_sync9 state MNV_SYNC9
-;
-show mnv_align3 state MNV_ALIGN3
-;
-show mnv_appr1 state MNV_APPR1
-show mnv_appr2 state MNV_APPR2
-show mnv_appr3 state MNV_APPR3
-;
+solver_type 3
+show grid
+move_cam_to 2000 3000 5000
+rotate_cam_by y 18
+rotate_cam_by x -30
+output_rate 50
+create_projection p1 Yang Earth
+create_projection p2 Yin Earth
+show Yang vel Earth YANG_VEL
+t=2770 update_projection p1
+t=9230 update_projection p1
+t=11000 hide grid
+t=15638 update_projection p1
+t=15640 show Yang dist Yin TARGET_DIST
+t=15640 show Yang vel_mag Yin TARGET_VEL
+t=21500 output_rate 5
+t=21500 lock_cam Yin
+t=22000 show grid
+t=22500 output_rate 1
+t=15760 update_projection p1
+
+show mnv1 params MNV1_APOAPSIS_RAISE
+show mnv1 state MNV1_STATE
+note STATUS Yang will raise its apoapsis to reduce the cost of the upcoming plane change maneuver.
+
+t=3000 hide MNV1_APOAPSIS_RAISE
+t=3000 show mnv2a params MNV2_PLANE_CHANGE
+t=3000 show mnv2b params MNV2_PERIAPSIS_RAISE
+t=3000 show mnv2a state MNV2_STATE
+t=3000 hide STATUS
+t=3000 note STATUS Yang will change its orbital plane to match that of its target.
+
+t=9400 hide MNV2_PLANE_CHANGE
+t=9400 hide MNV2_PERIAPSIS_RAISE
+t=9400 show mnv3 params MNV3_PHASE_INTERCEPT
+t=9400 show mnv3 state MNV3_STATE
+t=9400 hide STATUS
+t=9400 note STATUS Yang will lower its apoapsis to intercept Yin by synchronizing their time of arrival to an intersection point.
+
+t=16000 hide MNV3_PHASE_INTERCEPT
+t=16000 show mnv4 params MNV4_APPROACH_PARKING
+t=16000 show mnv4 state MNV4_STATE
+t=16000 hide STATUS
+t=16000 note STATUS Yang will match its orbital velocity with Yin at the intersection, effectively parking next to it for proximity operations.
+
+t=22760 hide MNV4_APPROACH_PARKING
+t=22760 hide grid
+t=22760 hide STATUS
+t=22760 note STATUS Yang has parked next to Yin. Orbital rendezvous is complete.

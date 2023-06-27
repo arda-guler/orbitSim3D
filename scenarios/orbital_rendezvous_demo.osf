@@ -11,27 +11,20 @@
 ;a bad one. I have used way too much Dv
 ;since I didn't want this to take many
 ;real-world hours.
-;
+
+;Celestial bodies
 
 B|Earth|data/models/miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0|0|0
+
+;Vessels
+
 V|Yang|data/models/minisat.obj|[1.0,0.0,1.0]|[6771000,0,0]|[0,3836,-6644]
 V|Yin|data/models/minisat.obj|[0.0,1.0,1.0]|[0,0,7000000]|[7546,0,0]
 
-M|mnv_align1|const_accel|Yang|Earth|normal_dynamic|20.0|2700.0|200.0
-M|mnv_align2|const_accel|Yang|Earth|antinormal_dynamic|10.0|4000.0|25.0
+;Maneuvers
 
-M|mnv_sync1|const_accel|Yang|Earth|prograde_dynamic|10.0|4050.0|60.0
-M|mnv_sync2|const_accel|Yang|Earth|prograde_dynamic|10.0|7650.0|2.0
-M|mnv_sync3|const_accel|Yang|Earth|retrograde_dynamic|10.0|11390.0|55.0
-M|mnv_sync4|const_accel|Yang|Earth|prograde_dynamic|5.0|11920.0|2.0
-M|mnv_sync5|const_accel|Yang|Earth|radial_in_dynamic|5.0|12060.0|2.0
-M|mnv_sync6|const_accel|Yang|Earth|prograde_dynamic|5.0|13910.0|6.0
-M|mnv_sync7|const_accel|Yang|Earth|prograde_dynamic|10.0|16110.0|8.0
-M|mnv_sync8|const_accel|Yang|Earth|retrograde_dynamic|5.0|16180.0|8.0
-M|mnv_sync9|const_accel|Yang|Earth|retrograde_dynamic|5.0|16810.0|10.0
-
-M|mnv_align3|const_accel|Yang|Earth|normal_dynamic|5.0|17150.0|20.0
-
-M|mnv_appr1|const_accel|Yang|Yin|retrograde_dynamic|10.0|24540.0|15.0
-M|mnv_appr2|const_accel|Yang|Yin|radial_in_dynamic|10.0|24580.0|15.0
-M|mnv_appr3|const_accel|Yang|Yin|retrograde_dynamic|5.0|24790.0|45.0
+M|mnv1|impulsive|Yang|Earth|prograde|1500.0|2768.0
+M|mnv2a|impulsive|Yang|Earth|[0,-1,0]|1831.0|9228.0
+M|mnv2b|impulsive|Yang|Earth|[0,0,-1]|500.0|9228.0
+M|mnv3|impulsive|Yang|Earth|retrograde|1218.0|15636.0
+M|mnv4|impulsive|Yang|Yin|retrograde|459|22754
