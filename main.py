@@ -1328,7 +1328,7 @@ def main(scn_filename=None, start_time=0):
                         if not command[5] in preset_orientations:
                             create_maneuver_const_accel(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                             
-                                                        eval(command[5]),
+                                                        vec3(lst=eval(command[5])),
                                             
                                                         float(command[6]), float(command[7]), float(command[8]))
                         else:
@@ -1342,7 +1342,7 @@ def main(scn_filename=None, start_time=0):
                         if not command[5] in preset_orientations:
                             create_maneuver_const_thrust(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
 
-                                                         eval(command[5]),
+                                                         vec3(lst=eval(command[5])),
 
                                                          float(command[6]), float(command[7]), float(command[8]),
                                                          float(command[9]), float(command[10]))
@@ -1358,7 +1358,7 @@ def main(scn_filename=None, start_time=0):
                         # name, type, vessel, frame, orientation, delta_v, perform_time
                         if not command[5] in preset_orientations:
                             create_maneuver_impulsive(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
-                                                      eval(command[5]), float(command[6]), float(command[7]))
+                                                      vec3(lst=eval(command[5])), float(command[6]), float(command[7]))
                         else:
                             create_maneuver_impulsive(command[1], find_obj_by_name(command[3]), find_obj_by_name(command[4]),
                                                       command[5], float(command[6]), float(command[7]))
@@ -1653,8 +1653,56 @@ def main(scn_filename=None, start_time=0):
                     else:
                         lock_active_cam_by_proximity()
 
+                # UNLOCK_CAM command
                 elif command[0] == "unlock_cam":
                     unlock_active_cam()
+
+                # MOVE_CAM_BY command
+                elif command[0] == "move_cam_by":
+                    temp_orient = get_active_cam().orient
+                    get_active_cam().orient = matrix3x3(1, 0, 0,
+                                                        0, 1, 0,
+                                                        0, 0, 1)
+                    if get_active_cam().lock:
+                        cam_lock_temp = get_active_cam().lock
+                        get_active_cam().lock = None
+                        get_active_cam().move(-vec3(float(command[1]), float(command[2]), float(command[3])))
+                        get_active_cam().lock = cam_lock_temp
+                        cam_lock_temp = None
+                    else:
+                        get_active_cam().move(-vec3(float(command[1]), float(command[2]), float(command[3])))
+                    get_active_cam().orient = temp_orient
+                    temp_orient = matrix3x3(1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1)
+                    
+                # MOVE_CAM_TO command
+                elif command[0] == "move_cam_to":
+                    temp_orient = get_active_cam().orient
+                    get_active_cam().orient = matrix3x3(1, 0, 0,
+                                                        0, 1, 0,
+                                                        0, 0, 1)
+                    if get_active_cam().lock:
+                        cam_lock_temp = get_active_cam().lock
+                        get_active_cam().lock = None
+                        get_active_cam().move(-vec3(float(command[1]), float(command[2]), float(command[3])) - get_active_cam().pos)
+                        get_active_cam().lock = cam_lock_temp
+                        cam_lock_temp = None
+                    else:
+                        get_active_cam().move(-vec3(float(command[1]), float(command[2]), float(command[3])) - get_active_cam().pos)
+                    get_active_cam().orient = temp_orient
+                    temp_orient = matrix3x3(1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1)
+
+                # ROTATE_CAM_BY command
+                elif command[0] == "rotate_cam_by":
+                    if command[1].lower() == "x":
+                        get_active_cam().rotate([float(command[2]), 0, 0])
+                    elif command[1].lower() == "y":
+                        get_active_cam().rotate([0, float(command[2]), 0])
+                    elif command[1].lower() == "z":
+                        get_active_cam().rotate([0, 0, float(command[2])])
 
                 # DRAW_MODE command
                 elif command[0] == "draw_mode":
@@ -2066,11 +2114,11 @@ def main(scn_filename=None, start_time=0):
         # update plots
         for p in plots:
             p.update(sim_time)
-            
+
             # going to display any of the plots?
             if sim_time >= p.get_end_time() > (sim_time - delta_t):
                 p.display()
-                
+
                 clear_cmd_terminal()
                 print("Exporting plot data to /exported_data/" + p.title + ".csv...")
                 p.export_to_file()
