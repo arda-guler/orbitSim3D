@@ -184,9 +184,9 @@ class kepler_projection():
 
             if prev_y * r_trans.y < 0:
                 if r_trans.y < 0:
-                    draw_an = cpos * visual_scaling_factor
-                else:
                     draw_dn = cpos * visual_scaling_factor
+                else:
+                    draw_an = cpos * visual_scaling_factor
 
             prev_y = r_trans.y
 
