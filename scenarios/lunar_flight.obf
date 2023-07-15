@@ -4,4 +4,10 @@ output_rate 1000
 create_projection p1 Luna Earth
 create_plot RMAG dist lunar-orbiter Earth 10 600000
 show grid
+move_cam_by 0 45000 35000
+rotate_cam_by x -40
+show lunar-orbiter dist Earth R_EARTH
+show lunar-orbiter vel_mag Earth V_EARTH
+show lunar-orbiter dist Luna R_LUNA
+show lunar-orbiter vel_mag Luna V_LUNA
 ;
