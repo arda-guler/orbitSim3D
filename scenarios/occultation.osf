@@ -36,3 +36,6 @@ M|mnv_hohmann1|const_accel|xlipse|Earth|prograde_dynamic|3|6000|160
 ;
 R|rad_press_1|xlipse|Sol|5|Earth|prograde_dynamic|200|1
 ;
+; Resources
+;
+U|energy|37000|power|dist_occultation|xlipse|Sol|[5e+24, -2, -20]|[0, 500000]

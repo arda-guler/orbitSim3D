@@ -28,3 +28,6 @@ M|mnv2a|impulsive|Yang|Earth|[0,-1,0]|1831.0|9228.0
 M|mnv2b|impulsive|Yang|Earth|[0,0,-1]|500.0|9228.0
 M|mnv3|impulsive|Yang|Earth|retrograde|1218.0|15636.0
 M|mnv4|impulsive|Yang|Yin|retrograde|459|22754
+
+;Resources
+U|target_signal|0|power_abs|dist_occultation|Yin|Yang|[10000000000000.0, -2, 0]|[0, 10]

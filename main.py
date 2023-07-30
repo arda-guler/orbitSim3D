@@ -29,6 +29,7 @@ from atmospheric_drag import *
 # from vector3 import *
 from solver import *
 from proximity import *
+from resource import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -51,6 +52,7 @@ maneuvers = []
 radiation_pressures = []
 atmospheric_drags = []
 proximity_zones = []
+resources = []
 
 batch_commands = []
 
@@ -111,7 +113,7 @@ def read_batch(batch_path):
     return commands
 
 def clear_scene():
-    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, plots, radiation_pressures, atmospheric_drags, sim_time
+    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources, plots, radiation_pressures, atmospheric_drags, sim_time
 
     objs = []
     vessels = []
@@ -120,13 +122,14 @@ def clear_scene():
     projections = []
     surface_points = []
     barycenters = []
+    resources = []
     plots = []
     radiation_pressures = []
     atmospheric_drags = []
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, proximity_zones, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, proximity_zones, resources, sim_time
 
     clear_scene()
 
@@ -292,11 +295,17 @@ def import_scenario(scn_filename):
             new_pz = proximity_zone(line[1], find_obj_by_name(line[2]), float(line[3]), float(line[4]))
             proximity_zones.append(new_pz)
             print("Loading proximity zone:", new_pz.name)
+
+        # import resource data
+        elif line[0] == "U":
+            new_res = resource(line[1], float(line[2]), line[3], line[4], find_obj_by_name(line[5]), find_obj_by_name(line[6]), eval(line[7]), eval(line[8]))
+            resources.append(new_res)
+            print("Loading resource:", new_res.name)
             
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, radiation_pressures, atmospheric_drags, proximity_zones, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, proximity_zones, sim_time
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -381,6 +390,14 @@ def export_scenario(scn_filename, verbose=True):
                 bc_save_string += b.get_name() + ","
             bc_save_string = bc_save_string[:-1]+"\n"
             scn_file.write(bc_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing resources...")
+        for res in resources:
+            res_save_string = "U|" + res.get_name() + "|" + str(res.value) + "|" + res.equation + "|" + res.variable + "|" + res.obj1.name + "|" + res.obj2.name + "|" + str(res.coeffs) + "|" + str(res.limits) + "\n"
+            scn_file.write(res_save_string)
 
         scn_file.write("\n")
 
@@ -908,6 +925,41 @@ def delete_proximity_zone(pz_name):
     proximity_zones.remove(pz_tbd)
     del pz_tbd
 
+def find_resource_by_name(res_name):
+    global resources
+
+    for res in resources:
+        if res.name == res_name:
+            return res
+
+    return None
+
+def create_resource(res_name, value, equation, variable, obj1, obj2, coeffs, limits):
+    global resources
+
+    if find_resource_by_name(res_name):
+        print("A resource with this name already exists. Please pick another name for the new resource.\n")
+        input("Press Enter to continue...")
+        return
+
+    try:
+        new_res = resource(res_name, value, equation, variable, obj1, obj2, coeffs, limits)
+        resources.append(new_res)
+    except:
+        print("Could not create new resource:", res_name)
+
+def delete_resource(res_name):
+    global resources
+    res_tbd = find_resource_by_name(res_name)
+
+    if not res_tbd:
+        print("Resource not found!")
+        time.sleep(2)
+        return
+
+    resources.remove(res_tbd)
+    del res_tbd
+
 def vessel_body_crash(v, b):
     # a vessel has crashed into a celestial body. We will convert the vessel object
     # into a surface point on the body (a crash site) and remove all references to
@@ -981,7 +1033,7 @@ def get_active_cam():
 
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
-           plots, cameras, barycenters, radiation_pressures, atmospheric_drags,\
+           plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
            proximity_zones, gvar_fov, gvar_near_clip, gvar_far_clip
 
     # read config to get start values
@@ -1110,7 +1162,7 @@ def main(scn_filename=None, start_time=0):
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, proximity_zones,
-                                                       projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
+                                                       projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
                                                        rapid_compute_buffer, scene_lock)
                     if panel_commands:
                         for panel_command in panel_commands:
@@ -1226,6 +1278,10 @@ def main(scn_filename=None, start_time=0):
                             else:
                                 print("Illegal parameter!\n")
                                 time.sleep(2)
+
+                        elif find_resource_by_name(command[1]):
+                            res = find_resource_by_name(command[1])
+                            output_buffer.append([command[3], command[2], res, "res"])
                                 
                         else:
                             print("Object/maneuver/projection not found.")
@@ -1517,6 +1573,23 @@ def main(scn_filename=None, start_time=0):
 
                     input("Press Enter to continue...")
 
+                # CREATE_RESOURCE
+                elif command[0] == "create_resource":
+                    create_resource(command[1], float(command[2]), command[3], command[4],
+                                    find_obj_by_name(command[5]), find_obj_by_name(command[6]), eval(command[7]),
+                                    eval(command[8]))
+
+                # DELETE_RESOURCE
+                elif command[0] == "delete_resource":
+                    delete_resource(command[1])
+
+                # GET_RESOURCES
+                elif command[0] == "get_resources":
+                    print("Resources currently in simulation:\n")
+                    for res in resources:
+                        print(res.name)
+                    input("Press Enter to continue...")
+
                 # GET_OBJECTS command
                 elif command[0] == "get_objects":
                     print("Objects currently in simulation:\n")
@@ -1740,9 +1813,10 @@ def main(scn_filename=None, start_time=0):
                         print("\nAvailable commands: help, show, hide, clear, cam_strafe_speed, cam_rotate_speed, delta_t, cycle_time,")
                         print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                         print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
-                        print("delete_plot, display_plot, get_plots, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove,")
-                        print("auto_dt_clear, get_auto_dt_buffer, draw_mode, point_size, create_barycenter, delete_barycenter,")
-                        print("export, rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
+                        print("delete_plot, display_plot, get_plots, create_resource, delete_resource, get_resources,")
+                        print("output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove, auto_dt_clear, get_auto_dt_buffer,")
+                        print("draw_mode, point_size, create_barycenter, delete_barycenter, export,")
+                        print("rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
                         print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin")
                         print("create_proximity_zone, delete_proximity_zone, get_proximity_zones,")
@@ -1878,6 +1952,19 @@ def main(scn_filename=None, start_time=0):
                         elif command[1] == "delete_barycenter":
                             print("'delete_barycenter' removes a previously marked barycenter.")
                             print("Syntax: delete_barycenter <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_resource":
+                            print("'create_resource' command adds a resource item to the simulation to keep track of\nresources such as the stored energy aboard a vessel or the signal strength between\nvessels.")
+                            # name, value, equation, variable, obj1, obj2, coeffs, limits
+                            print("Syntax: create_resource <name> <init_value> <equation_type> <equation_variable> <object_1> <object_2> <list_of_coefficients> <min_max_limits>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_resource":
+                            print("'delete_resource' command removes a resource item from the simulation.")
+                            print("Syntax: delete_resources <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_resources":
+                            print("'get_resources' command prints out the names of resource items currently in the simulation.")
+                            print("Syntax: get_resources")
                             input("Press Enter to continue...")
                         elif command[1] == "get_objects":
                             print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
@@ -2111,6 +2198,11 @@ def main(scn_filename=None, start_time=0):
                 if not [vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"] in output_buffer:
                     output_buffer.append([vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"])
 
+        # update resources
+        for res in resources:
+            res.update_occultation(bodies)
+            res.update_value(delta_t)
+
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -2232,6 +2324,13 @@ def main(scn_filename=None, start_time=0):
                         print(element[0], proj.get_energy())
                     elif element[1] == "params" and element[3] == "p":
                         print(element[0], "\n" + element[2].get_params_str())
+
+                    # resources
+                    elif element[1] == "value" and element[3] == "res":
+                        print(element[0], element[2].value)
+
+                    elif element[1] == "delta" and element[3] == "res":
+                        print(element[0], element[2].last_delta)
 
                     # note taking
                     elif element[1] == "note":

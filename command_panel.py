@@ -4,7 +4,7 @@ import tkinter as tk
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, proximity_zones,
-                      projections, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
+                      projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
                       rapid_compute_buffer, scene_lock):
     command_buffer = []
 
@@ -45,6 +45,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             
         for p in projections:
             objects_text += "PROJECTION: " + p.get_name() + "\n"
+
+        for res in resources:
+            objects_text += "RESOURCE: " + res.get_name() + "\n"
             
         for pl in plots:
             objects_text += "PLOTTER: " + pl.get_name() + "\n"
@@ -158,25 +161,21 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             if cmd_a == "show":
                 show_help = tk.Label(entry_panel, text="'show' command adds an output element to the command prompt/terminal.")
                 show_help.grid(row=0, column=0, columnspan=10)
-                # option 1
-                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
-                show_traj_button.grid(row=1, column=0)
-                show_traj_button.config(width=20,height=1)
 
-                # option 2
+                # option 1
                 show_s1t1_label = tk.Label(entry_panel, text="Object")
                 show_s1t2_label = tk.Label(entry_panel, text="Variable")
                 show_s1t3_label = tk.Label(entry_panel, text="Display Label")
-                show_s1t1_label.grid(row=2, column=1)
-                show_s1t2_label.grid(row=2, column=2)
-                show_s1t3_label.grid(row=2, column=3)
+                show_s1t1_label.grid(row=1, column=1)
+                show_s1t2_label.grid(row=1, column=2)
+                show_s1t3_label.grid(row=1, column=3)
                 
                 show_s1t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s1t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s1t3 = tk.Text(entry_panel, width=20, height=1)
-                show_s1t1.grid(row=3, column=1)
-                show_s1t2.grid(row=3, column=2)
-                show_s1t3.grid(row=3, column=3)
+                show_s1t1.grid(row=2, column=1)
+                show_s1t2.grid(row=2, column=2)
+                show_s1t3.grid(row=2, column=3)
 
                 def generate_s1():
                     if show_s1t1.get("1.0","end-1c") and show_s1t2.get("1.0","end-1c") and show_s1t3.get("1.0","end-1c"):
@@ -184,27 +183,27 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s1_button = tk.Button(entry_panel, text="Show Global Variable", command=generate_s1)
-                show_s1_button.grid(row=3, column=0)
+                show_s1_button.grid(row=2, column=0)
                 show_s1_button.config(width=20,height=1)
 
-                # option 3
+                # option 2
                 show_s2t1_label = tk.Label(entry_panel, text="Object")
                 show_s2t2_label = tk.Label(entry_panel, text= "Variable")
                 show_s2t3_label = tk.Label(entry_panel, text="Frame of Ref.")
                 show_s2t4_label = tk.Label(entry_panel, text="Display Label")
-                show_s2t1_label.grid(row=4, column=1)
-                show_s2t2_label.grid(row=4, column=2)
-                show_s2t3_label.grid(row=4, column=3)
-                show_s2t4_label.grid(row=4, column=4)
+                show_s2t1_label.grid(row=3, column=1)
+                show_s2t2_label.grid(row=3, column=2)
+                show_s2t3_label.grid(row=3, column=3)
+                show_s2t4_label.grid(row=3, column=4)
 
                 show_s2t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s2t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s2t3 = tk.Text(entry_panel, width=20, height=1)
                 show_s2t4 = tk.Text(entry_panel, width=20, height=1)
-                show_s2t1.grid(row=5, column=1)
-                show_s2t2.grid(row=5, column=2)
-                show_s2t3.grid(row=5, column=3)
-                show_s2t4.grid(row=5, column=4)
+                show_s2t1.grid(row=4, column=1)
+                show_s2t2.grid(row=4, column=2)
+                show_s2t3.grid(row=4, column=3)
+                show_s2t4.grid(row=4, column=4)
 
                 def generate_s2():
                     if show_s2t1.get("1.0","end-1c") and show_s2t2.get("1.0","end-1c") and show_s2t3.get("1.0","end-1c") and show_s2t4.get("1.0","end-1c"):
@@ -212,23 +211,23 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s2_button = tk.Button(entry_panel, text="Show Relative Variable", command=generate_s2)
-                show_s2_button.grid(row=5, column=0)
+                show_s2_button.grid(row=4, column=0)
                 show_s2_button.config(width=20,height=1)
 
-                # option 4
+                # option 3
                 show_s3t1_label = tk.Label(entry_panel, text="Maneuver")
                 show_s3t2_label = tk.Label(entry_panel, text="Data ('active'/'state'/'params')")
                 show_s3t3_label = tk.Label(entry_panel, text="Display Label")
-                show_s3t1_label.grid(row=6, column=1)
-                show_s3t2_label.grid(row=6, column=2)
-                show_s3t3_label.grid(row=6, column=3)
+                show_s3t1_label.grid(row=5, column=1)
+                show_s3t2_label.grid(row=5, column=2)
+                show_s3t3_label.grid(row=5, column=3)
 
                 show_s3t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s3t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s3t3 = tk.Text(entry_panel, width=20, height=1)
-                show_s3t1.grid(row=7, column=1)
-                show_s3t2.grid(row=7, column=2)
-                show_s3t3.grid(row=7, column=3)
+                show_s3t1.grid(row=6, column=1)
+                show_s3t2.grid(row=6, column=2)
+                show_s3t3.grid(row=6, column=3)
 
                 def generate_s3():
                     if show_s3t1.get("1.0","end-1c") and show_s3t2.get("1.0","end-1c") and show_s3t3.get("1.0","end-1c"):
@@ -236,23 +235,23 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s3_button = tk.Button(entry_panel, text="Show Maneuver Data", command=generate_s3)
-                show_s3_button.grid(row=7, column=0)
+                show_s3_button.grid(row=6, column=0)
                 show_s3_button.config(width=20,height=1)
 
-                # option 5
+                # option 4
                 show_s4t1_label = tk.Label(entry_panel, text="Radiation Press.")
                 show_s4t2_label = tk.Label(entry_panel, text="Data ('params')")
                 show_s4t3_label = tk.Label(entry_panel, text="Display Label")
-                show_s4t1_label.grid(row=8, column=1)
-                show_s4t2_label.grid(row=8, column=2)
-                show_s4t3_label.grid(row=8, column=3)
+                show_s4t1_label.grid(row=7, column=1)
+                show_s4t2_label.grid(row=7, column=2)
+                show_s4t3_label.grid(row=7, column=3)
 
                 show_s4t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s4t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s4t3 = tk.Text(entry_panel, width=20, height=1)
-                show_s4t1.grid(row=9, column=1)
-                show_s4t2.grid(row=9, column=2)
-                show_s4t3.grid(row=9, column=3)
+                show_s4t1.grid(row=8, column=1)
+                show_s4t2.grid(row=8, column=2)
+                show_s4t3.grid(row=8, column=3)
 
                 def generate_s4():
                     if show_s4t1.get("1.0","end-1c") and show_s4t2.get("1.0","end-1c") and show_s4t3.get("1.0","end-1c"):
@@ -260,23 +259,23 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s4_button = tk.Button(entry_panel, text="Show Rad. Press. Data", command=generate_s4)
-                show_s4_button.grid(row=9, column=0)
+                show_s4_button.grid(row=8, column=0)
                 show_s4_button.config(width=20,height=1)
 
-                # option 6
+                # option 5
                 show_s5t1_label = tk.Label(entry_panel, text="Atmo. Drag")
                 show_s5t2_label = tk.Label(entry_panel, text="Data ('params')")
                 show_s5t3_label = tk.Label(entry_panel, text="Display Label")
-                show_s5t1_label.grid(row=10, column=1)
-                show_s5t2_label.grid(row=10, column=2)
-                show_s5t3_label.grid(row=10, column=3)
+                show_s5t1_label.grid(row=9, column=1)
+                show_s5t2_label.grid(row=9, column=2)
+                show_s5t3_label.grid(row=9, column=3)
 
                 show_s5t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s5t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s5t3 = tk.Text(entry_panel, width=20, height=1)
-                show_s5t1.grid(row=11, column=1)
-                show_s5t2.grid(row=11, column=2)
-                show_s5t3.grid(row=11, column=3)
+                show_s5t1.grid(row=10, column=1)
+                show_s5t2.grid(row=10, column=2)
+                show_s5t3.grid(row=10, column=3)
 
                 def generate_s5():
                     if show_s5t1.get("1.0","end-1c") and show_s5t2.get("1.0","end-1c") and show_s5t3.get("1.0","end-1c"):
@@ -284,23 +283,23 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s5_button = tk.Button(entry_panel, text="Show Atmo. Drag Data", command=generate_s5)
-                show_s5_button.grid(row=11, column=0)
+                show_s5_button.grid(row=10, column=0)
                 show_s5_button.config(width=20,height=1)
 
-                # option 7
+                # option 6
                 show_s6t1_label = tk.Label(entry_panel, text="Projection")
                 show_s6t2_label = tk.Label(entry_panel, text="Data (attribute/'params')")
                 show_s6t3_label = tk.Label(entry_panel, text="Display Label")
-                show_s6t1_label.grid(row=12, column=1)
-                show_s6t2_label.grid(row=12, column=2)
-                show_s6t3_label.grid(row=12, column=3)
+                show_s6t1_label.grid(row=11, column=1)
+                show_s6t2_label.grid(row=11, column=2)
+                show_s6t3_label.grid(row=11, column=3)
 
                 show_s6t1 = tk.Text(entry_panel, width=20, height=1)
                 show_s6t2 = tk.Text(entry_panel, width=20, height=1)
                 show_s6t3 = tk.Text(entry_panel, width=20, height=1)
-                show_s6t1.grid(row=13, column=1)
-                show_s6t2.grid(row=13, column=2)
-                show_s6t3.grid(row=13, column=3)
+                show_s6t1.grid(row=12, column=1)
+                show_s6t2.grid(row=12, column=2)
+                show_s6t3.grid(row=12, column=3)
 
                 def generate_s6():
                     if show_s6t1.get("1.0","end-1c") and show_s6t2.get("1.0","end-1c") and show_s6t3.get("1.0","end-1c"):
@@ -308,17 +307,46 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                         add_to_buffer(command)
 
                 show_s6_button = tk.Button(entry_panel, text="Show Projection Data", command=generate_s6)
-                show_s6_button.grid(row=13, column=0)
+                show_s6_button.grid(row=12, column=0)
                 show_s6_button.config(width=20,height=1)
 
                 # option 7
-                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
-                show_labels_button.grid(row=14, column=0)
-                show_labels_button.config(width=20,height=1)
+                show_s7t1_label = tk.Label(entry_panel, text="Resource")
+                show_s7t2_label = tk.Label(entry_panel, text="Data ('value'/'delta')")
+                show_s7t3_label = tk.Label(entry_panel, text="Display Label")
+                show_s7t1_label.grid(row=13, column=1)
+                show_s7t2_label.grid(row=13, column=2)
+                show_s7t3_label.grid(row=13, column=3)
+
+                show_s7t1 = tk.Text(entry_panel, width=20, height=1)
+                show_s7t2 = tk.Text(entry_panel, width=20, height=1)
+                show_s7t3 = tk.Text(entry_panel, width=20, height=1)
+                show_s7t1.grid(row=14, column=1)
+                show_s7t2.grid(row=14, column=2)
+                show_s7t3.grid(row=14, column=3)
+
+                def generate_s7():
+                    if show_s7t1.get("1.0", "end-1c") and show_s7t2.get("1.0", "end-1c") and show_s7t3.get("1.0", "end-1c"):
+                        command = "show " + show_s7t1.get("1.0", "end-1c") + " " + show_s7t2.get("1.0", "end-1c") + " " + show_s7t3.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                show_s7_button = tk.Button(entry_panel, text="Show Resource Data", command=generate_s7)
+                show_s7_button.grid(row=14, column=0)
+                show_s7_button.config(width=20, height=1)
 
                 # option 8
+                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
+                show_traj_button.grid(row=15, column=0)
+                show_traj_button.config(width=20,height=1)
+
+                # option 9
+                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
+                show_labels_button.grid(row=15, column=1)
+                show_labels_button.config(width=20,height=1)
+
+                # option 10
                 show_grid_button = tk.Button(entry_panel, text="Show Grid", command=lambda: add_to_buffer("show grid"))
-                show_grid_button.grid(row=15, column=0)
+                show_grid_button.grid(row=15, column=2)
                 show_grid_button.config(width=20, height=1)
 
             elif cmd_a == "hide":
@@ -840,6 +868,70 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 up_s1_button = tk.Button(entry_panel, text="Update Projection", command=generate_s1)
                 up_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "create_resource":
+                crs_help = tk.Label(entry_panel, text="'create_resource' command adds a resource item to the simulation to keep track of resources\nsuch as the stored energy aboard a vessel or the signal strength between vessels.")
+                crs_help.grid(row=0, column=0, columnspan=10)
+                # option 1
+                crs_s1t1_label = tk.Label(entry_panel, text="Resource Name")
+                crs_s1t2_label = tk.Label(entry_panel, text="Initial Value")
+                crs_s1t3_label = tk.Label(entry_panel, text="Equation Type")
+                crs_s1t4_label = tk.Label(entry_panel, text="Variable")
+                crs_s1t5_label = tk.Label(entry_panel, text="Object 1")
+                crs_s1t6_label = tk.Label(entry_panel, text="Object 2")
+                crs_s1t7_label = tk.Label(entry_panel, text="Eqn. Coeffs.")
+                crs_s1t8_label = tk.Label(entry_panel, text="Value Limits")
+                crs_s1t1_label.grid(row=1, column=1)
+                crs_s1t2_label.grid(row=1, column=2)
+                crs_s1t3_label.grid(row=1, column=3)
+                crs_s1t4_label.grid(row=1, column=4)
+                crs_s1t5_label.grid(row=1, column=5)
+                crs_s1t6_label.grid(row=1, column=6)
+                crs_s1t7_label.grid(row=1, column=7)
+                crs_s1t8_label.grid(row=1, column=8)
+
+                crs_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t4 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t5 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t6 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t7 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t8 = tk.Text(entry_panel, width=20, height=1)
+                crs_s1t1.grid(row=2, column=1)
+                crs_s1t2.grid(row=2, column=2)
+                crs_s1t3.grid(row=2, column=3)
+                crs_s1t4.grid(row=2, column=4)
+                crs_s1t5.grid(row=2, column=5)
+                crs_s1t6.grid(row=2, column=6)
+                crs_s1t7.grid(row=2, column=7)
+                crs_s1t8.grid(row=2, column=8)
+
+                def generate_s1():
+                    if crs_s1t1.get("1.0", "end-1c") and crs_s1t2.get("1.0", "end-1c") and crs_s1t3.get("1.0", "end-1c") and crs_s1t4.get("1.0", "end-1c") and crs_s1t5.get("1.0", "end-1c") and crs_s1t6.get("1.0", "end-1c") and crs_s1t7.get("1.0", "end-1c") and crs_s1t8.get("1.0", "end-1c"):
+                        command = "create_resource " + crs_s1t1.get("1.0", "end-1c") + " " + crs_s1t2.get("1.0", "end-1c") + " " + crs_s1t3.get("1.0", "end-1c") + " " + crs_s1t4.get("1.0", "end-1c") + " " + crs_s1t5.get("1.0", "end-1c") + " " + crs_s1t6.get("1.0", "end-1c") + " " + crs_s1t7.get("1.0", "end-1c") + " " + crs_s1t8.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                crs_s1_button = tk.Button(entry_panel, text="Create Resource", command=generate_s1)
+                crs_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "delete_resource":
+                drs_help = tk.Label(entry_panel, text="'delete_resource' command removes a resource item from the simulation.")
+                drs_help.grid(row=0, column=0, columnspan=10)
+
+                drs_s1t1_label = tk.Label(entry_panel, text="Resource Name")
+                drs_s1t1_label.grid(row=1, column=1)
+
+                drs_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                drs_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if drs_s1t1.get("1.0", "end-1c"):
+                        command = "delete_resource " + drs_s1t1.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                drs_s1_button = tk.Button(entry_panel, text="Delete Resource", command=generate_s1)
+                drs_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "create_plot":
                 cpl_help = tk.Label(entry_panel, text="'create_plot' command adds a plotter to the simulation to plot some value against simulation time.")
@@ -1464,6 +1556,17 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         update_projection_button = tk.Button(cmd_window, text="Update Projection", command=lambda:enter_cmd("update_projection"))
         update_projection_button.config(width=15,height=1)
         update_projection_button.grid(row=current_row, column=2)
+
+        current_row += 1
+        resource_commands_label = tk.Label(cmd_window, text="Resource Management")
+        resource_commands_label.grid(row=current_row, column=0, columnspan=3)
+        current_row += 1
+        create_resource_button = tk.Button(cmd_window, text="Create Resource", command=lambda:enter_cmd("create_resource"))
+        create_resource_button.config(width=15, height=1)
+        create_resource_button.grid(row=current_row, column=0)
+        delete_resource_button = tk.Button(cmd_window, text="Delete Resource", command=lambda:enter_cmd("delete_resource"))
+        delete_resource_button.config(width=15, height=1)
+        delete_resource_button.grid(row=current_row, column=1)
 
         current_row += 1
         plot_commands_label = tk.Label(cmd_window, text="Plotting")

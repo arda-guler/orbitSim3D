@@ -7,6 +7,7 @@ output_rate 50
 create_projection p1 Yang Earth
 create_projection p2 Yin Earth
 show Yang vel Earth YANG_VEL
+show target_signal value TARGET_SIGNAL_STRENGTH
 t=2770 update_projection p1
 t=9230 update_projection p1
 t=11000 hide grid

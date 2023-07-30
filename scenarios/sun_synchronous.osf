@@ -19,3 +19,5 @@ B|Neptune|data/models/minineptune.obj|102409000000000000000000000|24624000|[0.50
 ;
 V|firewatch|data/models/minisat.obj|[0.0,0.8,0.7]|[-51388033919.77802, 8532672.992412258, -140657948236.30518]|[-27747.67648662449, 7428.240461956984, 10679.85802345346]
 ;
+U|occult|0|polynomial|occultation|firewatch|Sol|[1, 0]|None
+;

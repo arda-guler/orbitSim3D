@@ -21,3 +21,6 @@ V|Polyport|data/models/ministation.obj|[0.0,1.0,1.0]|[0,6771000,0]|[7671,0,0]
 ; Proximity Zones
 
 P|pzone|Polyport|15|150
+
+; Resources
+U|lance_kinetic_energy|0|power_abs|vel|Lance|Polyport|[250, 2, 0]|None

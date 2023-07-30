@@ -1,5 +1,6 @@
 lock_origin Earth
 clear traj_visuals
+show occult value SUN_OCCULTATION
 create_plot Groundtrack groundtrack firewatch Earth 100 12000
 output_rate 20
 ;

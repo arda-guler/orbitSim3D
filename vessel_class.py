@@ -104,6 +104,9 @@ class vessel():
         
         return grav_vec
 
+    def get_gravity_mag_by(self, body):
+        return self.get_gravity_by(body).mag()
+
     def update_vel(self, accel, dt):
         self.vel = self.vel + accel * dt
 
