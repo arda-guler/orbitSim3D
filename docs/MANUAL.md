@@ -50,7 +50,9 @@ Given the required parameters, the simulation can account for atmospheric drag. 
 
 Given the required parameters, the simulation can also account for radiation pressure. This can be used to calculate the drift in interplanetary trajectories that accumulate over time, or can be used as a main propulsion method in the case of solar sails. To learn more, see the [manual on radiation pressure effects.](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL_RADIATION_PRESSURE.md)
 
-OS3D is quite configurable and extendable, so much so that it will let the user make mistakes. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
+Using custom resources, the user can simulate solar/nuclear energy generation and use, antenna reception power and such.
+
+OS3D is quite configurable and extendable, and this includes the physics solver. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
 Relativistic effects are not taken into account whatsoever.
 
@@ -104,6 +106,8 @@ There are only two configuration files;
 - math_utils.py: General mathematical functions that are not provided by the math library.
 
 - orbit.py: 2-body Keplerian orbit class that is used for making quick trajectory projections into the future.
+
+- resource.py: Handles custom resources defined by equations; simulating energy generation, antenna power and such.
 
 - plot.py: Plot class that handles plotting of variables in certain time intervals on user's demand.
 
