@@ -14,10 +14,10 @@ Although you could load scenario files to OS3D from any path, the 'scenarios' di
 Any scenarios you export using OS3D will also appear there, in the 'scenarios' directory.
 
 ## Scenarios & Batch Files
-Although scenarios can keep all the data for the accurate replay of a space mission, batch files can be used to set up a nice user output screen and set Rapid Compute intervals. Demo space mission scenarios usually come with batch files with the same name as the scenario file, such as `lunar_journey.osf` and `lunar journey.obf`. In such cases, by default, OS3D also loads in the commands from the batch file. This auto-load behaviour can be changed by editing the configuration file at startup via 'Configure OrbitSim3D' option.
+Although scenarios can keep all the data for the accurate replay of a space mission, batch files can be used to set up a nice user output screen and set Rapid Compute intervals. Demo space mission scenarios usually come with batch files with the same name as the scenario file, such as `lunar_flight.osf` and `lunar_flight.obf`. In such cases, by default, OS3D also loads in the commands from the batch file. This auto-load behaviour can be changed by editing the configuration file at startup via 'Configure OrbitSim3D' option.
 
 ## Syntax Guide & Creating Scenarios
-The best way to create scenarios is to design them in OS3D using the command panel and export them via the 'export' command, leaving the hassle of using the somewhat harsh syntax to the software, since OSF files are formatted in a very specific way for OS3D to parse and understand. An example is shown below, taken from `lunar_journey.osf`;
+The best way to create scenarios is to design them in OS3D using the command panel and export them via the 'export' command, leaving the hassle of using the somewhat harsh syntax to the software, since OSF files are formatted in a very specific way for OS3D to parse and understand. An example is shown below;
 
 ```
 ;Celestial bodies
@@ -122,3 +122,126 @@ The syntax for denoting custom resources is as follows;
 ```
 U|resource_name|initial_value|equation_type(polynomial/logarithmic/power, incremental/absolute)|variable|object1|object2|equation_coefficients|value_min_max_limits
 ```
+
+## [Example Scenarios](https://github.com/arda-guler/orbitSim3D/tree/master/scenarios)
+OS3D provides example scenarios in /scenarios folder, demonstrating nearly all OS3D features in simple ways and settings.
+
+Each of the example scenarios are explained below. These example missions can be categorized into three main types:
+- **Demonstration:** This scenario demonstrates a space mission or OS3D features.
+- **Challenge:** This scenario challenges the user to plan and execute a space mission to acheive the given objectives.
+- **Sandbox:** This scenario was made as a template to build other scenarios upon or to play around the universe with.
+
+### [3body.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/3body.osf)
+**Type:** Demonstration / Sandbox
+
+**Desc:** A model of the Alpha Centauri triple star system with the fictional planet "Trisolaris" from Cixin Liu's famous sci-fi novel Three Body Theorem (the first book in Remembrance of Earth's Past).
+
+### [apophis_2029.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/apophis_2029.osf)
+**Type:** Demonstration
+
+**Desc:** The expected Earth fly-by of 99942 Apophis in 2029.
+
+### [artemis-1.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/artemis-1.osf)
+**Type:** Demonstation
+
+**Desc:** Orion deep space capsule flies outbound to Luna, having been injected into a Luanr transfer orbit.
+
+### [ascent.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/ascent.osf)
+**Type:** Demonstration
+
+**Desc:** An ascent capsule launches from Luna's surface, entering a low Selenocentric orbit.
+
+### [decay.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/decay.osf)
+**Type:** Demonstration / Sandbox
+
+**Desc:** The orbit of an abandoned space station in LEO decays due to atmospheric drag. Slowly.
+
+### [DEFCON.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/DEFCON.osf)
+**Type:** Demonstration
+
+**Desc:** Mutually assured destruction, the destroyer of worlds. USA and USSR launch ICBMs at each other.
+
+### [fourth_twilight.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/fourth_twilight.osf)
+**Type:** Demonstration
+
+**Desc:** A few spacecraft orbiting Earth at different inclinations, under the influence of oblate body gravitational perturbations.
+
+### [geostationary.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/geostationary.osf)
+**Type:** Demonstration / Sandbox
+
+**Desc:** Two geostationary satellites in zero inclination orbits, their phases 180 degrees apart.
+
+### [hell_probe.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/hell_probe.osf)
+**Type:** Demonstration
+
+**Desc:** In this mission, an exploration probe parked in LEO is brought to a Venus orbit.
+
+### [hypervelocity.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/hypervelocity.osf)
+**Type:** Demonstration
+
+**Desc:** A space station collides with a satellite in LEO and contributes to Kessler syndrome.
+
+### [jupiter_direct.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/jupiter_direct.osf)
+**Type:** Demonstration
+
+**Desc:** A futuristic spacecraft performs a constant 1G brachistochrone transfer flight from Earth to Jupiter.
+
+### [lagrange.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/lagrange.osf)
+**Type:** Sandbox
+
+**Desc:** Objects in Earth-Sol L4 and L5 lagrange points.
+
+### [launch_vehicle.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/launch_vehicle.osf)
+**Type:** Demonstration
+
+**Desc:** Launch of a small-sat two-stage launch vehicle.
+
+### [northern_terror.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/northern_terror.osf)
+**Type:** Sandbox
+
+**Desc:** A hypothetical Near-Earth Object strike on, well, Earth.
+
+### [occultation.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/occultation.osf)
+**Type:** Demonstration
+
+**Desc:** Shows a satellite generating and consuming battery power in LEO, entering and exiting Earth's shadow.
+
+### [OdysseyII.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/OdysseyII.osf)
+**Type:** Challenge
+
+**Desc:** Takes place in Arthur C. Clarke's 2001 universe, Leonov arrives at Jupiter and has to rendezvous with the derelict Discovery in the orbit of Io.
+
+### [orbital_rendezvous_demo.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/orbital_rendezvous_demo.osf)
+**Type:** Demonstration
+
+**Desc:** A satellite performs an expensive orbital rendezvous mission in Earth orbit to meet up with another satellite. A solution for the two_mirrors challenge scenario.
+
+### [sol.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/sol.osf)
+**Type:** Sandbox
+
+**Desc:** Our solar system.
+
+### [solar_surf.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/solar_surf.osf)
+**Type:** Demonstration
+
+**Desc:** A demonstration of solar sails, with two satellites in a rather low Heliocentric orbit. One has a solar sail, the other has not.
+
+### [sun_synchronous.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/sun_sychronous.osf)
+**Type:** Demonstration
+
+**Desc:** A sun synchronous Earth observation satellite, never going into Earth's dark side.
+
+### [three_vessels.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/three_vessels.osf)
+**Type:** Sandbox
+
+**Desc:** The very first OS3D scenario ever created. Kept for nostalgia reasons. Self-explanatory. There are three vessels to play around with.
+
+### [two_mirrors.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/two_mirrors.osf)
+**Type:** Challenge
+
+**Desc:** Can you rendezvous the two satellites in out-of-plane orbits?
+
+### [voyager.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/voyager.osf)
+**Type:** Demonstration
+
+**Desc:** Voyager 1's Grand Tour milestone - the Jupiter flyby!
