@@ -583,10 +583,18 @@ def create_vessel(name, model_name, color, pos, vel):
         time.sleep(3)
         return
 
+    if type(pos) == list:
+        pos = vec3(lst=pos)
+
+    if type(vel) == list:
+        vel = vec3(lst=vel)
+
     try:
         new_vessel = vessel(name, model, model_path, color, pos, vel)
     except:
         print("Could not create vessel:", name)
+        time.sleep(3)
+        return
         
     vessels.append(new_vessel)
     objs.append(new_vessel)
@@ -2399,7 +2407,7 @@ def pick_scenario():
     scn_filename = input(" > ")
     return scn_filename
     
-def init_sim():
+def init_sim(sys_args=None):
     global initial_run
 
     # do not run if started from IDLE, it must be
@@ -2415,6 +2423,20 @@ def init_sim():
     # on windows, change text color to green because yes
     if os.name == "nt":
         os.system("color a")
+
+    if sys_args and len(sys_args) > 1:
+        try:
+            import_scenario(sys_args[1])
+        except FileNotFoundError:
+            try:
+                import_scenario("scenarios/" + sys_args[1])
+            except FileNotFoundError:
+                try:
+                    import_scenario("scenarios/" + sys_args[1] + ".osf")
+                except FileNotFoundError:
+                    print("The program run argument is not a valid scenario - loading main menu...")
+                    time.sleep(3)
+                    clear_cmd_terminal()
 
     # display icon because it's cool
     icon_stages = []
@@ -2491,4 +2513,4 @@ def init_sim():
         time.sleep(2)
         init_sim()
 
-init_sim()
+init_sim(sys.argv)
