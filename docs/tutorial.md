@@ -14,32 +14,39 @@ Let's get started. I will **type in bold letters like this** if I want you to do
 ### Getting Started
 **If you haven't done so already, run main.py from your command prompt or terminal to see the initialization menu.**
 
-You should be seeing three options - one for loading a scenario, one for starting an empty scene and the last one for configuring OS3D. ***You can configure your keyboard controls the way you like, but please don't touch any other configuration variables if you don't know what you are doing. Close the config editor window when you are done, and return to initialization menu.***
+![TUT1](https://github.com/arda-guler/orbitSim3D/assets/80536083/14861563-8c34-4eea-9fb8-06a2a85ad5a6)
+
+You should be seeing four options - one for resuming the latest scenario, one for loading a scenario, one for starting an empty scene and the last one for configuring OS3D. 
+
+***You can configure your keyboard controls the way you like, but please don't touch any other configuration variables if you don't know what you are doing. Close the config editor window when you are done, and return to initialization menu.***
 
 In order to simulate a system, OS3D first needs to know about the initial states of the celestial bodies and spacecraft you want to simulate. Such data is kept in .osf files (usually in the `scenarios/` folder) in plain text format, but creating a scenario from scratch can sometimes be a bit too much work due to the strict formatting requirements (I should do something about that sometime). I know you are eager to fly spaceships, so let's skip the boring part now and load one of the scenarios I prepared beforehand.
 
 **Choose the first option in the initialization menu by either typing '1' or 'L' and pressing Enter, which will let you choose the scenario to load.**
 
+![tut4](https://github.com/arda-guler/orbitSim3D/assets/80536083/82a7207a-2319-4259-9666-3c5395151648)
+
 The program will ask for the scenario filename next. You could of course type in the name of any scenario, but for the purposes of this tutorial, I will ask you to load a specific scenario.
 
 **Type in 'two_mirrors' and press Enter to load the scenario.**
 
-*Like this:*
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or1.PNG?raw=true)](http://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or1.PNG?raw=true)
+![tut5](https://github.com/arda-guler/orbitSim3D/assets/80536083/01bf9bdb-3e48-4054-91c9-1c90750a5b92)
 
 The program will quickly load the scenario, and a second window will appear. The command prompt (terminal) will act as the numerical output display as well as the command interpreter, whereas the OpenGL window will act as the 3D rendering canvas.
 
 ### A First Look at the Simulated Universe
 
-![pict1](https://user-images.githubusercontent.com/80536083/178112594-01590b9e-3a9a-45fc-a5f5-3963555ecc53.PNG)
+![tut6](https://github.com/arda-guler/orbitSim3D/assets/80536083/ef7ed75f-8630-489b-9769-d3d6c25fef6e)
 
 If you look at the OpenGL window, you will see a blue orb and two objects next to it leaving trails as they move around. The beautiful blue orb is planet Earth, and the two objects (one magenta and one cyan) are two imaginary satellites orbiting Earth.
+
+***Arrange (drag & resize) the two windows the way you like. I personally did it like the one above.***
 
 ***Try moving the camera around the scene, rotate and translate your viewpoint.***
 
 If you get close enough to either one of the satellites, you will be able to see their 3D models. Note that there are no collision checks for the camera, and it might pass through the Earth, creating weird graphical effects. In that case, just translate your camera backwards until you are out of the planet.
 
-Once you are done playing with the camera and pretending you are a WWII fighter in space, let's get to business. How about we start off by maneuvering one of these satellites into an elliptical orbit that takes it much higher above Earth? (In case you didn't notice, you have no choice but to agree since this is a non-interactive text tutorial.)
+Once you are done playing with the camera and pretending you are a WWII fighter in space, let's get to business.
 
 ### Controlling the Simulation
 
@@ -53,30 +60,90 @@ Now, you can use whichever one of these options you like, but I suggest that you
 
 **Open the command panel window by pressing P.**
 
+![tut7](https://github.com/arda-guler/orbitSim3D/assets/80536083/48a02add-7c39-46cd-87ed-055102670157)
+
 A new window should appear, and the simulation should pause. On the window, you will see three text fields, titled "Simulation Items", "Simulation Variables" and "Command Buffer". Let's go through each one of them:
 - Simulation Items: Everything that exists in the simulated universe can be seen here. The format is \<TYPE\>: \<name\>
 - Simulation Variables: Some important and common simulation variables such as time step length (Delta T) can be seen here.
 - Command Buffer: All commands scheduled for execution by the command panel once the simulation resumes can be seen here.
 
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or3.PNG?raw=true)
+Your `Command Buffer` window should be clear, and you should be able to see 4 items in the `Simulation Items` box - the planet Earth, and the vessels Yin and Yang, and a resource named 'target_signal' - don't worry about what the latter is right now. This window makes it easier to keep track of things, especially in large scenarios, so even if you won't enter a command, you could refer to the command panel for reference.
 
-Your `Command Buffer` window should be clear, and you should be able to see 3 items in the `Simulation Items` box - the planet Earth, and the vessels Yin and Yang. This window makes it easier to keep track of things, especially in large scenarios, so even if you won't enter a command, you could refer to the command panel for reference.
+### Displaying Output
 
-### Creating a Maneuver
+We wish to enter commands using the command panel. You see, on the bottom output window, we have no outputs displayed other than the simulated time. Let's populate that space with some useful things, by displaying a satellite's velocity and altitude above Earth.
 
-But, we DO want to enter a command.
+**Press the Enter Command button on the command panel.**
 
-**Click the Enter Command button on the command panel.**
+![tut8](https://github.com/arda-guler/orbitSim3D/assets/80536083/58983fb6-3158-47d3-beb9-2e2a232e4666)
 
-You should now see another window popping up, one with many buttons for the numerous commands available in OS3D. We will shortly be using one of these buttons.
+This will open a new window named 'Commands'. That is a list of all commands we can enter using the command panel. The first command we will use is an output management command, and is therefore placed in the Output Management category. The 'show' command is what we are looking for. (At any time you wish to learn what a command does, you can click on the button and read the info text about it. Apart from a few, a lot of the command names are self-explanatory.)
 
-Changing a satellite's orbit usually involves performing an orbital maneuver to change its velocity vector. Let's start planning this orbital maneuver.
+**Press the Show button on the 'Commands' window.**
 
-**Press Create Maneuver button on the Commands window.**
+![tut9](https://github.com/arda-guler/orbitSim3D/assets/80536083/a96032f9-c170-4663-8c2e-dbdeb4a660fe)
 
-Yet another window should pop up. There are several entry fields with buttons on the sides, but there is no big red button that reads "Go Higher" or something similar, is there? Of course things aren't that simple - you are here for the mechanics behind going higher (and sometimes lower), not for a joyride. (Once you are comfortable with OS3D and Python, implementing your "Go Higher" button shouldn't be that much of a trouble.)
+Now, yet another window will pop-up. Don't worry, this is the highest number of windows you will have to have open at any time.
 
-Anyway, so how do we "go higher" then?
+The 'show' command is a pretty universal command, so there are a lot of alternative syntax options to use it. Currently, we will use it to display a relative variable, so we will use the appropriate row on inputs next to the 'Show Relative Variable' button.
+
+**Enter 'Yin' in Object field.** This is the object about which we wish to display information.
+
+**Enter 'vel_mag' in Variable field.** This is the variable we wish to display. If we typed 'vel', we would display the velocity in three vector components. 'vel_mag' just shows the velocity magnitude.
+
+**Enter 'Earth' in Frame of Ref. field.** This is the Frame of Reference relative to which the variable is calculated. In this case, that is the planet Earth.
+
+**Enter any name you wish in Display Label field.** Avoid spaces and special characters. This will be the title of the variable in the output display.
+
+**Press once on the Show Relative Variable button.**
+
+In the command buffer field, a new command should appear.
+
+![tut10](https://github.com/arda-guler/orbitSim3D/assets/80536083/7e47d252-247f-410c-a749-4c61655f88e0)
+
+This command should display the satellite Yin's velocity relative to Earth on the output display. We also wanted to see its altitude above Earth, so let's also do that.
+
+**Delete 'vel_mag' in Variable field and enter 'alt'.** This means we now want to display the altitude (above sea level).
+
+**Clear the Display Label field and enter a new name for the new variable.** Avoid using the same display label for multiple variables.
+
+**Press once on the Show Relative Variable button.**
+
+On the command buffer window, a second command should appear.
+
+![tut11](https://github.com/arda-guler/orbitSim3D/assets/80536083/0fc366f2-6e24-4d1b-8ba7-64bf972807a6)
+
+Now that we have entered our commands, we should resume the simulation so that they will be executed and the output display will be modified.
+
+**Close 'show' window.**
+
+**Close 'Commands' window.**
+
+**Click on 'Confirm Commands and Close' button.**
+
+![tut12](https://github.com/arda-guler/orbitSim3D/assets/80536083/f46d52fc-720a-477b-84a6-f2c56b66e87d)
+
+As soon as the simulation resumes, we will see the outputs on the output display.
+
+![tut13](https://github.com/arda-guler/orbitSim3D/assets/80536083/1bc8867f-b8bc-41ab-bf5f-181294e891a8)
+
+The standard variables are all displayed in SI units - meaning that the velocity output is in meters per second and the altitude output is in meters. If you make use of the simulation items called 'resources', you can also output variables in different units, but that's a bit too advanced for an introductory tutorial. 
+
+Speaking of resources, we have a resource called 'target_signal' in this scenario that's already set up for you. Using the knowledge you learned just now on entering commands, how would you display the value of 'target_signal'?
+
+***Enter a new command using the command panel and display the value of 'target_signal' resource.***
+
+![tut14](https://github.com/arda-guler/orbitSim3D/assets/80536083/3b06e7f7-cf0d-4d70-9021-203789c0ec6c)
+
+### Performing an Orbital Maneuver
+
+We don't simply want to look at satellites and see them going on in their orbits. OS3D is made to be a space mission simulator after all, and we wish to control the spacecraft. Let's perform an orbital maneuver and modify Yin's orbit around Earth.
+
+**Open the 'create_maneuver' command window.** You can do this the same way you opened the 'show' command window.
+
+![tut15](https://github.com/arda-guler/orbitSim3D/assets/80536083/33117c3e-aef1-4fa4-9364-3e9ec6149287)
+
+I wish to increase the altitude of Yin's orbit around Earth. How do we go about that? There is no "Go Higher" button in here! How do we "Go Higher" then?
 
 *(Feel more than free to skip the following 3 paragraphs if you are already familiar with orbital mechanics.)* If you paid enough attention, you would have noticed that our satellites were following a circle around planet Earth. That's because the satellites have some sideways speed, but the gravity of Earth is constantly pulling them inwards, curving their path into a circle (actually an ellipse, but in this case it's almost a circle). 
 
@@ -84,11 +151,9 @@ Now, imagine if the satellites had more sideways speed. Earth's gravity wouldn't
 
 [![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/speed.png?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/speed.png?raw=true)
 
-We can increase the sideways speed of the satellite by orienting it into the direction its travelling in, and applying thrust using its engines. The direction the satellite is travelling in is called "prograde". (Yes, start learning some terms.) We need to tell the satellite to rotate into that orientation and use its engines for some time. Let's do that!
+We can increase the sideways speed of the satellite by orienting it into the direction its travelling in, and applying thrust using its engines. The direction the satellite is travelling in is called "prograde". (Yes, start learning some terms.) We need to tell the satellite to rotate into that orientation and use its engines to change its orbital velocity. Let's do that!
 
-We will be creating a constant acceleration maneuver (because that's the simpler type), so we will use the entry fields on the top, those near the "Create Const. Accel. Mnv." button.
-
-While entering things into the entry fields, do NOT use the space character!
+We will be creating an impulsive maneuver (because that's the simplest type), so we will use the entry fields near the "Create Impulsive Mnv." button.
 
 **Enter any name for "Maneuver Name" field.** Try to avoid special characters, and use only letters.
 
@@ -98,69 +163,113 @@ While entering things into the entry fields, do NOT use the space character!
 
 **Enter "prograde" in "Orientation" field.** This tells OS3D in which direction the vessel should apply thrust. You could also enter a vector value in here if you wanted.
 
-**Enter "10" in "Acceleration" field.** This sets how much acceleration the vessel should experience due to its engine for the duration of the maneuver. It's unit is [m s-2], meters per second per second. 
+**Enter "1500" in "Delta-v" field.** This sets by how much we want to modify our orbital velocity. The unit is in meters per second, of course.
 
-For "Start Time" field, you will have to enter when you want the vessel to start executing the maneuver. For this, you will have to refer to `Sim. Time` value which can be found in the command panel main window, in the `Simulation Variables` box.
+For "Perform Time" field, you will have to enter when you want the vessel to execute the maneuver. For this, you will have to refer to `Sim. Time` value which can be found in the command panel main window, in the `Simulation Variables` box.
 
-**Enter your current time + 100 seconds into "Start Time" field.** For example, if your `Sim. Time` value is 253, you should enter 353. This value is in seconds. 
+**Enter your current Sim. Time + 150 seconds into "Perform Time" field.** For example, if your `Sim. Time` value is 850, you should enter 1000. This value is in seconds. 
 
-As a Start Time value, you could technically enter any value above your current time, but if you don't put a delay, you would have to rush to the 3D scene to see the maneuver happening. I'm just putting a 100 second delay for convenience.
+As a Perform Time value, you could technically enter any value above your current time, but if you don't put a delay, you would have to rush to the 3D scene to see the maneuver happening. I'm just putting a 150 second delay for convenience.
 
-**Enter "70" in "Duration" field.** Self explanatory - this value tells for how long you want the engines to apply thrust. Unit is, again, seconds.
+Once you make sure you've filled all the entry fields, **click once on the "Create Impulsive Mnv." button**. Now go and look at the Command Buffer box - it should no longer be empty since your command should now be queued.
 
-Once you make sure you've filled all the entry fields, **click once on the "Create Const. Accel. Mnv." button**. Now go and look at the Command Buffer box - it should no longer be empty since your command should now be queued.
-
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or4.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or4.PNG?raw=true)
+![tut16](https://github.com/arda-guler/orbitSim3D/assets/80536083/1da501fa-5eae-4742-9d89-1494c709fd54)
 
 **Close the "create_maneuver" window.**
 
-### Using the Output Display
+This command will schedule an impulsive maneuver to be executed by the satellite Yin, but the output display won't display any information about it since we didn't tell it to. Let's tell it to.
 
-We are about to schedule our maneuver to be executed, but the program won't give us much of a feedback since we didn't tell it to. Let's tell it to.
+**Show maneuver parameters using the 'show' command.** Look at the screenshot below if you are stuck.
 
-**On the "Commands" window, click on "Show" button.**
+![tut17](https://github.com/arda-guler/orbitSim3D/assets/80536083/78f2bdbb-0aa1-4c7f-abd6-25a2e5947dd2)
 
-Another window should appear, this time for the "show" command. Next to the button that reads "Show Maneuver Data", you will see 3 entry fields. Using that command, we can see the data related to the maneuver we created on the output display.
+**Show maneuver state, again using the 'show' command.** Look at the screenshot below if you are stuck.
 
-**Enter the maneuver name in the "Maneuver" field.** Make sure you type in the exact same maneuver name that you used in the create_maneuver command!
+![tut18](https://github.com/arda-guler/orbitSim3D/assets/80536083/c0f331d7-08dd-4c3a-8586-53011f3d57bc)
 
-**Enter 'params' in the "Data" field.** This will tell OS3D to show us the maneuver parameters.
+**Close 'show' and 'Commands' windows.**
 
-**Enter anything into "Display Label" field.** This is the name with which the output will appear on the output display. Again, avoid special characters.
+**'Confirm Commands and Close' the command panel.** As before, like we did the first time when we learned how to use the 'show' command.
 
-**Click once on the Show Maneuver Data button.**
+The output window will be further modified to display the information regarding the scheduled impulsive maneuver.
 
-We are not done yet. We don't want to just see the maneuver parameters, we also want to see the state of the maneuver.
+![tut19](https://github.com/arda-guler/orbitSim3D/assets/80536083/328709f5-bc6f-480e-a889-d74c7cde0093)
 
-**Erase what you've written in "Data" and "Display Label" fields.**
+The maneuver state will read 'Pending' until simulation time hits 1000 (or whatever time you have set), after which, the satellite Yin will leave a magenta square on its trajectory line and the maneuver state will switch to 'Completed'. You will also see a dramatic increase in Yin's velocity, from about 7500 m/s to something over 9000 m/s.
 
-**Enter "state" in "Data" field.**
+![tut20](https://github.com/arda-guler/orbitSim3D/assets/80536083/0ecfce59-9d1a-4387-9baa-f801416a6a3b)
 
-**Enter something else into "Display Label" field.** Do not use the same display label as the one you already used.
+We can now wait until the n-body propagator computes a whole orbit and Yin completes a full elliptical orbit around the Earth. But, since this is a two-body problem (in this particular scenario, no distant bodies are in the simulation and Earth is assumed a uniform mass), we can also use a Keplerian two-body model. This is called an "orbit projection". Let's create one.
 
-**Click once on the Show Maneuver Data button.**
+**Open the command panel and open the window for the command 'create_projection'.**
 
-[![](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or5.PNG?raw=true)](https://github.com/arda-guler/arda-guler.github.io/blob/master/extrn_storage/OS3D/intro_tutorial/or5.PNG?raw=true)
+![tut21](https://github.com/arda-guler/orbitSim3D/assets/80536083/6919dcc8-9414-4fd1-9a84-93536723aa35)
 
-We are done entering our commands.
+**Enter any name for the projection.** Again, avoid spaces and special characters.
 
-**Close the "show" and "Commands" windows.**
+**Enter 'Yin' for Satellite field.**
 
-As soon as we confirm our commands, the simulation will execute the commands and resume.
+**Enter 'Earth' for Parent Body field.**
 
-**On the main command panel window, click "Confirm Commands and Close".**
+**Press once onto Create Projection button.**
 
-The command panel should disappear and the simulation should continue. (If the simulation doesn't resume, it is either processing your commands or you forgot to close some of the command panel windows.) 
+![tut22](https://github.com/arda-guler/orbitSim3D/assets/80536083/5039072f-3dd8-43a1-a662-ae1794872d7e)
 
-You will now see some output on the output display. When the simulation time hits the maneuver start time, the maneuver will begin. The maneuver state will change from "Pending" to "Performing" for 70 simulation seconds, and finally report "Completed" once the maneuver is finished.
+**Close the 'create_projection' window.**
 
-![tutogif3](https://user-images.githubusercontent.com/80536083/178112732-74b1c235-8f05-46d7-84d6-5d82a6772a72.gif)
+This will project the two-body orbit onto the 3D scene, but we could also use some orbital parameters on the numerical output display.
 
-Feel free to roam around the 3D scene as the maneuver happens. While performing the maneuver, you can see that the satellite "Yin" will leave a yellow trail instead of a trail of its own color (which is cyan).
+**Use the 'show' command to display orbit projection parameters.** Refer to the screenshot below if you are stuck.
 
-![Imag3](https://user-images.githubusercontent.com/80536083/178112812-bf0b1102-e386-4fbf-8644-3335d4af0add.png)
+![tut23](https://github.com/arda-guler/orbitSim3D/assets/80536083/af84a016-4c47-4e59-b89d-9e674c172c0f)
 
-After a while, you will see "Yin" being flung outwards to a higher altitude, and eventually it will come back to its starting point, completing one orbit, having drawn an ellipse around Earth.
+**Close the command windows, 'Confirm Commands and Close' the command panel.** ...as we did before.
+
+When the simulation resumes, a dashed orbit will appear in the 3D rendering scene, along with ascending/descending nodes and apoapsis/periapsis. (Since Yin's orbit has 0 inclination, ascending and descending nodes are arbitrary.)
+
+![tut24](https://github.com/arda-guler/orbitSim3D/assets/80536083/4faf407d-b144-4f1d-964d-498fa19193e6)
+
+While reading apoapsis and periapsis, it is important to distinguish the R and Alt values - former being the distance from the center of mass of the parent body and the latter being the altitude above sea level.
+
+We have learned how to display a lot of information on the screen, but how do we get rid of the unnecessary stuff? We use the 'hide' command!
+
+**Use the 'hide' command to hide the output elements related to the impulsive maneuver.** Refer to the screenshot below if you are stuck.
+
+![tut25](https://github.com/arda-guler/orbitSim3D/assets/80536083/54e735bc-60b4-4ec1-956e-39cc1bc03b84)
+
+When you confirm the commands, the output display will be modified so that some information is no longer displayed, reducing clutter.
+
+### Timed Commands
+
+Let's do one last thing. All the commands we entered so far were executed as soon as we confirmed them and resumed the simulation. What do we do if we want to set a specific time for their execution?
+
+**Open the 'show' command window.**
+
+**Press once on 'Show Grid' button.** This command requires no text inputs, simply pressing on the button is enough.
+
+**Close the 'show' command window and the 'Commands' window. DO NOT CONFIRM THE COMMANDS YET!**
+
+![tut26](https://github.com/arda-guler/orbitSim3D/assets/80536083/e7882c9c-d715-4702-a459-8c33163e9a04)
+
+**Press the 'Asgn. Exec. Time' button.** This will open a new window.
+
+**Enter 0 into the Cmd. Index field.** Since there is only one command in the command buffer, it will be at index 0. You can see the index of each command on the buffer as the leftmost character.
+
+**Enter any time above the current simulation time into Exec. Time field.**
+
+**Press Assign Time button.** This should modify the command on the command buffer so that it will have a leading 't=' expression in front of it. That expression shows at what simulation time the command will be executed.
+
+![tut27](https://github.com/arda-guler/orbitSim3D/assets/80536083/7c946b53-0467-4e7b-93aa-044e69d76809)
+
+**Close 'Assign Command Execution Time' window.**
+
+**'Confirm Commands and Close' the command panel.**
+
+When the assigned execution time is reached, the 3D scene should start displaying a grid on the XZ plane, with lines to show objects' elevation in the Y axis.
+
+![tut28](https://github.com/arda-guler/orbitSim3D/assets/80536083/346bfb12-5f78-4f00-97a0-cfe6f80c66f6)
+
+### What's Next?
 
 With that, the introductory tutorial is complete. ***Now, you are free to set your own challenges. Here are three suggestions***:
 
@@ -170,10 +279,6 @@ With that, the introductory tutorial is complete. ***Now, you are free to set yo
 
 - If you are feeling particularly adventurous, program an autopilot to rendezvous Yin with Yang in orbit!
 
-## Cool, what next?
-
-Well, I don't know. It's up to you.
-
-Check out the .osf files in the scenarios folder with your favorite text editor - load in the ones you like and try your skills with the challenge scenarios, or sit back and watch some demo space missions!
+Check out the [Example Scenarios](https://github.com/arda-guler/orbitSim3D/blob/master/docs/MANUAL_SCENARIOS.md#example-scenarios) with your favorite text editor - load in the ones you like and try your skills with the challenge scenarios, or sit back and watch some demo space missions!
 
 Try to discover efficient transfer routes for robotic spacecraft, or fast ways to get people to other planets in the Solar System. Create your own planetary systems and curse imaginary civilizations to three-body problems. Write your own calculators to extend OS3D, and even open a few Pull Requests while you are at it :)
