@@ -57,7 +57,7 @@ Although exporting scenarios through OS3D is usually convenient, sometimes, you 
 ### Celestial Bodies
 The syntax for denoting celestial bodies is as follows;
 ```
-B|body_name|body_model|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_J2|body_luminosity
+B|body_name|body_model|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_rotation_axis(vector3)|body_J2|body_luminosity
 ```
 
 If J2, day length or luminosity are unknown, they should be set to 0. If orientation is not known or irrelevant to the simulation, the best option is to set it as a 3x3 identity matrix, i.e. [[1,0,0],[0,1,0],[0,0,1]]
