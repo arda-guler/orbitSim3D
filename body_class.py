@@ -4,7 +4,7 @@ import math
 
 class body():
     def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient,
-                 day_length, J2, luminosity, atmos_sea_level_density, atmos_scale_height):
+                 day_length, rot_axis, J2, luminosity, atmos_sea_level_density, atmos_scale_height):
         self.name = name
         self.model = model
         self.model_path = model_path
@@ -15,12 +15,13 @@ class body():
         self.vel = vel
         self.orient = orient
         self.day_length = day_length
-        self.traj_history = []
+        self.rot_axis = rot_axis
         self.J2 = J2
         self.luminosity = luminosity # used for calculating radiation pressure due to Sun etc. (Watts)
         self.atmos_sea_level_density = atmos_sea_level_density
         self.atmos_scale_height = atmos_scale_height
 
+        self.traj_history = []
         self.draw_pos = self.pos * visual_scaling_factor
 
     def get_name(self):
@@ -49,6 +50,9 @@ class body():
 
     def set_color(self, color):
         self.color = color
+
+    def get_rot_axis(self):
+        return self.rot_axis
 
     def get_luminosity(self):
         return self.luminosity
@@ -116,7 +120,8 @@ class body():
     def update_orient(self, dt):
         if self.day_length:
             rotation_amount = dt*360/self.day_length
-            self.rotate_body([0,rotation_amount,0])
+            rotation = self.rot_axis * rotation_amount
+            self.rotate_body(rotation.tolist())
 
     # convert abosulte coords to body-centered reference frame coords, both cartezian
     # it's like the ECEF coordinate system

@@ -187,13 +187,15 @@ def import_scenario(scn_filename):
                                        [float(orient_nums[3]), float(orient_nums[4]), float(orient_nums[5])],
                                        [float(orient_nums[6]), float(orient_nums[7]), float(orient_nums[8])]]),
 
-                            float(line[9]),
+                            float(line[9]), # day length
                             
-                            float(line[10]),
+                            vec3(lst=eval(line[10])), # rot axis
 
-                            float(line[11]),
+                            float(line[11]), # J2
 
-                            float(line[12]), float(line[13]))
+                            float(line[12]), # luminosity
+
+                            float(line[13]), float(line[14])) # atmosphere
             
             bodies.append(new_body)
             objs.append(new_body)
@@ -339,7 +341,7 @@ def export_scenario(scn_filename, verbose=True):
         for b in bodies:
             body_save_string = "B|" + b.get_name() + "|" + b.get_model_path() + "|" + str(b.get_mass()) + "|" +\
                                str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos().tolist()) + "|" +\
-                               str(b.get_vel().tolist()) + "|" + str(b.get_orient().tolist()) + "|" + str(b.get_day_length()) + "|" +\
+                               str(b.get_vel().tolist()) + "|" + str(b.get_orient().tolist()) + "|" + str(b.get_day_length()) + "|" + str(b.get_rot_axis().tolist()) + "|" +\
                                str(b.get_J2()) + "|" + str(b.luminosity) + "|" + str(b.atmos_sea_level_density) + "|" +\
                                str(b.atmos_scale_height) + "\n"
             scn_file.write(body_save_string)

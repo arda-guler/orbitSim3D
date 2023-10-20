@@ -5,6 +5,7 @@ create_projection earth-orbit Earth Sol
 ;
 lock_origin Kesif-IV
 cam_strafe_speed 10
+show sol_vel delta ACCEL_WRT_SOL
 ;
 auto_dt 1000 5
 auto_dt 5000 10

@@ -1,7 +1,6 @@
 lock_origin Earth
 clear traj_visuals
 show rad_press_1 params RAD_PRESS
-create_resource energy 20000 power dist_occultation xlipse Sol [5e24,-2,-20] [0,500000]
 show energy value BATTERY_ENERGY
 show energy delta BATTERY_CHARGE
 ;
