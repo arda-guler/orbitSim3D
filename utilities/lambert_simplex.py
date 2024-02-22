@@ -48,14 +48,12 @@ def lambert(r0, r, delta_t, ksi_0, ksi_u, ksi_l, t_m, M, tol, mu):
 
         if A > 0 and B < 0:
             ksi_l += PI
-            print("B =", B, "< 0")
             continue
 
         X = sqrt(B / c2)
         delta_tt = 1 / sqrt(mu) * (X**3 * c3 + A * sqrt(B))
 
         if abs(delta_t - delta_tt) < tol:
-            print(abs(delta_t - delta_tt))
             break
 
         if delta_tt <= delta_t:
@@ -81,6 +79,3 @@ def lambert(r0, r, delta_t, ksi_0, ksi_u, ksi_l, t_m, M, tol, mu):
                    Ginv * (Gdot * r[2] - r0[2])])
 
     return v0, v1
-
-        
-    
