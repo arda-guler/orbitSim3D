@@ -1,0 +1,26 @@
+;  4DANCE.OSF
+;  Author: arda-guler
+;
+; Some satellites dancing around super-dense Earth, (or a white dwarf?)
+; in a region of spacetime where general relativity
+; is relevant. Some, however, have anti-Einsteinian
+; shields which render them immune to relativity.
+; (So you can compare their orbits.)
+;
+
+; Celestial bodies
+
+B|Endo|data/models/miniearth.obj|5.972e30|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|[0,1,0]|0|0|0|0
+
+;Vessels
+
+V|Mira|data/models/minisat.obj|[0.0,1.0,0.0]|[42164000,0,0]|[0,0,-2255904]
+V|Ao|data/models/minisat.obj|[1.0,0.1,0.1]|[-42164000,0,0]|[0,0,1755904]
+V|Megu|data/models/minisat.obj|[0.0,1.0,0.0]|[42164000,0,0]|[0,0,-2255904]
+V|Ino|data/models/minisat.obj|[1.0,0.1,0.1]|[-42164000,0,0]|[0,0,1755904]
+
+; GR effects
+GR0|ms|Endo|Mira
+GR0|as|Endo|Ao
+GR1|mlt|Endo|Mira|[0,1180509042e6,0]
+GR1|alt|Endo|Ao|[0,1180509042e6,0]
