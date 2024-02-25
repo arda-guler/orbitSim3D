@@ -112,13 +112,13 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
     for sch in schwarzschilds:
         if sch.vessel in vessels:
             v_idx = vessels.index(sch.vessel)
-            accel_vec = sch.compute_Schwarschild()
+            accel_vec = sch.compute_Schwarzschild()
             vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
-    for lt in lensthirrings:
+    for lt in lensethirrings:
         if lt.vessel in vessels:
             v_idx = vessels.index(lt.vessel)
-            accel_vec = sch.compute_LenseThirring()
+            accel_vec = lt.compute_LenseThirring()
             vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
             
     # - - - POSITION UPDATE - - -
@@ -172,13 +172,13 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
     for sch in schwarzschilds:
         if sch.vessel in vessels:
             v_idx = vessels.index(sch.vessel)
-            accel_vec = sch.compute_Schwarschild()
+            accel_vec = sch.compute_Schwarzschild()
             vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
-    for lt in lensthirrings:
+    for lt in lensethirrings:
         if lt.vessel in vessels:
             v_idx = vessels.index(lt.vessel)
-            accel_vec = sch.compute_LenseThirring()
+            accel_vec = lt.compute_LenseThirring()
             vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
     # - - - VELOCITY UPDATE - - -
@@ -258,13 +258,13 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         for sch in schwarzschilds:
             if sch.vessel in vessels:
                 v_idx = vessels.index(sch.vessel)
-                accel_vec = sch.compute_Schwarschild()
+                accel_vec = sch.compute_Schwarzschild()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
-        for lt in lensthirrings:
+        for lt in lensethirrings:
             if lt.vessel in vessels:
                 v_idx = vessels.index(lt.vessel)
-                accel_vec = sch.compute_LenseThirring()
+                accel_vec = lt.compute_LenseThirring()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         return vessel_accels, body_accels
@@ -295,15 +295,15 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     d3 = 1.3512071919596578
 
     update_objs_pos(vessels, bodies, c1, delta_t)
-    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
     update_objs_vel(vessels, bodies, d1, vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, c2, delta_t)
-    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
     update_objs_vel(vessels, bodies, d2, vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, c3, delta_t)
-    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+    vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
     update_objs_vel(vessels, bodies, d3, vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, c4, delta_t)
@@ -376,13 +376,13 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         for sch in schwarzschilds:
             if sch.vessel in vessels:
                 v_idx = vessels.index(sch.vessel)
-                accel_vec = sch.compute_Schwarschild()
+                accel_vec = sch.compute_Schwarzschild()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
-        for lt in lensthirrings:
+        for lt in lensethirrings:
             if lt.vessel in vessels:
                 v_idx = vessels.index(lt.vessel)
-                accel_vec = sch.compute_LenseThirring()
+                accel_vec = lt.compute_LenseThirring()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         return vessel_accels, body_accels
@@ -426,7 +426,7 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     for i in range(15):
         update_objs_pos(vessels, bodies, cs[i], delta_t)
         vacc, bacc = compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures,
-                                             sim_time, delta_t)
+                                             schwarzschilds, lensethirrings, sim_time, delta_t)
         update_objs_vel(vessels, bodies, ds[i], vacc, bacc, delta_t)
 
     update_objs_pos(vessels, bodies, cs[15], delta_t)
