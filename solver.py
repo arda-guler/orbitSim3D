@@ -1,6 +1,6 @@
 from vector3 import *
 
-def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
 
     for rp in radiation_pressures:
         rp.update_occultation(bodies)
@@ -14,6 +14,15 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
         accel = ad.calc_accel()
         ad.vessel.update_vel(accel, delta_t)
         # do not update vessel position in this 'for' loop, we did not apply all accelerations!
+
+    # GR
+    for sch in schwarzschilds:
+        accel = sch.compute_Schwarzschild()
+        sch.vessel.update_vel(accel, delta_t)
+
+    for lt in lensethirrings:
+        accel = lt.compute_LenseThirring()
+        lt.vessel.update_vel(accel, delta_t)
 
     for m in maneuvers:
         m.perform_maneuver(sim_time, delta_t)
@@ -51,7 +60,7 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
 
-def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
     
     # update masses and occultation calculations
     for ad in atmospheric_drags:
@@ -99,6 +108,19 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
             accel_vec = rp.calc_accel()
             vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
+    # calculate vessel accelerations due to relativistic effects
+    for sch in schwarzschilds:
+        if sch.vessel in vessels:
+            v_idx = vessels.index(sch.vessel)
+            accel_vec = sch.compute_Schwarschild()
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+
+    for lt in lensthirrings:
+        if lt.vessel in vessels:
+            v_idx = vessels.index(lt.vessel)
+            accel_vec = sch.compute_LenseThirring()
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+            
     # - - - POSITION UPDATE - - -
     for b in bodies:
         b_idx = bodies.index(b)
@@ -146,6 +168,19 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
             accel_vec = rp.calc_accel()
             vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
+    # calculate vessel accelerations due to relativistic effects
+    for sch in schwarzschilds:
+        if sch.vessel in vessels:
+            v_idx = vessels.index(sch.vessel)
+            accel_vec = sch.compute_Schwarschild()
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+
+    for lt in lensthirrings:
+        if lt.vessel in vessels:
+            v_idx = vessels.index(lt.vessel)
+            accel_vec = sch.compute_LenseThirring()
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+
     # - - - VELOCITY UPDATE - - -
     for b in bodies:
         b_idx = bodies.index(b)
@@ -171,7 +206,7 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         v.update_traj_history()
         v.update_draw_traj_history()
 
-def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
 
     # update masses and occultation calculations
     for ad in atmospheric_drags:
@@ -181,7 +216,7 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         rp.update_occultation(bodies)
         rp.update_mass(maneuvers, sim_time, delta_t)
 
-    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
         vessel_accels = [vec3(0, 0, 0)] * len(vessels)
         body_accels = [vec3(0, 0, 0)] * len(bodies)
 
@@ -217,6 +252,19 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
             if rp.vessel in vessels:
                 v_idx = vessels.index(rp.vessel)
                 accel_vec = rp.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to relativistic effects
+        for sch in schwarzschilds:
+            if sch.vessel in vessels:
+                v_idx = vessels.index(sch.vessel)
+                accel_vec = sch.compute_Schwarschild()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        for lt in lensthirrings:
+            if lt.vessel in vessels:
+                v_idx = vessels.index(lt.vessel)
+                accel_vec = sch.compute_LenseThirring()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         return vessel_accels, body_accels
@@ -277,7 +325,7 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         v.update_traj_history()
         v.update_draw_traj_history()
 
-def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
     # update masses and occultation calculations
     for ad in atmospheric_drags:
         ad.update_mass(maneuvers, sim_time, delta_t)
@@ -286,7 +334,7 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         rp.update_occultation(bodies)
         rp.update_mass(maneuvers, sim_time, delta_t)
 
-    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t):
+    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
         vessel_accels = [vec3(0, 0, 0)] * len(vessels)
         body_accels = [vec3(0, 0, 0)] * len(bodies)
 
@@ -322,6 +370,19 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
             if rp.vessel in vessels:
                 v_idx = vessels.index(rp.vessel)
                 accel_vec = rp.calc_accel()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel accelerations due to relativistic effects
+        for sch in schwarzschilds:
+            if sch.vessel in vessels:
+                v_idx = vessels.index(sch.vessel)
+                accel_vec = sch.compute_Schwarschild()
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        for lt in lensthirrings:
+            if lt.vessel in vessels:
+                v_idx = vessels.index(lt.vessel)
+                accel_vec = sch.compute_LenseThirring()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         return vessel_accels, body_accels

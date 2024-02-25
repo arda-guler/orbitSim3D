@@ -14,6 +14,3 @@ To learn more, see [the manual](https://github.com/arda-guler/orbitSim3D/blob/ma
 Having trouble finding your way around? Have a look at the [introductory tutorial](https://github.com/arda-guler/orbitSim3D/blob/master/docs/tutorial.md) for the basics!
 
 [Click here to visit a screenshot gallery.](https://arda-guler.github.io/OrbitSim3D-web/gallery.html)
-
-## Kozmoworks
-I am working on [Kozmoworks](https://github.com/arda-guler/Kozmoworks) as the successor to OrbitSim3D, with even more features and a lot shorter computation times. Check it out if you like!

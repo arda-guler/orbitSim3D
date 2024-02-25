@@ -54,13 +54,15 @@ Given the required parameters, the simulation can also account for radiation pre
 
 Using custom resources, the user can simulate solar/nuclear energy generation and use, antenna reception power and such.
 
+The simulation can also account for two of the effects predicted by general relativity: the Schwarzschild radial-out component and Lense-Thirring (frame-dragging) effect.
+
 OS3D is quite configurable and extendable, and this includes the physics solver. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
 Relativistic effects are not taken into account whatsoever.
 
 ## Validation
 
-The documentation of how a particular solver setup can be validated, as well as an example case, is given in the [validation documentation](https://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md).
+This part is in reconstruction. (I used to use an incomplete model of the Solar System as an example case, which I think increased errors quite a bit. I will replace it with sth else.)
 
 ## Scenarios (.osf)
 
@@ -102,6 +104,8 @@ There are only two configuration files;
 - radiation_pressure.py: The 'radiation_pressure' class used to simulate the effects of radiation pressure on spacecraft.
 
 - atmospheric_drag.py: The 'atmospheric_drag' class used to simulate the effects of atmospheric drag on spacecraft.
+
+- general_relativity.py: General relativity effect classes used to simulate relativistic effects such as frame-dragging.
 
 - proximity.py: The 'proximity_zone' class used to check for vessel-to-vessel close passes and collisions.
 

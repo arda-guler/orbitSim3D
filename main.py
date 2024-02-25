@@ -30,6 +30,7 @@ from atmospheric_drag import *
 from solver import *
 from proximity import *
 from resource import *
+from general_relativity import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -51,6 +52,8 @@ cameras = []
 maneuvers = []
 radiation_pressures = []
 atmospheric_drags = []
+schwarzschilds = []
+lensethirrings = []
 proximity_zones = []
 resources = []
 
@@ -113,7 +116,8 @@ def read_batch(batch_path):
     return commands
 
 def clear_scene():
-    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources, plots, radiation_pressures, atmospheric_drags, sim_time
+    global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources,\
+           plots, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, sim_time
 
     objs = []
     vessels = []
@@ -126,10 +130,13 @@ def clear_scene():
     plots = []
     radiation_pressures = []
     atmospheric_drags = []
+    schwarzschilds = []
+    lensethirrings = []
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags, proximity_zones, resources, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags,\
+           schwarzschilds, lensethirrings, proximity_zones, resources, sim_time
 
     clear_scene()
 
@@ -303,11 +310,23 @@ def import_scenario(scn_filename):
             new_res = resource(line[1], float(line[2]), line[3], line[4], find_obj_by_name(line[5]), find_obj_by_name(line[6]), eval(line[7]), eval(line[8]))
             resources.append(new_res)
             print("Loading resource:", new_res.name)
+
+        # import Schwarzschild effect data
+        elif line[0] == "GR0":
+            new_sch = GR_Schwarzschild(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]))
+            schwarzschilds.append(new_sch)
+            print("Loading Schwarzschild effect:", new_sch.name)
+
+        # import Lense-Thirring effect data
+        elif line[0] == "GR1":
+            new_lt = GR_LenseThirring(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]), eval(line[4]))
+            lensethirrings.append(new_lt)
+            print("Loading Lense-Thirring effect:", new_lt.name)
             
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, proximity_zones, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, proximity_zones, sim_time
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -426,6 +445,22 @@ def export_scenario(scn_filename, verbose=True):
         for pz in proximity_zones:
             pz_save_string = "P|" + pz.name + "|" + pz.vessel.get_name() + "|" + str(pz.vessel_size) + "|" + str(pz.zone_size) + "\n"
             scn_file.write(pz_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing Schwarzschild effects...")
+        for sch in schwarzschilds:
+            sch_save_string = "GR0|" + sch.name + "|" + sch.body.get_name() + "|" + sch.vessel.get_name() + "\n"
+            scn_file.write(sch_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing Lense-Thirring effects...")
+        for lt in lensethirrings:
+            lt_save_string = "GR1|" + lt.name + "|" + lt.body.get_name() + "|" + lt.vessel.get_name() + "|" + str(lt.J) + "\n"
+            scn_file.write(lt_save_string)
 
         scn_file.write("\n")
 
@@ -970,6 +1005,74 @@ def delete_resource(res_name):
     resources.remove(res_tbd)
     del res_tbd
 
+def find_schwarzschild_by_name(sch_name):
+    global schwarzschilds
+
+    for sch in schwarzschilds:
+        if sch.name == sch_name:
+            return sch
+
+    return None
+
+def create_schwarzschild(sch_name, body, vessel):
+    global schwarzschilds
+
+    if find_schwarzschild_by_name(sch_name):
+        print("A Schwarzschild effect with this name already exists. Please pick another name for the new effect.\n")
+        input("Press Enter to continue...")
+
+    try:
+        new_sch = GR_Schwarzschild(sch_name, body, vessel)
+        schwarzschilds.append(new_sch)
+    except:
+        print("Could not create new Schwarzschild effect:", sch_name)
+
+def delete_schwarzschild(sch_name):
+    global schwarzschilds
+    sch_tbd = find_schwarzschild_by_name(sch_name)
+
+    if not sch_name:
+        print("Schwarzschild effect not found!")
+        time.sleep(2)
+        return
+
+    schwarzschilds.remove(sch_tbd)
+    del sch_tbd
+
+def find_lensethirring_by_name(lt_name):
+    global lensethirrings
+
+    for lt in lensethirrings:
+        if lt.name == lt_name:
+            return lt
+
+    return None
+
+def create_lensethirring(lt_name, body, vessel, J):
+    global lensethirrings
+
+    if find_lensethirring_by_name(lt_name):
+        print("A Lense-Thirring effect with this name already exists. Please pick another name for the new effect.\n")
+        input("Press Enter to continue...")
+
+    try:
+        new_lt = GR_LenseThirring(lt_name, body, vessel, J)
+        lensethirrings.append(new_lt)
+    except:
+        print("Could not create new Lense-Thirring effect:", lt_name)
+
+def delete_lensethirring(lt_name):
+    global lensethirrings
+    lt_tbd = find_lensethirring_by_name(lt_name)
+
+    if not lt_name:
+        print("Lense-Thirring effect not found!")
+        time.sleep(2)
+        return
+
+    lensethirrings.remove(lt_tbd)
+    del lt_tbd
+
 def vessel_body_crash(v, b):
     # a vessel has crashed into a celestial body. We will convert the vessel object
     # into a surface point on the body (a crash site) and remove all references to
@@ -1044,7 +1147,7 @@ def get_active_cam():
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
-           proximity_zones, gvar_fov, gvar_near_clip, gvar_far_clip
+           proximity_zones, schwarzschilds, lensethirrings, gvar_fov, gvar_near_clip, gvar_far_clip
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
@@ -1171,9 +1274,9 @@ def main(scn_filename=None, start_time=0):
                     frame_command = True
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
-                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, proximity_zones,
-                                                       projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
-                                                       rapid_compute_buffer, scene_lock)
+                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
+                                                       proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
+                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1600,6 +1703,36 @@ def main(scn_filename=None, start_time=0):
                         print(res.name)
                     input("Press Enter to continue...")
 
+                # CREATE_SCHWARZSCHILD
+                elif command[0] == "create_schwarzschild":
+                    create_schwarzschild(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]))
+
+                # DELETE_SCHWARZSCHILD
+                elif command[0] == "delete_schwarzschild":
+                    delete_schwarzschild(command[1])
+
+                # GET_SCHWARZSCHILDS
+                elif command[0] == "get_schwarzschilds":
+                    print("Schwarzschild effects currently in simulation:\n")
+                    for sch in schwarzschilds:
+                        print(sch.name)
+                    input("Press Enter to continue...")
+
+                # CREATE_LENSETHIRRING
+                elif command[0] == "create_lensethirring":
+                    create_lensethirring(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]), eval(command[4]))
+
+                # DELETE_LENSETHIRRING
+                elif command[0] == "delete_lensethirring":
+                    delete_lensethirring(command[1])
+
+                # GET_LENSETHIRRINGS
+                elif command[0] == "get_lensethirrings":
+                    print("Lense-Thirring effects currently in simulation:\n")
+                    for lt in lensethirrings:
+                        print(lt.name)
+                    input("Press Enter to continue...")
+
                 # GET_OBJECTS command
                 elif command[0] == "get_objects":
                     print("Objects currently in simulation:\n")
@@ -1824,7 +1957,8 @@ def main(scn_filename=None, start_time=0):
                         print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                         print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
                         print("delete_plot, display_plot, get_plots, create_resource, delete_resource, get_resources,")
-                        print("output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove, auto_dt_clear, get_auto_dt_buffer,")
+                        print("create_schwarzschild, delete_schwarzschild, get_schwarzschild, create_lensethirring, delete_lensethirring,")
+                        print("get_lensethirrings, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove, auto_dt_clear, get_auto_dt_buffer,")
                         print("draw_mode, point_size, create_barycenter, delete_barycenter, export,")
                         print("rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
@@ -1975,6 +2109,30 @@ def main(scn_filename=None, start_time=0):
                         elif command[1] == "get_resources":
                             print("'get_resources' command prints out the names of resource items currently in the simulation.")
                             print("Syntax: get_resources")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_schwarzschild":
+                            print("'create_schwarzschild' command adds a Schwarzschild component of the general relativity effects near a massive body.")
+                            print("Syntax: create_schwarzschild <name> <massive_body_name> <vessel_name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_schwarzschild":
+                            print("'delete_schwarzschild' command removes a Schwarzschild component of the general relativity effect near a massive body from the simulation.")
+                            print("Syntax: delete_schwarzschild <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_schwarzschilds":
+                            print("'get_schwarzschild' command lists Schwarzschild components of the general relativity effect near massive bodies in the simulation.")
+                            print("Syntax: get_schwarzschilds")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_lensethirring":
+                            print("'create_lensethirring' command adds a frame-dragging component of the general relativity effects near a massive body.")
+                            print("Syntax: create_lensethirring <name> <massive_body_name> <vessel_name> <specific_angular_momentum>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_lensethirring":
+                            print("'delete_lensethirring' command removes a frame-dragging component of the general relativity effect near a massive body from the simulation.")
+                            print("Syntax: delete_lensethirring <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_lensethirrings":
+                            print("'get_lensethirrings' command lists frame-dragging components of the general relativity effect near massive bodies in the simulation.")
+                            print("Syntax: get_lensethirrings")
                             input("Press Enter to continue...")
                         elif command[1] == "get_objects":
                             print("\n'get_objects' command prints out the names of objects currently in simulation.\n")
@@ -2157,13 +2315,13 @@ def main(scn_filename=None, start_time=0):
 
         # compute time step with the selected solver
         if solver_type == 0:
-            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 1:
-            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 2:
-            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         else:
-            Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, sim_time, delta_t)
+            Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
 
         # check collisions
         for v in vessels:

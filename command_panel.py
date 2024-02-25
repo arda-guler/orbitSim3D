@@ -3,9 +3,9 @@ import tkinter as tk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, proximity_zones,
-                      projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed, cam_rotate_speed,
-                      rapid_compute_buffer, scene_lock):
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
+                      proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
+                      cam_rotate_speed, rapid_compute_buffer, scene_lock):
     command_buffer = []
 
     def on_panel_close():
@@ -39,6 +39,12 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
         for ad in atmospheric_drags:
             objects_text += "ATMOSPHERIC DRAG: " + ad.get_name() + "\n"
+
+        for sch in schwarzschilds:
+            objects_text += "SCHWARZCHILD EFFECT: " + sch.get_name() + "\n"
+
+        for lt in lensethirrings:
+            objects_text += "LENSE-THIRRING EFFECT: " + lt.get_name() + "\n"
 
         for pz in proximity_zones:
             objects_text += "PROXIMITY ZONE: " + pz.get_name() + "\n"
@@ -1470,6 +1476,106 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 lo_s1_button = tk.Button(entry_panel, text="Lock Origin", command=generate_s1)
                 lo_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "create_schwarzschild":
+                create_schwarzschild_help = tk.Label(entry_panel, text="'create_schwarzschild' command adds a Schwarzschild component of the general relativity effects near a massive body.")
+                create_schwarzschild_help.grid(row=0, column=0, columnspan=10)
+
+                csch_s1t1_label = tk.Label(entry_panel, text="Name")
+                csch_s1t1_label.grid(row=1, column=1)
+
+                csch_s1t2_label = tk.Label(entry_panel, text="Msv. Body")
+                csch_s1t2_label.grid(row=1, column=2)
+
+                csch_s1t3_label = tk.Label(entry_panel, text="Vessel")
+                csch_s1t3_label.grid(row=1, column=3)
+
+                csch_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                csch_s1t1.grid(row=2, column=1)
+
+                csch_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                csch_s1t2.grid(row=2, column=2)
+
+                csch_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                csch_s1t3.grid(row=2, column=3)
+
+                def generate_s1():
+                    if csch_s1t1.get("1.0","end-1c") and csch_s1t2.get("1.0","end-1c") and csch_s1t3.get("1.0","end-1c"):
+                        command = "create_schwarzschild " + csch_s1t1.get("1.0","end-1c") + " " + csch_s1t2.get("1.0","end-1c") + " " + csch_s1t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                csch_s1_button = tk.Button(entry_panel, text="Crt. Schwzschld.", command=generate_s1)
+                csch_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "delete_schwarzschild":
+                dsch_help = tk.Label(entry_panel, text="'delete_schwarzschild' command removes a Schwarzschild component of the general relativity effect near a massive body from the simulation.")
+                dsch_help.grid(row=0, column=0, columnspan=10)
+
+                dsch_s1t1_label = tk.Label(entry_panel, text="Sch. Effect Name")
+                dsch_s1t1_label.grid(row=1, column=1)
+                dsch_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                dsch_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if dsch_s1t1.get("1.0","end-1c"):
+                        command = "delete_schwarzschild " + dsch_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                dsch_s1_button = tk.Button(entry_panel, text="Delete Sch. Effect", command=generate_s1)
+                dsch_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "create_lensethirring":
+                create_lensethirring_help = tk.Label(entry_panel, text="'create_lensethirring' command adds a frame-dragging component of the general relativity effects near a massive body.")
+                create_lensethirring_help.grid(row=0, column=0, columnspan=10)
+
+                clt_s1t1_label = tk.Label(entry_panel, text="Name")
+                clt_s1t1_label.grid(row=1, column=1)
+
+                clt_s1t2_label = tk.Label(entry_panel, text="Msv. Body")
+                clt_s1t2_label.grid(row=1, column=2)
+
+                clt_s1t3_label = tk.Label(entry_panel, text="Vessel")
+                clt_s1t3_label.grid(row=1, column=3)
+
+                clt_s1t4_label = tk.Label(entry_panel, text="Specific Ang. Momentum")
+                clt_s1t4_label.grid(row=1, column=4)
+
+                clt_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                clt_s1t1.grid(row=2, column=1)
+
+                clt_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                clt_s1t2.grid(row=2, column=2)
+
+                clt_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                clt_s1t3.grid(row=2, column=3)
+
+                clt_s1t4 = tk.Text(entry_panel, width=20, height=1)
+                clt_s1t4.grid(row=2, column=4)
+
+                def generate_s1():
+                    if clt_s1t1.get("1.0","end-1c") and clt_s1t2.get("1.0","end-1c") and clt_s1t3.get("1.0","end-1c") and clt_s1t4.get("1.0","end-1c"):
+                        command = "create_lensethirring " + clt_s1t1.get("1.0","end-1c") + " " + clt_s1t2.get("1.0","end-1c") + " " + clt_s1t3.get("1.0","end-1c") + " " + clt_s1t4.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                clt_s1_button = tk.Button(entry_panel, text="Crt. Lense-Thrng.", command=generate_s1)
+                clt_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "delete_lensethirring":
+                dlt_help = tk.Label(entry_panel, text="'delete_lensethirring' command removes a frame-dragging component of the general relativity effect near a massive body from the simulation.")
+                dlt_help.grid(row=0, column=0, columnspan=10)
+
+                dlt_s1t1_label = tk.Label(entry_panel, text="L-T Effect Name")
+                dlt_s1t1_label.grid(row=1, column=1)
+                dlt_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                dlt_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if dlt_s1t1.get("1.0","end-1c"):
+                        command = "delete_lensethirring " + dlt_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                dlt_s1_button = tk.Button(entry_panel, text="Delete L-T Effect", command=generate_s1)
+                dlt_s1_button.grid(row=2, column=0)
                 
         cmd_window = tk.Tk()
         cmd_window.protocol("WM_DELETE_WINDOW", on_command_window_close)
@@ -1672,6 +1778,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         unlock_origin_button = tk.Button(cmd_window, text="Unlock Origin", command=lambda:add_to_buffer("unlock_origin"))
         unlock_origin_button.config(width=15, height=1)
         unlock_origin_button.grid(row=current_row, column=1)
+
+        current_row += 1
+        general_relativity_commands_label = tk.Label(cmd_window, text="General Relativity")
+        general_relativity_commands_label.grid(row=current_row, column=0, columnspan=3)
+        current_row += 1
+        create_sch_button = tk.Button(cmd_window, text="Create Schwrzchld.", command=lambda:enter_cmd("create_schwarzschild"))
+        create_sch_button.config(width=15, height=1)
+        create_sch_button.grid(row=current_row, column=0)
+        delete_sch_button = tk.Button(cmd_window, text="Delete Schwrzchld.", command=lambda:enter_cmd("delete_schwarzschild"))
+        delete_sch_button.config(width=15, height=1)
+        delete_sch_button.grid(row=current_row, column=1)
+        current_row += 1
+        create_lt_button = tk.Button(cmd_window, text="Create Lense-Thrng.", command=lambda:enter_cmd("create_lensethirring"))
+        create_lt_button.config(width=15, height=1)
+        create_lt_button.grid(row=current_row, column=0)
+        delete_lt_button = tk.Button(cmd_window, text="Delete Lense-Thrng.", command=lambda:enter_cmd("delete_lensethirring"))
+        delete_lt_button.config(width=15, height=1)
+        delete_lt_button.grid(row=current_row, column=1)
     
     root = tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_panel_close)

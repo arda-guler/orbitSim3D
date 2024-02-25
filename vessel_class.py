@@ -75,6 +75,14 @@ class vessel():
                          (x_diff * body.orient.m21) + (y_diff * body.orient.m22) + (z_diff * body.orient.m23),
                          (x_diff * body.orient.m31) + (y_diff * body.orient.m32) + (z_diff * body.orient.m33)])
 
+    def get_body_centered_vel(self, body):
+        x_diff = self.vel.x - body.vel.x
+        y_diff = self.vel.y - body.vel.y
+        z_diff = self.vel.z - body.vel.z
+        return vec3(lst=[(x_diff * body.orient.m11) + (y_diff * body.orient.m12) + (z_diff * body.orient.m13),
+                         (x_diff * body.orient.m21) + (y_diff * body.orient.m22) + (z_diff * body.orient.m23),
+                         (x_diff * body.orient.m31) + (y_diff * body.orient.m32) + (z_diff * body.orient.m33)])
+
     def get_gravity_by(self, body):
         grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
         grav_vec = self.get_unit_vector_towards(body) * grav_mag
