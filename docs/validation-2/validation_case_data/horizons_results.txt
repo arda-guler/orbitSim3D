@@ -1,0 +1,109 @@
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Fri Mar  1 07:56:12 2024 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: International Space Station (spacecraft) (-125544) {source: iss}
+Center body name: Earth (399)                     {source: DE441}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2015-Jan-01 00:00:00.0000 TDB
+Stop  time      : A.D. 2015-Jan-03 00:00:00.0000 TDB
+Step-size       : 720 minutes
+*******************************************************************************
+Center geodetic : 0.0, 0.0, 0.0                   {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.0, 0.0, 0.0                   {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 6378.137, 6378.137, 6356.752 km {Equator_a, b, pole_c}
+Output units    : KM-S
+Calendar mode   : Mixed Julian/Gregorian
+Output type     : GEOMETRIC cartesian states
+Output format   : 2 (position and velocity)
+EOP file        : eop.240229.p240524
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2024-FEB-29. PREDICTS-> 2024-MAY-23
+Reference frame : ICRF
+*******************************************************************************
+JDTDB
+   X     Y     Z
+   VX    VY    VZ
+*******************************************************************************
+$$SOE
+2457023.500000000 = A.D. 2015-Jan-01 00:00:00.0000 TDB 
+ X = 4.264432924834558E+03 Y =-2.479924482268171E+03 Z = 4.650035205058384E+03
+ VX= 5.660977774306436E+00 VY= 4.281155575648442E+00 VZ=-2.908750353319627E+00
+2457024.000000000 = A.D. 2015-Jan-01 12:00:00.0000 TDB 
+ X =-4.623456266143041E+03 Y =-3.867065644022405E+03 Z = 3.120883355379895E+03
+ VX= 5.376502950290718E+00 VY=-2.487688570266960E+00 VZ= 4.862173643390055E+00
+2457024.500000000 = A.D. 2015-Jan-02 00:00:00.0000 TDB 
+ X =-5.220947223103393E+03 Y = 1.940111586461913E+03 Z =-3.887283380724519E+03
+ VX=-4.704839456790215E+00 VY=-4.436114419956811E+00 VZ= 4.100674263875897E+00
+2457025.000000000 = A.D. 2015-Jan-02 12:00:00.0000 TDB 
+ X = 3.656448353144516E+03 Y = 3.991596519372922E+03 Z =-4.092759708201492E+03
+ VX=-6.356080050697837E+00 VY= 1.891737393636018E+00 VZ=-3.841206083327009E+00
+2457025.500000000 = A.D. 2015-Jan-03 00:00:00.0000 TDB 
+ X = 5.973598822413450E+03 Y =-1.434906908373958E+03 Z = 2.870024234485354E+03
+ VX= 3.530668607656801E+00 VY= 4.556548536292415E+00 VZ=-5.062508115777383E+00
+$$EOE
+*******************************************************************************
+ 
+TIME
+
+  Barycentric Dynamical Time ("TDB" or T_eph) output was requested. This
+continuous coordinate time is equivalent to the relativistic proper time
+of a clock at rest in a reference frame co-moving with the solar system
+barycenter but outside the system's gravity well. It is the independent
+variable in the solar system relativistic equations of motion.
+
+  TDB runs at a uniform rate of one SI second per second and is independent
+of irregularities in Earth's rotation.
+ 
+CALENDAR SYSTEM
+
+  Mixed calendar mode was active such that calendar dates after AD 1582-Oct-15
+(if any) are in the modern Gregorian system. Dates prior to 1582-Oct-5 (if any)
+are in the Julian calendar system, which is automatically extended for dates
+prior to its adoption on 45-Jan-1 BC.  The Julian calendar is useful for
+matching historical dates. The Gregorian calendar more accurately corresponds
+to the Earth's orbital motion and seasons. A "Gregorian-only" calendar mode is
+available if such physical events are the primary interest.
+
+REFERENCE FRAME AND COORDINATES
+
+  International Celestial Reference Frame (ICRF)
+
+    The ICRF is an adopted reference frame whose axes are defined relative to 
+    fixed extragalactic radio sources distributed across the sky.
+
+    The ICRF was aligned with the prior FK5/J2000 dynamical system at the ~0.02 
+    arcsecond level but is not identical and has no associated standard epoch.
+
+  Symbol meaning:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (km)
+      Y      Y-component of position vector (km)
+      Z      Z-component of position vector (km)
+      VX     X-component of velocity vector (km/sec)                           
+      VY     Y-component of velocity vector (km/sec)                           
+      VZ     Z-component of velocity vector (km/sec)                           
+
+ABERRATIONS AND CORRECTIONS
+
+ Geometric state vectors have NO corrections or aberrations applied.
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/hrzn_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Author      : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************

@@ -62,7 +62,7 @@ Relativistic effects are not taken into account whatsoever.
 
 ## Validation
 
-This part is in reconstruction. (I used to use an incomplete model of the Solar System as an example case, which I think increased errors quite a bit. I will replace it with sth else.)
+[Two orbit propagator validation cases](http://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md) were examined. Read the related document for the detailed discussion.
 
 ## Scenarios (.osf)
 

@@ -1,0 +1,35 @@
+0.5 days (43200 seconds) integration (around 7 orbits):
+dt=1s
+Error: Euler w/out J2: 3.3934533417103374 %
+Error: Euler w/ J2: 0.33069801201352883 %
+Error: Yoshida8 w/out J2: 3.338156908582299 %
+Error: Yoshida8 w/ J2: 0.4164456105805677 %
+
+dt=100s
+Error: Euler w/ J2: 10.793022970394238 %
+Error: Yoshida8 w/ J2: 30.120918217199062 %
+
+
+1 day (86400 seconds) integration (around 15 orbits):
+dt=1s
+Error: Euler w/out J2: 6.089755754093886 %
+Error: Euler w/ J2: 0.5874206237855437 %
+Error: Yoshida8 w/out J2: 6.497964326228753 %
+Error: Yoshida8 w/ J2: 0.7892508053627536 %
+
+dt=100s
+Error: Euler w/ J2: 40.04950801764816 %
+Error: Yoshida8 w/ J2: 21.496804718875566 %
+
+
+2 days (172800 seconds) integration (around 31 orbits):
+dt=1s
+Error: Euler w/out J2: 13.97736605993215 %
+Error: Euler w/ J2: 1.7015347078049137 %
+Error: Yoshida8 w/out J2: 13.985818437525513 %
+Error: Yoshida8 w/ J2: 1.6925799063338627 %
+
+dt=100s
+Error: Euler w/ J2: 133.14192162727758 %
+Error: Yoshida8 w/ J2: 19.907185716488787 %
+

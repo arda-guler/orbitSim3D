@@ -1,0 +1,7 @@
+solver_type 3
+delta_t 100
+output_rate 20
+create_plot Px pos_x ISS Earth 10 173800
+create_plot Py pos_y ISS Earth 10 173800
+create_plot Pz pos_z ISS Earth 10 173800
+rapid_compute 172500
