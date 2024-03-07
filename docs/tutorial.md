@@ -1,6 +1,6 @@
 # Introductory Tutorial
 ## Overview (Babbling)
-Welcome to OS3D. Here, you can try your hand at navigating spacecraft in a 1:1 scale digital universe with true-to-real-life Newtonian Laws of Motion and find your way through some n-body chaos - all without putting billions of dollars of hardware at risk. *(General relativity will be none of our concern as long as we simulate spacecraft that travel far below the speed of light. If that sounds kind of sad, that's probably because it is.)*
+Welcome to OS3D. Here, you can try your hand at navigating spacecraft in a 1:1 scale digital universe with true-to-real-life Newtonian Laws of Motion and find your way through some n-body chaos - all without putting billions of dollars of hardware at risk.
 
 Who knows, one day, you might come up with a brilliant low-energy trajectory which a space agency might use for their next robotic exploration mission. Or you could just start the simulation and admire the wireframe monochrome planet graphics. It's okay. I don't judge. Take your time.
 
