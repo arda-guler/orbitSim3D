@@ -58,8 +58,6 @@ The simulation can also account for two of the effects predicted by general rela
 
 OS3D is quite configurable and extendable, and this includes the physics solver. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
-Relativistic effects are not taken into account whatsoever.
-
 ## Validation
 
 [Two orbit propagator validation cases](http://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md) were examined. Read the related document for the detailed discussion.
