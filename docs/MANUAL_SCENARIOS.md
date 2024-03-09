@@ -196,6 +196,11 @@ Each of the example scenarios are explained below. These example missions can be
 
 **Desc:** Launch of a small-sat two-stage launch vehicle.
 
+### [mars_transfer.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/mars_transfer.osf)
+**Type:** Demonstration
+
+**Desc:** A simple Hohmann transfer from Earth to Mars. 
+
 ### [northern_terror.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/northern_terror.osf)
 **Type:** Sandbox
 
