@@ -1,0 +1,27 @@
+lock_origin Orbiter
+lock_cam Orbiter
+show Orbiter dist Mars MARS_DIST
+show Orbiter vel_mag Mars MARS_VEL
+create_projection earthorbit Earth Sol
+create_projection marsorbit Mars Sol
+output_rate 100
+t=10000 delta_t 2
+t=15000 delta_t 4
+t=30000 output_rate 5000
+t=30000 delta_t 100
+t=30000 create_projection transfer_orbit Orbiter Sol
+t=200000 delta_t 1000
+t=200000 output_rate 50000
+t=5000000 update_projection transfer_orbit
+t=10000000 update_projection transfer_orbit
+t=15000000 update_projection transfer_orbit
+t=20000000 update_projection transfer_orbit
+t=26468460 output_rate 1000
+t=26468460 delta_t 100
+t=26486460 output_rate 5
+t=26486460 delta_t 10
+t=26488490 clear traj_visuals
+t=26488490 create_projection p_mars Orbiter Mars
+t=26488490 delete_projection transfer_orbit
+t=26488490 delta_t 100
+t=26488490 output_rate 5000
