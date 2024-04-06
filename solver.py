@@ -1,3 +1,5 @@
+import copy
+
 from vector3 import *
 
 def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
@@ -448,5 +450,110 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         v.update_traj_history()
         v.update_draw_traj_history()
 
+def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t,
+             solver_type=0, tolerance=1e-8):
+
+    c_delta_t = delta_t
+    z_delta_t = delta_t * 0.5
+
+    def copylist(inlist):
+        outlist = []
+        for obj in inlist:
+            outlist.append(copy.copy(obj))
+
+        return outlist
+
+    good_step = False
+    increase_delta_t = False
+    while not good_step:
+        # safekeep original states, use copies for computations
+        c_bodies = copylist(bodies)
+        c_vessels = copylist(vessels)
+        c_surface_points = copylist(surface_points)
+        c_maneuvers = copylist(maneuvers)
+        c_atmospheric_drags = copylist(atmospheric_drags)
+        c_radiation_pressures = copylist(radiation_pressures)
+        c_schwarzschilds = copylist(schwarzschilds)
+        c_lensethirrings = copylist(lensethirrings)
+        c_sim_time = sim_time
+
+        # solve the step using delta_t
+        if solver_type == 0:
+            SymplecticEuler(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+        elif solver_type == 1:
+            VelocityVerlet(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+        elif solver_type == 2:
+            Yoshida4(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+        else:
+            Yoshida8(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+
+        # save results
+        d1_positions = []
+        for obj in c_bodies:
+            d1_positions.append(obj.pos)
+
+        for obj in c_vessels:
+            d1_positions.append(obj.pos)
+
+        # solve the step using using delta_t / 2
+        z_bodies = copylist(bodies)
+        z_vessels = copylist(vessels)
+        z_surface_points = copylist(surface_points)
+        z_maneuvers = copylist(maneuvers)
+        z_atmospheric_drags = copylist(atmospheric_drags)
+        z_radiation_pressures = copylist(radiation_pressures)
+        z_schwarzschilds = copylist(schwarzschilds)
+        z_lensethirrings = copylist(lensethirrings)
+        z_sim_time = sim_time
+
+        if solver_type == 0:
+            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+        elif solver_type == 1:
+            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+        elif solver_type == 2:
+            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+        else:
+            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+
+        # save results
+        d2_positions = []
+        for obj in z_bodies:
+            d2_positions.append(obj.pos)
+
+        for obj in z_vessels:
+            d2_positions.append(obj.pos)
+
+        # compare all
+        if len(d1_positions) == len(d2_positions):
+            errors = []
+            for i in range(len(d1_positions)):
+                errors.append((d1_positions[i] - d2_positions[i]).mag())
+
+            for e in errors:
+                if e > tolerance:
+                    delta_t = 0.5 * delta_t
+                else:
+                    good_step = True
+                    if e < tolerance * 0.3:
+                        increase_delta_t = True
+
+        else:
+            pass # something changed during this step - can't compare
+
+    if solver_type == 0:
+        SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+    elif solver_type == 1:
+        VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+    elif solver_type == 2:
+        Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+    elif solver_type == 3:
+        Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+    
+    return delta_t, increase_delta_t
+    
 # def RK89() ?
 # Maybe with a not-energy-conserving warning.

@@ -1221,9 +1221,6 @@ def main(scn_filename=None, start_time=0):
             pass
 
     while not glfw.window_should_close(window):
-
-        sim_time += delta_t
-
         glfw.poll_events()
 
         frame_command = False
@@ -2314,14 +2311,17 @@ def main(scn_filename=None, start_time=0):
                 delta_t = maneuver_auto_dt
 
         # compute time step with the selected solver
+        increase_delta_t = False
         if solver_type == 0:
             SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 1:
             VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 2:
             Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
-        else:
+        elif solver_type == 3:
             Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+        else:
+            delta_t, increase_delta_t = adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t, solver_type-4)
 
         # check collisions
         for v in vessels:
@@ -2525,6 +2525,10 @@ def main(scn_filename=None, start_time=0):
         elif warn_cycle_time and cycle_time*2 <= cycle_dt and not cycle_time == 0:
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
+
+        sim_time += delta_t
+        if increase_delta_t:
+            delta_t = delta_t * 2
 
     # save latest simulation state
     export_scenario("_latest", verbose=False)
