@@ -542,7 +542,7 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
                         increase_delta_t = True
 
         else:
-            pass # something changed during this step - can't compare
+            good_step = True # something changed during this step - can't compare
 
     if solver_type == 0:
         SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
