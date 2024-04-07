@@ -1,6 +1,6 @@
 # orbitSim3D
 
-N-body orbit and mission simulation in 3D space.
+Sophisticated astrodynamics and space mission simulator.
 
 ![introB](https://user-images.githubusercontent.com/80536083/178114746-7824188d-e437-4438-ad3a-dd32e9ef6eba.png)
 
