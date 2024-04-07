@@ -5,7 +5,7 @@ import tkinter as tk
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                       proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                      cam_rotate_speed, rapid_compute_buffer, scene_lock):
+                      cam_rotate_speed, rapid_compute_buffer, scene_lock, solver_type, tolerance):
     command_buffer = []
 
     def on_panel_close():
@@ -79,7 +79,30 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
     def set_vars_field():
         sim_variables_field.config(state="normal")
-        vars_text = "Sim. Time: " + str(sim_time) + "\n"
+        vars_text = "Sim. Time: " + str(sim_time) + "\n\n"
+        
+        vars_text += "Solver Type: " + str(solver_type) + "\n("
+        if solver_type == 0:
+            vars_text += "Sym. Euler" + ")\n"
+        elif solver_type == 1:
+            vars_text += "Vel. Verlet" + ")\n"
+        elif solver_type == 2:
+            vars_text += "Yoshida4" + ")\n"
+        elif solver_type == 3:
+            vars_text += "Yoshida8" + ")\n"
+        elif solver_type == 4:
+            vars_text += "Adap. Sym. Euler" + ")\n"
+        elif solver_type == 5:
+            vars_text += "Adap. Vel. Verlet" + ")\n"
+        elif solver_type == 6:
+            vars_text += "Adap. Yoshida4" + ")\n"
+        elif solver_type == 7:
+            vars_text += "Adap. Yoshida8" + ")\n"
+
+        vars_text += "Adap. Tolerance: " + str(tolerance) + "\n"
+        if solver_type < 4:
+            vars_text += "Using nonadaptive solver.\nTolerance is disregarded.\n\n"
+            
         vars_text += "Delta T: " + str(delta_t) + "\n"
         vars_text += "Cycle Time: " + str(cycle_time) + "\n"
         vars_text += "Output Rate: " + str(output_rate) + "\n"
@@ -1214,6 +1237,55 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 otr_s1_button = tk.Button(entry_panel, text="Set Output Rate", command=generate_s1)
                 otr_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "solver_type":
+                svt_help = tk.Label(entry_panel, text="'solver_type' command selects which physics solver to use.")
+                svt_help.grid(row=0, column=0, columnspan=10)
+
+                svt_b0 = tk.Button(entry_panel, text="0 (Symplectic Euler)", command=lambda:add_to_buffer("solver_type 0"))
+                svt_b1 = tk.Button(entry_panel, text="1 (Velocity Verlet)", command=lambda:add_to_buffer("solver_type 1"))
+                svt_b2 = tk.Button(entry_panel, text="2 (Yoshida 4th Order)", command=lambda:add_to_buffer("solver_type 2"))
+                svt_b3 = tk.Button(entry_panel, text="3 (Yoshida 8th Order)", command=lambda:add_to_buffer("solver_type 3"))
+                svt_b4 = tk.Button(entry_panel, text="4 (Adaptive Sym. Euler)", command=lambda:add_to_buffer("solver_type 4"))
+                svt_b5 = tk.Button(entry_panel, text="5 (Adaptive Vel. Vrlt.)", command=lambda:add_to_buffer("solver_type 5"))
+                svt_b6 = tk.Button(entry_panel, text="6 (Adaptive Yoshida4th)", command=lambda:add_to_buffer("solver_type 6"))
+                svt_b7 = tk.Button(entry_panel, text="7 (Adaptive Yoshida8th)", command=lambda:add_to_buffer("solver_type 7"))
+
+                svt_b0.config(width=25,height=1)
+                svt_b1.config(width=25,height=1)
+                svt_b2.config(width=25,height=1)
+                svt_b3.config(width=25,height=1)
+                svt_b4.config(width=25,height=1)
+                svt_b5.config(width=25,height=1)
+                svt_b6.config(width=25,height=1)
+                svt_b7.config(width=25,height=1)
+
+                svt_b0.grid(row=1, column=0)
+                svt_b1.grid(row=2, column=0)
+                svt_b2.grid(row=3, column=0)
+                svt_b3.grid(row=4, column=0)
+                svt_b4.grid(row=1, column=1)
+                svt_b5.grid(row=2, column=1)
+                svt_b6.grid(row=3, column=1)
+                svt_b7.grid(row=4, column=1)
+
+            elif cmd_a == "tolerance":
+                tol_help = tk.Label(entry_panel, text="'tolerance' command sets the position error tolerance for adaptive time-step solvers.")
+                tol_help.grid(row=0, column=0, columnspan=10)
+                
+                tol_s1t1_label = tk.Label(entry_panel, text="Tolerance")
+                tol_s1t1_label.grid(row=1, column=1)
+
+                tol_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                tol_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if tol_s1t1.get("1.0","end-1c"):
+                        command = "tolerance " + tol_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                tol_s1_button = tk.Button(entry_panel, text="Set Tol.", command=generate_s1)
+                tol_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "note":
                 nte_help = tk.Label(entry_panel, text="'note' command lets the user take a note on the output screen.")
                 nte_help.grid(row=0, column=0, columnspan=10)
@@ -1745,6 +1817,17 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         rapid_compute_button = tk.Button(cmd_window, text="Rapid Compute", command=lambda:enter_cmd("rapid_compute"))
         rapid_compute_button.config(width=15, height=1)
         rapid_compute_button.grid(row=current_row, column=2)
+
+        current_row += 1
+        solver_commands_label = tk.Label(cmd_window, text="Solver Controls")
+        solver_commands_label.grid(row=current_row, column=0, columnspan=3)
+        current_row += 1
+        solver_type_button = tk.Button(cmd_window, text="Solver Type", command=lambda:enter_cmd("solver_type"))
+        solver_type_button.config(width=15,height=1)
+        solver_type_button.grid(row=current_row, column=0)
+        tolerance_button = tk.Button(cmd_window, text="Tolerance", command=lambda:enter_cmd("tolerance"))
+        tolerance_button.config(width=15,height=1)
+        tolerance_button.grid(row=current_row, column=1)
 
         current_row += 1
         misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")

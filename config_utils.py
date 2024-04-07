@@ -148,6 +148,7 @@ def read_current_config():
     vessel_body_collision = 1
     batch_autoload = 1
     solver_type = 0
+    tolerance = 1e-8
     
     try:
         current_cfg_file = open("data/config/current.cfg", "r")
@@ -240,8 +241,10 @@ def read_current_config():
             batch_autoload = int(get_float_in_line(line[:-1]))
         elif line[:-1].startswith("solver_type"):
             solver_type = int(get_float_in_line(line[:-1]))
+        elif line[:-1].startswith("tolerance"):
+            tolerance = float(get_float_in_line(line[:-1]))
 
     return sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
            window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
            cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
-           maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type
+           maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type, tolerance

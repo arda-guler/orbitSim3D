@@ -1153,7 +1153,7 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type, tolerance = read_current_config()
 
     # set global vars
     gvar_fov = fov
@@ -1273,7 +1273,7 @@ def main(scn_filename=None, start_time=0):
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                                                        proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock)
+                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, solver_type, tolerance)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1938,14 +1938,12 @@ def main(scn_filename=None, start_time=0):
                     export_scenario(command[1])
 
                 # SOLVER_TYPE command
-                # This command is not exposed in the help text or the command panel
-                # because I think changing the solver in the middle of a simulation is not
-                # something that should be encouraged. Regardless, it is possible to do it.
-                # This is mainly here for scenario authors to set their integrators to a
-                # predefined method at the scenario start so everyone will experience
-                # the intended playback.
                 elif command[0] == "solver_type":
                     solver_type = int(command[1])
+
+                # TOLERANCE command
+                elif command[0] == "tolerance":
+                    tolerance = float(command[1])
 
                 # HELP command
                 elif command[0] == "help":
@@ -1961,7 +1959,8 @@ def main(scn_filename=None, start_time=0):
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
                         print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin")
                         print("create_proximity_zone, delete_proximity_zone, get_proximity_zones,")
-                        print("get_timed_commands, timed_commands_remove, timed_commands_clear\n")
+                        print("get_timed_commands, timed_commands_remove, timed_commands_clear,")
+                        print("solver_type, tolerance\n")
                         print("Commands can be buffered to run at specific simulation times by adding 't=<execution_time> '")
                         print("in front of them.\n")
                         print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
@@ -2155,9 +2154,18 @@ def main(scn_filename=None, start_time=0):
                             print("\n'cam_rotate_speed' command sets the speed of camera rotation.\n")
                             print("Syntax: cam_rotate_speed <speed> \n")
                             input("Press Enter to continue...")
+                        elif command[1] == "solver_type":
+                            print("\n'solver_type' command selects which physics solver to use.")
+                            print("Syntax: solver_type <type_number>")
+                            print("Type numbers --> 0: Symplectic Euler, 1: Velocity Verlet, 2: Yoshida4, 3: Yoshida8")
+                            print("             --> 4: Adpt. Sym. Euler, 5: Adpt. Vel. Vrt., 6: Adpt. Y4, 7: Adpt. Y8\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "tolerance":
+                            print("\n'tolerance' command sets the position error tolerance for adaptive time-step solvers.")
+                            print("Syntax: tolerance <tolerance>\n")
+                            input("Press Enter to continue...")
                         elif command[1] == "delta_t":
                             print("\n'delta_t' command sets time step length of each physics frame.")
-                            print("Set delta_t negative to run the simulation backwards (to retrace an object's trajectory).\n")
                             print("Syntax: delta_t <seconds>\n")
                             input("Press Enter to continue...")
                         elif command[1] == "auto_dt":
@@ -2211,6 +2219,18 @@ def main(scn_filename=None, start_time=0):
                         elif command[1] == "cycle_time":
                             print("\n'cycle_time' command sets the amount of time the machine should take to calculate each physics frame.\n")
                             print("Syntax: cycle_time <seconds>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_timed_commands":
+                            print("\n'get_timed_commands' displays the scheduled commands yet to be executed.")
+                            print("Syntax: get_timed_commands\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "timed_commands_remove":
+                            print("\n'timed_commands_remove' aborts the execution of a timed command.")
+                            print("Syntax: timed_commands_remove <cmd_index>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "timed_commands_clear":
+                            print("\n'timed_commands_clear' aborts the execution of all timed commands.")
+                            print("Syntax: timed_commands_clear\n")
                             input("Press Enter to continue...")
                         elif command[1] == "note":
                             print("\n'note' command lets the user take a note on the output screen.")
@@ -2312,6 +2332,7 @@ def main(scn_filename=None, start_time=0):
 
         # compute time step with the selected solver
         increase_delta_t = False
+        adaptive_warning = False
         if solver_type == 0:
             SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 1:
@@ -2321,7 +2342,11 @@ def main(scn_filename=None, start_time=0):
         elif solver_type == 3:
             Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
         else:
-            delta_t, increase_delta_t = adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t, solver_type-4)
+            delta_t, increase_delta_t, adaptive_warning = adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t, solver_type-4, tolerance)
+
+        if solver_type > 3 and output_rate != 1:
+            output_rate = 1
+            output_buffer.append(["ADPT_OUTPUT", "note", "output_rate automatically set to 1 to ensure proper screen updates."])
 
         # check collisions
         for v in vessels:
@@ -2525,6 +2550,10 @@ def main(scn_filename=None, start_time=0):
         elif warn_cycle_time and cycle_time*2 <= cycle_dt and not cycle_time == 0:
             print("Cycle time too low! Machine can't update physics at the given cycle time!\n")
             print("Consider increasing cycle_time to get more consistent calculation rate.\n")
+
+        if adaptive_warning:
+            print("Adaptive time-step solver has had some trouble achieving the desired tolerance in the last step.")
+            print("Max. time-step attempts had been reached.")
 
         sim_time += delta_t
         if increase_delta_t:

@@ -455,6 +455,7 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
 
     c_delta_t = delta_t
     z_delta_t = delta_t * 0.5
+    original_delta_t = delta_t
 
     def copylist(inlist):
         outlist = []
@@ -463,9 +464,14 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
 
         return outlist
 
+    warn = False
     good_step = False
     increase_delta_t = False
-    while not good_step:
+    max_attempts = 100
+    attempts = 0
+    while (not good_step) and (attempts < max_attempts):
+        attempts += 1
+        
         # safekeep original states, use copies for computations
         c_bodies = copylist(bodies)
         c_vessels = copylist(vessels)
@@ -544,6 +550,11 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         else:
             good_step = True # something changed during this step - can't compare
 
+    if attempts == max_attempts:
+        delta_t = original_delta_t
+        increase_delta_t = False
+        warn = True
+
     if solver_type == 0:
         SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
     elif solver_type == 1:
@@ -553,7 +564,7 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
     elif solver_type == 3:
         Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
     
-    return delta_t, increase_delta_t
+    return delta_t, increase_delta_t, warn
     
 # def RK89() ?
 # Maybe with a not-energy-conserving warning.
