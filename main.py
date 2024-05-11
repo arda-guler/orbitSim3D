@@ -31,6 +31,7 @@ from solver import *
 from proximity import *
 from resource import *
 from general_relativity import *
+from test_propagator import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -806,9 +807,15 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
 
     elif variable == "vel_mag":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "Velocity of " + obj1_name + " rel to " + obj2_name, [],
-                        obj1, obj2, "vel_mag", start_time, end_time)
+
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "Velocity of " + obj1_name + " rel to " + obj2_name, [],
+                            obj1, obj2, "vel_mag", start_time, end_time)
+
+        else:
+            new_plot = plot(name, "Time", [], "Velocity of " + obj1_name, [],
+                            obj1, None, "vel_mag", start_time, end_time)
 
     elif variable == "groundtrack":
         obj1 = find_obj_by_name(obj1_name)
@@ -818,39 +825,63 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
 
     elif variable == "pos_x":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "X Position of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "pos_x", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "X Position of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "pos_x", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "X Position of " + obj1_name, [],
+                            obj1, None, "pos_x", start_time, end_time)
 
     elif variable == "pos_y":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "Y Position of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "pos_y", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "Y Position of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "pos_y", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "Y Position of " + obj1_name, [],
+                            obj1, None, "pos_y", start_time, end_time)
 
     elif variable == "pos_z":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "Z Position of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "pos_z", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "Z Position of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "pos_z", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "Z Position of " + obj1_name, [],
+                            obj1, None, "pos_z", start_time, end_time)
 
     elif variable == "vel_x":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "X Velocity of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "vel_x", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "X Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "vel_x", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "X Velocity of " + obj1_name, [],
+                            obj1, None, "vel_x", start_time, end_time)
 
     elif variable == "vel_y":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "Y Velocity of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "vel_y", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "Y Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "vel_y", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "Y Velocity of " + obj1_name, [],
+                            obj1, None, "vel_y", start_time, end_time)
 
     elif variable == "vel_z":
         obj1 = find_obj_by_name(obj1_name)
-        obj2 = find_obj_by_name(obj2_name)
-        new_plot = plot(name, "Time", [], "Z Velocity of " + obj1_name + " rel. to " + obj2_name, [],
-                        obj1, obj2, "vel_z", start_time, end_time)
+        if not obj2_name == "None":
+            obj2 = find_obj_by_name(obj2_name)
+            new_plot = plot(name, "Time", [], "Z Velocity of " + obj1_name + " rel. to " + obj2_name, [],
+                            obj1, obj2, "vel_z", start_time, end_time)
+        else:
+             new_plot = plot(name, "Time", [], "Z Velocity of " + obj1_name, [],
+                            obj1, None, "vel_z", start_time, end_time)
 
     plots.append(new_plot)
 
@@ -2669,6 +2700,7 @@ def init_sim(sys_args=None):
     print("1) (L)oad Scenario")
     print("2) (S)tart Empty Scene")
     print("3) (C)onfigure OrbitSim3D")
+    print("4) (T)est Propagator")
 
     menu_select = input("\n > ")
 
@@ -2694,6 +2726,10 @@ def init_sim(sys_args=None):
 
     elif menu_select == "3" or menu_select.lower() == "c":
         configure_sim()
+        init_sim()
+
+    elif menu_select == "4" or menu_select.lower() == "t":
+        test_propagator()
         init_sim()
 
     # :) do the intro again

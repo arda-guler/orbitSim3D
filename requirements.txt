@@ -4,3 +4,4 @@ PyWavefront==1.3.3
 keyboard==0.13.5
 matplotlib==3.5.3
 numpy==1.22.1
+skyfield==1.48

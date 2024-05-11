@@ -58,9 +58,11 @@ The simulation can also account for two of the effects predicted by general rela
 
 OS3D is quite configurable and extendable, and this includes the physics solver. The real-world accuracy of the simulation therefore depends on the user. For a simple introduction about possible risks, please read about the [Time Acceleration Problem](https://github.com/arda-guler/orbitSim3D/blob/master/docs/time_accel_problem.md "Time Acceleration Problem"), which is actually the OS3D version of a common trouble in scientific simulation software, engineering analysis software, video games and the like.
 
+Relativistic effects are not taken into account whatsoever.
+
 ## Validation
 
-[Two orbit propagator validation cases](http://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md) were examined. Read the related document for the detailed discussion.
+The errors of various orbit propagator configurations can be tested using the "Test Propagator" option in the main menu. [Two orbit propagator validation cases](http://github.com/arda-guler/orbitSim3D/blob/master/docs/validation.md) were examined for earlier versions of OS3D, but these are now outdated. 
 
 ## Scenarios (.osf)
 
@@ -114,6 +116,8 @@ There are only two configuration files;
 - resource.py: Handles custom resources defined by equations; simulating energy generation, antenna power and such.
 
 - plot.py: Plot class that handles plotting of variables in certain time intervals on user's demand.
+
+- test_propagator.py: Runs a positional error check on the orbit propagator configuration of your choice using an n-body model of the Solar System and comparing it against DE421 ephemeris.
 
 - command_panel.py: Command panel window which provides a basic GUI interface for entering commands easily.
 
