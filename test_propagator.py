@@ -105,31 +105,31 @@ def test_propagator():
                    vec3(lst=list(sv_SolarSystem[1][0])), vec3(lst=list(sv_SolarSystem[1][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    venus = body("Sol", None, None, 3.2485859200000006E+05 * 1e9 / grav_const, None, None,
+    venus = body("Venus", None, None, 3.2485859200000006E+05 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[2][0])), vec3(lst=list(sv_SolarSystem[2][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    earth = body("Sol", None, None, 4.0350323550225981E+05 * 1e9 / grav_const, None, None,
+    earth = body("Earth", None, None, 4.0350323550225981E+05 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[3][0])), vec3(lst=list(sv_SolarSystem[3][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    mars = body("Sol", None, None, 4.2828375214000022E+04 * 1e9 / grav_const, None, None,
+    mars = body("Mars", None, None, 4.2828375214000022E+04 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[4][0])), vec3(lst=list(sv_SolarSystem[4][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    jupiter = body("Sol", None, None, 1.2671276480000021E+08 * 1e9 / grav_const, None, None,
+    jupiter = body("Jupiter", None, None, 1.2671276480000021E+08 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[5][0])), vec3(lst=list(sv_SolarSystem[5][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    saturn = body("Sol", None, None, 3.7940585200000003E+07 * 1e9 / grav_const, None, None,
+    saturn = body("Saturn", None, None, 3.7940585200000003E+07 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[6][0])), vec3(lst=list(sv_SolarSystem[6][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    uranus = body("Sol", None, None, 5.7945486000000080E+06 * 1e9 / grav_const, None, None,
+    uranus = body("Uranus", None, None, 5.7945486000000080E+06 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[7][0])), vec3(lst=list(sv_SolarSystem[7][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
-    neptune = body("Sol", None, None, 6.8365271005800236E+06 * 1e9 / grav_const, None, None,
+    neptune = body("Neptune", None, None, 6.8365271005800236E+06 * 1e9 / grav_const, None, None,
                    vec3(lst=list(sv_SolarSystem[8][0])), vec3(lst=list(sv_SolarSystem[8][1])), # pos, vel
                    None, None, None, None, None, None, None)
 
