@@ -39,7 +39,10 @@ class plot:
                 self.y_list.append(self.obj1.get_dist_to(self.obj2))
             elif self.var == "vel_mag":
                 self.x_list.append(time)
-                self.y_list.append(self.obj1.get_vel_mag_rel_to(self.obj2))
+                if self.obj2:
+                    self.y_list.append(self.obj1.get_vel_mag_rel_to(self.obj2))
+                else:
+                    self.y_list.append(self.obj1.get_vel_mag())
             elif self.var == "groundtrack":
                 bcc = self.obj1.get_body_centered_coords(self.obj2)
                 gpos = impact_gpos(bcc)
@@ -49,22 +52,40 @@ class plot:
                 self.y_list.append(lat)
             elif self.var == "pos_x":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.pos - self.obj2.pos).x)
+                if self.obj2:
+                    self.y_list.append((self.obj1.pos - self.obj2.pos).x)
+                else:
+                    self.y_list.append(self.obj1.pos.x)
             elif self.var == "pos_y":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.pos - self.obj2.pos).y)
+                if self.obj2:
+                    self.y_list.append((self.obj1.pos - self.obj2.pos).y)
+                else:
+                    self.y_list.append(self.obj1.pos.y)
             elif self.var == "pos_z":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.pos - self.obj2.pos).z)
+                if self.obj2:
+                    self.y_list.append((self.obj1.pos - self.obj2.pos).z)
+                else:
+                    self.y_list.append(self.obj1.pos.z)
             elif self.var == "vel_x":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.vel - self.obj2.vel).x)
+                if self.obj2:
+                    self.y_list.append((self.obj1.vel - self.obj2.vel).x)
+                else:
+                    self.y_list.append(self.obj1.vel.x)
             elif self.var == "vel_y":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.vel - self.obj2.vel).y)
+                if self.obj2:
+                    self.y_list.append((self.obj1.vel - self.obj2.vel).y)
+                else:
+                    self.y_list.append(self.obj1.vel.y)
             elif self.var == "vel_z":
                 self.x_list.append(time)
-                self.y_list.append((self.obj1.vel - self.obj2.vel).z)
+                if self.obj2:
+                    self.y_list.append((self.obj1.vel - self.obj2.vel).z)
+                else:
+                    self.y_list.append(self.obj1.vel.z)
 
     def display(self):
         if self.var != "groundtrack":

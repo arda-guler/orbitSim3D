@@ -59,6 +59,7 @@ proximity_zones = []
 resources = []
 
 batch_commands = []
+command_history = []
 
 preset_orientations = ["prograde", "prograde_dynamic", "retrograde", "retrograde_dynamic",
                        "normal", "normal_dynamic", "antinormal", "antinormal_dynamic",
@@ -327,7 +328,7 @@ def import_scenario(scn_filename):
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, proximity_zones, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, proximity_zones, sim_time, command_history
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -468,6 +469,20 @@ def export_scenario(scn_filename, verbose=True):
         if verbose:
             print("Scenario export complete!")
             time.sleep(2)
+
+    # Export commands
+    if command_history:
+        if verbose:
+            print("Saving command history into " + scn_filename[:-4] + ".obf")
+            
+        with open(scn_filename[:-4] + ".obf", "w") as cmd_file:
+            for cmd in command_history:
+                cmd_file.write(' '.join(cmd) + "\n")
+
+        if verbose:
+            print("Command history export complete!")
+            time.sleep(2)
+            
 
 def create_maneuver_const_accel(mnv_name, mnv_vessel, mnv_frame, mnv_orientation, mnv_accel, mnv_start,
                                 mnv_duration):
@@ -1176,7 +1191,7 @@ def get_active_cam():
     return cameras[0]
 
 def main(scn_filename=None, start_time=0):
-    global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands,\
+    global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
            proximity_zones, schwarzschilds, lensethirrings, gvar_fov, gvar_near_clip, gvar_far_clip
 
@@ -1209,6 +1224,7 @@ def main(scn_filename=None, start_time=0):
     # put "camera" in starting position
     glTranslate(main_cam.get_pos().x, main_cam.get_pos().y, main_cam.get_pos().z)
 
+    command_history = []
     batch_commands = []
     timed_commands = []
     output_buffer = []
@@ -2303,6 +2319,13 @@ def main(scn_filename=None, start_time=0):
                 else:
                     print("\nUnrecognized command: " + str(command[0]))
                     input("Press Enter to continue...")
+
+                # add executed command to history
+                if command != [""] and command != [" "]:
+                    if command[0].startswith("t="):
+                        command_history.append(command)
+                    elif command[0] != "batch":
+                        command_history.append(["t=" + str(sim_time)] + command)
 
                 command = [""]
 
