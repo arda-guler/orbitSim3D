@@ -117,7 +117,7 @@ There are only two configuration files;
 
 - plot.py: Plot class that handles plotting of variables in certain time intervals on user's demand.
 
-- test_propagator.py: Runs a positional error check on the orbit propagator configuration of your choice using an n-body model of the Solar System and comparing it against DE421 ephemeris.
+- test_propagator.py: Runs a positional error check on the orbit propagator configuration of your choice using an n-body model of the Solar System and comparing it against JPL Horizons ephemeris.
 
 - command_panel.py: Command panel window which provides a basic GUI interface for entering commands easily.
 
