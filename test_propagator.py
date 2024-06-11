@@ -1,54 +1,69 @@
-import numpy as np
-# import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-from skyfield.api import load, PlanetaryConstants
+import requests
+import re
 
 from math_utils import grav_const
 from body_class import *
 from solver import *
 from vector3 import *
 
-def get_state_vectors(date_time):
-    planets = load('data/ephemeris/de421.bsp')
+def parseJPL(input_string):
+    # Regular expressions to match the lines containing the vector components
+    position_pattern = re.compile(r'\bX\s*=\s*([+-]?\d+\.\d+E[+-]\d+)\s*Y\s*=\s*([+-]?\d+\.\d+E[+-]\d+)\s*Z\s*=\s*([+-]?\d+\.\d+E[+-]\d+)')
+    velocity_pattern = re.compile(r'\bVX\s*=\s*([+-]?\d+\.\d+E[+-]\d+)\s*VY\s*=\s*([+-]?\d+\.\d+E[+-]\d+)\s*VZ\s*=\s*([+-]?\d+\.\d+E[+-]\d+)')
 
-    ts = load.timescale()
-    t = ts.utc(date_time.year, date_time.month, date_time.day, date_time.hour, date_time.minute, date_time.second)
+    # Finding all matches in the input string
+    position_match = position_pattern.search(input_string)
+    velocity_match = velocity_pattern.search(input_string)
     
-    sun = planets['sun']
-    mercury = planets['mercury barycenter']
-    venus = planets['venus barycenter']
-    earth = planets['earth barycenter']
-    mars = planets['mars barycenter']
-    jupiter = planets['jupiter barycenter']
-    saturn = planets['saturn barycenter']
-    uranus = planets['uranus barycenter']
-    neptune = planets['neptune barycenter']
+    if position_match and velocity_match:
 
-    km_to_m = 1000  # Convert kilometers to meters
-    km_per_s_to_m_per_s = 1000  # Convert kilometers per second to meters per second
+        position = vec3(lst=[float(position_match.group(1)),
+                             float(position_match.group(2)),
+                             float(position_match.group(3))])
 
-    sun_pos, sun_vel = sun.at(t).position.km * km_to_m, sun.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    mercury_pos, mercury_vel = mercury.at(t).position.km * km_to_m, mercury.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    venus_pos, venus_vel = venus.at(t).position.km * km_to_m, venus.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    earth_pos, earth_vel = earth.at(t).position.km * km_to_m, earth.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    mars_pos, mars_vel = mars.at(t).position.km * km_to_m, mars.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    jupiter_pos, jupiter_vel = jupiter.at(t).position.km * km_to_m, jupiter.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    saturn_pos, saturn_vel = saturn.at(t).position.km * km_to_m, saturn.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    uranus_pos, uranus_vel = uranus.at(t).position.km * km_to_m, uranus.at(t).velocity.km_per_s * km_per_s_to_m_per_s
-    neptune_pos, neptune_vel = neptune.at(t).position.km * km_to_m, neptune.at(t).velocity.km_per_s * km_per_s_to_m_per_s
+        velocity = vec3(lst=[float(velocity_match.group(1)),
+                             float(velocity_match.group(2)),
+                             float(velocity_match.group(3))])
+        
+        return [position * 1000, velocity * 1000]
+    
+    else:
+        return None
 
-    state_vectors = [
-        (sun_pos, sun_vel),
-        (mercury_pos, mercury_vel),
-        (venus_pos, venus_vel),
-        (earth_pos, earth_vel),
-        (mars_pos, mars_vel),
-        (jupiter_pos, jupiter_vel),
-        (saturn_pos, saturn_vel),
-        (uranus_pos, uranus_vel),
-        (neptune_pos, neptune_vel)
-    ]
+def getPlanetsJPL(start_time):
+    dt_stop_time = start_time + timedelta(days=1)
+    stop_time = dt_stop_time.strftime("%Y-%m-%d")
+    start_time = start_time.strftime("%Y-%m-%d")
+    
+    state_vectors = []
+    
+    for i in range(1, 11): # 1 to 10 for Mercury - Neptune and Sol (10)
+        bodyid = i
 
+        url = "https://ssd.jpl.nasa.gov/api/horizons.api"
+
+        url += "?format=text&EPHEM_TYPE=VECTORS&OBJ_DATA=NO&VEC_TABLE=2&CENTER='500@0'"
+        url += "&COMMAND='{}'&START_TIME='{}'&STOP_TIME='{}'&STEP_SIZE='3d'".format(bodyid, start_time, stop_time)
+
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            state_vectors.append(parseJPL(response.text))
+
+        elif response.status_code == 400:
+            print("Error 400 Bad Request")
+
+        elif response.status_code == 405:
+            print("Error 400 Method Not Allowed")
+
+        elif response.status_code == 500:
+            print("Error 400 Internal Server Error")
+
+        elif response.status_code == 503:
+            print("Error 400 Server Unavailable")
+
+    # print("OK! Got planet state vectors from JPL!")
     return state_vectors
 
 def test_propagator():
@@ -83,57 +98,57 @@ def test_propagator():
     print("")
 
     print("Constructing the Solar System at", str(t_0), "...")
-    print("Getting state vectors...")
-    sv_SolarSystem = get_state_vectors(t_0)
+    print("Getting state vectors using JPL Horizons API...")
+    sv_SolarSystem = getPlanetsJPL(t_0)
 
     print("Generating bodies...")
-    ss_body_names = ["Sun",
-                     "Mercury",
+    ss_body_names = ["Mercury",
                      "Venus",
                      "Earth",
                      "Mars",
                      "Jupiter",
                      "Saturn",
                      "Uranus",
-                     "Neptune"]
+                     "Neptune",
+                     "Sol"]
 
     sun = body("Sol", None, None, 1.3271244004193938e11 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[0][0])), vec3(lst=list(sv_SolarSystem[0][1])), # pos, vel
+                   sv_SolarSystem[9][0], sv_SolarSystem[9][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     mercury = body("Mercury", None, None, 2.2031780000000021E+04 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[1][0])), vec3(lst=list(sv_SolarSystem[1][1])), # pos, vel
+                   sv_SolarSystem[0][0], sv_SolarSystem[0][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     venus = body("Venus", None, None, 3.2485859200000006E+05 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[2][0])), vec3(lst=list(sv_SolarSystem[2][1])), # pos, vel
+                   sv_SolarSystem[1][0], sv_SolarSystem[1][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     earth = body("Earth", None, None, 4.0350323550225981E+05 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[3][0])), vec3(lst=list(sv_SolarSystem[3][1])), # pos, vel
+                   sv_SolarSystem[2][0], sv_SolarSystem[2][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     mars = body("Mars", None, None, 4.2828375214000022E+04 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[4][0])), vec3(lst=list(sv_SolarSystem[4][1])), # pos, vel
+                   sv_SolarSystem[3][0], sv_SolarSystem[3][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     jupiter = body("Jupiter", None, None, 1.2671276480000021E+08 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[5][0])), vec3(lst=list(sv_SolarSystem[5][1])), # pos, vel
+                   sv_SolarSystem[4][0], sv_SolarSystem[4][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     saturn = body("Saturn", None, None, 3.7940585200000003E+07 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[6][0])), vec3(lst=list(sv_SolarSystem[6][1])), # pos, vel
+                   sv_SolarSystem[5][0], sv_SolarSystem[5][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     uranus = body("Uranus", None, None, 5.7945486000000080E+06 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[7][0])), vec3(lst=list(sv_SolarSystem[7][1])), # pos, vel
+                   sv_SolarSystem[6][0], sv_SolarSystem[6][1], # pos, vel
                    None, None, None, None, None, None, None)
 
     neptune = body("Neptune", None, None, 6.8365271005800236E+06 * 1e9 / grav_const, None, None,
-                   vec3(lst=list(sv_SolarSystem[8][0])), vec3(lst=list(sv_SolarSystem[8][1])), # pos, vel
+                   sv_SolarSystem[7][0], sv_SolarSystem[7][1], # pos, vel
                    None, None, None, None, None, None, None)
 
-    bodies = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
+    bodies = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune, sun]
     print("Solar System constructed successfully.")
 
     timeinterval = (t_f - t_0).total_seconds()
@@ -195,9 +210,11 @@ def test_propagator():
 ##    plt.show()
 
     ## errors
-    final_sv = get_state_vectors(t_f_actual)
+    print("Getting final positions from JPL Horizons to compare...")
+    final_sv = getPlanetsJPL(t_f_actual)
+    print("Calculating errors...")
     errors = []
-    for idx_b, b in enumerate(bodies):
+    for idx_b, b in enumerate(bodies[:-1]):
             error = vec3(lst=list(final_sv[idx_b][0])) - body_trajs[idx_b][-1]
             errors.append(error)
 
@@ -207,7 +224,3 @@ def test_propagator():
         print("Mean error accumulation:", e.mag() / (N_cycles * dt), "meter error/second\n")
 
     input("Test program finished. Press Enter to return...")
-
-##if __name__ == "__main__":
-##    test_propagator()
-    
