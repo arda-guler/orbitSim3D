@@ -473,9 +473,9 @@ def export_scenario(scn_filename, verbose=True):
     # Export commands
     if command_history:
         if verbose:
-            print("Saving command history into " + scn_filename[:-4] + ".obf")
+            print("Saving command history into " + scn_filename[:-4] + "_cmdhist.obf")
             
-        with open(scn_filename[:-4] + ".obf", "w") as cmd_file:
+        with open(scn_filename[:-4] + "_cmdhist.obf", "w") as cmd_file:
             for cmd in command_history:
                 cmd_file.write(' '.join(cmd) + "\n")
 

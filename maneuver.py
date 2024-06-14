@@ -19,6 +19,10 @@ class maneuver_impulsive(maneuver):
         self.frame_body = frame_body
         self.orientation = orientation
         self.orientation_input = orientation
+
+        if type(self.orientation_input) != str and type(self.orientation_input) != list:
+            self.orientation_input = orientation.tolist()
+            
         self.delta_v = delta_v
         self.t_perform = t_perform
         self.done = False
@@ -91,6 +95,10 @@ class maneuver_const_accel(maneuver):
         self.frame_body = frame_body
         self.orientation = orientation
         self.orientation_input = orientation
+        
+        if type(self.orientation_input) != str and type(self.orientation_input) != list:
+            self.orientation_input = orientation.tolist()
+            
         self.accel = accel
         self.duration = duration
         self.t_start = t_start
@@ -195,6 +203,10 @@ class maneuver_const_thrust(maneuver):
         self.frame_body = frame_body
         self.orientation = orientation
         self.orientation_input = orientation
+
+        if type(self.orientation_input) != str and type(self.orientation_input) != list:
+            self.orientation_input = orientation.tolist()
+            
         self.thrust = thrust
         self.mass_init = mass_init
         self.mass_flow = mass_flow
