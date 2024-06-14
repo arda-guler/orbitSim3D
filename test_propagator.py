@@ -79,7 +79,8 @@ def test_propagator():
     solvertype = "Yoshida8"
 
     print("\nORBIT PROPAGATOR TEST - SETUP\n")
-    print("Total propagator test run is 5 simulated years long and runs an n-body simulation of major Solar System planets.")
+    print("The orbit propagator test runs an n-body simulation of major Solar System planets between given dates.")
+    print("Final positions are compared against the results from JPL Horizons API. Errors are presented on completion.")
     solvertype = input("Solver type to test (SymplecticEuler, VelocityVerlet, Yoshida4, Yoshida8 (default)): ")
     if not solvertype:
         solvertype = "Yoshida8"
@@ -89,6 +90,18 @@ def test_propagator():
         dt = 2 * day
     else:
         dt = float(dt)
+
+    t_0_input = input("Start date (yyyy-mm-dd, default is 2017-01-01): ")
+    if not t_0_input:
+        t_0 = datetime(2017, 1, 1, 0, 0, 0)
+    else:
+        t_0 = datetime.strptime(t_0_input, "%Y-%m-%d")
+
+    t_f_input = input("End date (yyyy-mm-dd, default is 2022-01-01): ")
+    if not t_f_input:
+        t_f = datetime(2022, 1, 1, 0, 0, 0)
+    else:
+        t_f = datetime.strptime(t_f_input, "%Y-%m-%d")
     
     print("\n\n= = RUNNING ORBIT PROPAGATOR TEST = =")
     print("Solver:", solvertype)
