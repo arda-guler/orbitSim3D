@@ -1190,6 +1190,43 @@ def get_active_cam():
     # just a fail-safe
     return cameras[0]
 
+def rotate_scene(pivot, target, dt):
+    global vessels, bodies, objs, projections
+
+    # get the rotation vector
+    rotation_vector = vec3()
+    if type(target) == type(vec3()):
+        rotation_vector = target
+        theta = rotation_vector.mag() * dt
+    else:
+        if pivot:
+            dx = target.pos.x - pivot.pos.x
+            dz = target.pos.z - pivot.pos.z
+        else:
+            dx = target.pos.x
+            dz = target.pos.z
+
+        theta = math.atan2(dx, dz)
+
+    base_mtx = matrix3x3()
+    rot_mtx = base_mtx.rotated(theta, vec3(0, 1, 0))
+
+    for o in objs:
+        o.pos = rot_mtx.dot(o.pos)
+        o.vel = rot_mtx.dot(o.vel)
+
+    for b in bodies:
+        b.orient = b.orient.rotated(theta, vec3(0, -1, 0))
+
+    for p in projections:
+        for i, dv in enumerate(p.draw_vertices):
+            p.draw_vertices[i] = rot_mtx.dot(dv)
+
+        p.draw_ap = rot_mtx.dot(p.draw_ap)
+        p.draw_pe = rot_mtx.dot(p.draw_pe)
+        p.draw_an = rot_mtx.dot(p.draw_an)
+        p.draw_dn = rot_mtx.dot(p.draw_dn)
+
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
@@ -1233,6 +1270,7 @@ def main(scn_filename=None, start_time=0):
     rapid_compute_flag = False
     show_trajectories = True
     scene_lock = None
+    scene_rot_target = None
     accept_keyboard_input = True
     speed_input_locked = False
     grid_active = False
@@ -1320,7 +1358,7 @@ def main(scn_filename=None, start_time=0):
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                                                        proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, solver_type, tolerance)
+                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1492,9 +1530,19 @@ def main(scn_filename=None, start_time=0):
                     for v in vessels:
                         v.clear_draw_traj_history() # so we don't get odd "jumps" in the trajectory trails
 
+                # LOCK_SCENE_ROT command
+                elif command[0] == "lock_scene_rot":
+                    scene_rot_target = find_obj_by_name(command[1])
+                    if not scene_rot_target:
+                        scene_rot_target = vec3(0, 1, 0) * float(command[1])
+
                 # UNLOCK_ORIGIN command
                 elif command[0] == "unlock_origin":
                     scene_lock = None
+
+                # UNLOCK_SCENE_ROT command
+                elif command[0] == "unlock_scene_rot":
+                    scene_rot_target = None
 
                 # CREATE_VESSEL command
                 elif command[0] == "create_vessel":
@@ -2004,7 +2052,7 @@ def main(scn_filename=None, start_time=0):
                         print("draw_mode, point_size, create_barycenter, delete_barycenter, export,")
                         print("rapid_compute, cancel_rapid_compute, get_rapid_compute_buffer, rapid_compute_clear,")
                         print("vessel_body_collision, apply_radiation_pressure, remove_radiation_pressure,")
-                        print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin")
+                        print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin, lock_scene_rot, unlock_scene_rot,")
                         print("create_proximity_zone, delete_proximity_zone, get_proximity_zones,")
                         print("get_timed_commands, timed_commands_remove, timed_commands_clear,")
                         print("solver_type, tolerance\n")
@@ -2049,6 +2097,15 @@ def main(scn_filename=None, start_time=0):
                         elif command[1] == "unlock_origin":
                             print("\n'unlock_origin' command releases coordinate system origin from the object it was locked to.\n")
                             print("Syntax: unlock_origin\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "lock_scene_rot":
+                            print("\n'lock_scene_rot' command sets the scene rotation rate by locking the view direction to a target object or by defining a constant rotation rate.\n")
+                            print("Syntax Option 1: lock_scene_rot <object_name>\n")
+                            print("Syntax Option 2: lock_scene_rot <rotation_rate>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "unlock_scene_rot":
+                            print("\n'unlock_scene_rot' stops the scene reference frame from rotating.")
+                            print("Syntax: unlock_scene_rot\n")
                             input("Press Enter to continue...")
                         elif command[1] == "create_vessel":
                             print("\n'create_vessel' command adds a new space vessel to the simulation.\n")
@@ -2402,6 +2459,10 @@ def main(scn_filename=None, start_time=0):
             output_rate = 1
             output_buffer.append(["ADPT_OUTPUT", "note", "output_rate automatically set to 1 to ensure proper screen updates."])
 
+        # rotate scene
+        if scene_rot_target:
+            rotate_scene(scene_lock, scene_rot_target, delta_t)
+
         # check collisions
         for v in vessels:
             for b in bodies:
@@ -2595,7 +2656,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size, grid_active)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size, grid_active, scene_rot_target)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

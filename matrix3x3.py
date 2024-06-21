@@ -112,6 +112,13 @@ class matrix3x3:
 
         return matrix3x3(n11, n12, n13, n21, n22, n23, n31, n32, n33)
 
+    def dot(self, vector):
+        result_x = self.m11 * vector.x + self.m12 * vector.y + self.m13 * vector.z
+        result_y = self.m21 * vector.x + self.m22 * vector.y + self.m23 * vector.z
+        result_z = self.m31 * vector.x + self.m32 * vector.y + self.m33 * vector.z
+        
+        return vec3(result_x, result_y, result_z)
+
     def rotated(self, angle, axis):
         v = axis.normalized()
         a = -math.radians(angle)

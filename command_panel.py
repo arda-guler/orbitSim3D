@@ -5,7 +5,7 @@ import tkinter as tk
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                       proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                      cam_rotate_speed, rapid_compute_buffer, scene_lock, solver_type, tolerance):
+                      cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance):
     command_buffer = []
 
     def on_panel_close():
@@ -112,6 +112,11 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             vars_text += "Scene Lock: " + str(scene_lock.get_name()) + "\n"
         else:
             vars_text += "Scene Lock: None\n"
+
+        if scene_rot_target:
+            vars_text += "Scene Rot. Target: " + str(scene_rot_target) + "\n"
+        else:
+            vars_text += "Scene Rot. Target: None\n"
         sim_variables_field.delete(1.0, "end")
         sim_variables_field.insert(1.0, vars_text)
         sim_variables_field.config(state="disabled")
@@ -1549,6 +1554,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 lo_s1_button = tk.Button(entry_panel, text="Lock Origin", command=generate_s1)
                 lo_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "lock_scene_rot":
+                lock_scene_rot_help = tk.Label(entry_panel, text="'lock_scene_rot' command sets the scene rotation rate by locking the view direction to a target object or by defining a constant rotation rate.")
+                lock_scene_rot_help.grid(row=0, column=0, columnspan=10)
+
+                lsr_s1t1_label = tk.Label(entry_panel, text="Target Object or Rate (rad/s)")
+                lsr_s1t1_label.grid(row=1, column=1)
+
+                lsr_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                lsr_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if lsr_s1t1.get("1.0","end-1c"):
+                        command = "lock_scene_rot " + lsr_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                lsr_s1_button = tk.Button(entry_panel, text="Lock Sn. Rot.", command=generate_s1)
+                lsr_s1_button.grid(row=2, column=0)
+
             elif cmd_a == "create_schwarzschild":
                 create_schwarzschild_help = tk.Label(entry_panel, text="'create_schwarzschild' command adds a Schwarzschild component of the general relativity effects near a massive body.")
                 create_schwarzschild_help.grid(row=0, column=0, columnspan=10)
@@ -1861,6 +1884,13 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         unlock_origin_button = tk.Button(cmd_window, text="Unlock Origin", command=lambda:add_to_buffer("unlock_origin"))
         unlock_origin_button.config(width=15, height=1)
         unlock_origin_button.grid(row=current_row, column=1)
+        current_row += 1
+        lock_scene_rot_button = tk.Button(cmd_window, text="Lock Scene Rot.", command=lambda:enter_cmd("lock_scene_rot"))
+        lock_scene_rot_button.config(width=15, height=1)
+        lock_scene_rot_button.grid(row=current_row, column=0)
+        unlock_scene_rot_button = tk.Button(cmd_window, text="Unlk. Sn. Rt.", command=lambda:add_to_buffer("unlock_scene_rot"))
+        unlock_scene_rot_button.config(width=15, height=1)
+        unlock_scene_rot_button.grid(row=current_row, column=1)
 
         current_row += 1
         general_relativity_commands_label = tk.Label(cmd_window, text="General Relativity")
