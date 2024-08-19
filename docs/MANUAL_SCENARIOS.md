@@ -181,6 +181,11 @@ Each of the example scenarios are explained below. These example missions can be
 
 **Desc:** A space station collides with a satellite in LEO and contributes to Kessler syndrome.
 
+### [JUICE.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/JUICE.osf)
+**Type:** Demonstration
+
+**Desc:** JUICE aligns itself for a slingshot around Earth using a Lunar gravity assist in August 2024.
+
 ### [jupiter_direct.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/jupiter_direct.osf)
 **Type:** Demonstration
 
