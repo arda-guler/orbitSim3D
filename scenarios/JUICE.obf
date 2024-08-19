@@ -1,0 +1,10 @@
+lock_origin Earth
+move_cam_to 0 150000 -50000
+rotate_cam_by y 180
+rotate_cam_by x 290
+move_cam_by 0 0 50000
+show grid
+create_projection LunaOrbit Luna Earth
+t=10 delta_t 10
+t=10 output_rate 100
+t=10 clear traj_visuals
