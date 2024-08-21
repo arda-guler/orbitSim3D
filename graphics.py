@@ -306,7 +306,7 @@ def drawBarycenters(barycenters, active_cam):
         glEnd()
         glPopMatrix()
 
-def drawBarycenterLabels(bcs, cam, offset=0.05):
+def drawBarycenterLabels(bcs, cam, offset=0.05, far_clip=1e6):
 
     for bc in bcs:
 
@@ -314,9 +314,9 @@ def drawBarycenterLabels(bcs, cam, offset=0.05):
             label_render_start = world2cam(bc.get_pos().tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(bc.get_name(), vector_scale(bc.get_color(), 2), label_render_start, cam)
+            render_AN(bc.get_name(), vector_scale(bc.get_color(), 2), label_render_start, cam, 0.1, far_clip)
 
-def drawBodyLabels(bs, cam, offset=0.05):
+def drawBodyLabels(bs, cam, offset=0.05, far_clip=1e6):
 
     for b in bs:
 
@@ -324,9 +324,9 @@ def drawBodyLabels(bs, cam, offset=0.05):
             label_render_start = world2cam(b.get_pos().tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(b.get_name(), vector_scale(b.get_color(), 2), label_render_start, cam)
+            render_AN(b.get_name(), vector_scale(b.get_color(), 2), label_render_start, cam, 0.1, far_clip)
 
-def drawSurfacePointLabels(sps, cam, offset=0.05):
+def drawSurfacePointLabels(sps, cam, offset=0.05, far_clip=1e6):
 
     for sp in sps:
 
@@ -343,9 +343,9 @@ def drawSurfacePointLabels(sps, cam, offset=0.05):
                 label_render_start = world2cam(sp.get_pos().tolist(), cam)
                 label_render_start[0] += offset
                 label_render_start[1] -= offset
-                render_AN(sp.get_name(), vector_scale(sp.get_color(), 2), label_render_start, cam)
+                render_AN(sp.get_name(), vector_scale(sp.get_color(), 2), label_render_start, cam, 0.1, far_clip)
 
-def drawVesselLabels(vs, cam, offset=0.05):
+def drawVesselLabels(vs, cam, offset=0.05, far_clip=1e6):
 
     for v in vs:
 
@@ -353,9 +353,9 @@ def drawVesselLabels(vs, cam, offset=0.05):
             label_render_start = world2cam(v.get_pos().tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(v.get_name(), vector_scale(v.get_color(), 2), label_render_start, cam)
+            render_AN(v.get_name(), vector_scale(v.get_color(), 2), label_render_start, cam, 0.1, far_clip)
 
-def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
+def drawProjectionLabels(ps, cam, offset=0.05, size=0.05, far_clip=1e6):
 
     for p in ps:
         pe_adjusted = p.draw_pe + p.get_body().get_draw_pos()
@@ -372,31 +372,45 @@ def drawProjectionLabels(ps, cam, offset=0.05, size=0.05):
             label_render_start = world2cam(pe_adjusted.tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("PERI " + str(p.get_periapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("PERI " + str(p.get_periapsis_alt())), p.vessel.get_color(), label_render_start, cam, size, far_clip)
 
         if world2cam(ap_adjusted, cam):
             label_render_start = world2cam(ap_adjusted.tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("APO " + str(p.get_apoapsis_alt())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("APO " + str(p.get_apoapsis_alt())), p.vessel.get_color(), label_render_start, cam, size, far_clip)
 
         if world2cam(an_adjusted, cam):
             label_render_start = world2cam(an_adjusted.tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("ASCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("ASCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size, far_clip)
 
         if world2cam(dn_adjusted, cam):
             label_render_start = world2cam(dn_adjusted.tolist(), cam)
             label_render_start[0] += offset
             label_render_start[1] -= offset
-            render_AN(("DSCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size)
+            render_AN(("DSCN " + str(p.get_inclination())), p.vessel.get_color(), label_render_start, cam, size, far_clip)
+
+def drawStarfield(starfield, cam, far_clip):
+    star_dist = far_clip * 0.5
+    
+    glPushMatrix()
+    glColor(1, 1, 1)
+    glTranslate(-cam.pos[0], -cam.pos[1], -cam.pos[2])
+    glBegin(GL_POINTS)
+    for s in starfield:
+        glVertex3f(s[0] * star_dist, s[1] * star_dist, s[2] * star_dist)
+        
+    glEnd()
+    glPopMatrix()
 
 def drawRapidCompute(cam, size=0.2):
     render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1, labels_visible=True, scene_lock=None, point_size=2, grid_active=False, scene_rot_target=None):
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1,
+              labels_visible=True, scene_lock=None, point_size=2, grid_active=False, scene_rot_target=None, starfield=[], far_clip=1e6):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -404,6 +418,9 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     bodies.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
     vessels.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
     surface_points.sort(key=lambda x: (-x.get_draw_pos() - active_cam.get_pos()).mag(), reverse=True)
+
+    if starfield:
+        drawStarfield(starfield, active_cam, far_clip)
 
     if grid_active:
         spacing = drawGridPlane(active_cam, bodies, vessels)
@@ -417,15 +434,15 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
 
     if labels_visible:
         glEnable(GL_LINE_SMOOTH)
-        drawBarycenterLabels(barycenters, active_cam)
-        drawBodyLabels(bodies, active_cam)
-        drawSurfacePointLabels(surface_points, active_cam)
-        drawVesselLabels(vessels, active_cam)
+        drawBarycenterLabels(barycenters, active_cam, 0.05, far_clip)
+        drawBodyLabels(bodies, active_cam, 0.05, far_clip)
+        drawSurfacePointLabels(surface_points, active_cam, 0.05, far_clip)
+        drawVesselLabels(vessels, active_cam, 0.05, far_clip)
         glDisable(GL_LINE_SMOOTH)
 
     drawProjections(projections)
     if labels_visible:
-        drawProjectionLabels(projections, active_cam)
+        drawProjectionLabels(projections, active_cam, 0.05, 0.05, far_clip)
     # draw trajectory and predictions
     if show_trajectories:
         glEnable(GL_LINE_SMOOTH)
@@ -435,7 +452,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
 
     if grid_active and spacing:
         spacing_exp = int(math.log(spacing, 10) + 0.5)
-        render_AN("GRID SPACING 1e" + str(spacing_exp) + " M", (1, 0, 0), [-11.5, 5.5], active_cam, 0.1)
+        render_AN("GRID SPACING 1e" + str(spacing_exp) + " M", (1, 0, 0), [-11.5, 5.5], active_cam, 0.1, far_clip)
 
     if scene_rot_target:
-        render_AN("ROTATING REFERENCE FRAME", (1, 0, 0), [-11.5, -5.5], active_cam, 0.1)
+        render_AN("ROTATING REFERENCE FRAME", (1, 0, 0), [-11.5, -5.5], active_cam, 0.1, far_clip)

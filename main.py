@@ -58,6 +58,8 @@ lensethirrings = []
 proximity_zones = []
 resources = []
 
+starfield = []
+
 batch_commands = []
 command_history = []
 
@@ -1191,7 +1193,7 @@ def get_active_cam():
     return cameras[0]
 
 def rotate_scene(pivot, target, dt):
-    global vessels, bodies, objs, projections
+    global vessels, bodies, objs, projections, starfield
 
     # get the rotation vector
     rotation_vector = vec3()
@@ -1227,16 +1229,40 @@ def rotate_scene(pivot, target, dt):
         p.draw_an = rot_mtx.dot(p.draw_an)
         p.draw_dn = rot_mtx.dot(p.draw_dn)
 
+    for idx_s in range(len(starfield)):
+        starfield[idx_s] = rot_mtx.dot(vec3(lst=starfield[idx_s])).tolist()
+
+def generate_starfield(N_stars):
+    global starfield
+    PI = 3.14159265358979323846264338327950288
+
+    starfield = []
+
+    for i in range(N_stars):
+        RA = random.uniform(0, 2 * PI)
+        DEC = math.asin(random.uniform(-1, 1))
+
+        x = math.cos(RA) * math.cos(DEC)
+        y = math.sin(DEC)
+        z = math.sin(RA) * math.cos(DEC)
+
+        starfield.append([x, y, z])
+
+def clear_starfield():
+    global starfield
+    starfield = []
+
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
-           proximity_zones, schwarzschilds, lensethirrings, gvar_fov, gvar_near_clip, gvar_far_clip
+           proximity_zones, schwarzschilds, lensethirrings, gvar_fov, gvar_near_clip, gvar_far_clip,\
+           starfield
 
     # read config to get start values
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type, tolerance = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type, tolerance, default_star_num, autostarfield = read_current_config()
 
     # set global vars
     gvar_fov = fov
@@ -1275,6 +1301,9 @@ def main(scn_filename=None, start_time=0):
     speed_input_locked = False
     grid_active = False
     cycle_dt = 1
+
+    if autostarfield:
+        generate_starfield(default_star_num)
 
     sim_time = start_time
 
@@ -1358,7 +1387,7 @@ def main(scn_filename=None, start_time=0):
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                                                        proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance)
+                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1543,6 +1572,17 @@ def main(scn_filename=None, start_time=0):
                 # UNLOCK_SCENE_ROT command
                 elif command[0] == "unlock_scene_rot":
                     scene_rot_target = None
+
+                # GENERATE_STARFIELD command
+                elif command[0] == "generate_starfield":
+                    if len(command) >= 2:
+                        generate_starfield(int(command[1]))
+                    else:
+                        generate_starfield(1000)
+
+                # CLEAR_STARFIELD command
+                elif command[0] == "clear_starfield":
+                    clear_starfield()
 
                 # CREATE_VESSEL command
                 elif command[0] == "create_vessel":
@@ -2055,7 +2095,7 @@ def main(scn_filename=None, start_time=0):
                         print("apply_atmospheric_drag, remove_atmospheric_drag, lock_origin, unlock_origin, lock_scene_rot, unlock_scene_rot,")
                         print("create_proximity_zone, delete_proximity_zone, get_proximity_zones,")
                         print("get_timed_commands, timed_commands_remove, timed_commands_clear,")
-                        print("solver_type, tolerance\n")
+                        print("solver_type, tolerance, generate_starfield, clear_starfield\n")
                         print("Commands can be buffered to run at specific simulation times by adding 't=<execution_time> '")
                         print("in front of them.\n")
                         print("Press P to use the command panel interface or C to use the command line (...like you just did.)\n")
@@ -2085,6 +2125,16 @@ def main(scn_filename=None, start_time=0):
                             print("Syntax: clear <thing>\n")
                             print("Things to clear: output (clears the output display buffer), scene (removes everything from the physics scene),")
                             print("traj_visuals (clears vessel trajectories up to current time in the 3D scene)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "generate_starfield":
+                            print("\n'generate_starfield' command generates a starfield to aid the eye with camera rotations as well as make the sky look a bit more familiar.")
+                            print("Default number of stars is", default_star_num, "and can be changed via configuration (requires restart).\n")
+                            print("Syntax 1: generate_starfield <num_of_stars>")
+                            print("Syntax 2: generate_starfield (uses default number of stars)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "clear_starfield":
+                            print("\n'clear_starfield' command clears the starfield and stops a starry background from being rendered.\n")
+                            print("Syntax: clear_starfield\n")
                             input("Press Enter to continue...")
                         elif command[1] == "batch":
                             print("\n'batch' command reads a batch file and queues the commands to be sent to the interpreter.\n")
@@ -2656,7 +2706,8 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories, draw_mode, labels_visible, scene_lock, point_size, grid_active, scene_rot_target)
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories,
+                      draw_mode, labels_visible, scene_lock, point_size, grid_active, scene_rot_target, starfield, far_clip)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

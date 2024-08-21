@@ -5,7 +5,7 @@ import tkinter as tk
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                       proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                      cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance):
+                      cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num):
     command_buffer = []
 
     def on_panel_close():
@@ -117,6 +117,12 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             vars_text += "Scene Rot. Target: " + str(scene_rot_target) + "\n"
         else:
             vars_text += "Scene Rot. Target: None\n"
+
+        if starfield:
+            vars_text += "Strfld. Star Count: " + str(len(starfield)) + "\n"
+        else:
+            vars_text += "Strfld. Disabled\n"
+            
         sim_variables_field.delete(1.0, "end")
         sim_variables_field.insert(1.0, vars_text)
         sim_variables_field.config(state="disabled")
@@ -424,6 +430,28 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 clear_s1_button.grid(row=1, column=0)
                 clear_s2_button.grid(row=2, column=0)
                 clear_s3_button.grid(row=3, column=0)
+
+            elif cmd_a == "generate_starfield":
+                gsf_help_text = "'generate_starfield' command generates a starfield to aid the eye with camera rotations as well as make the sky look a bit more familiar.\nDefault number of stars is " + str(default_star_num) + ", you can click the button without entering a number to use the default.\nDefault number can be modified by editing the config file (requires restart)."
+                gsf_help = tk.Label(entry_panel, text=gsf_help_text)
+                gsf_help.grid(row=0, column=0, columnspan=10)
+
+                gsf_s1t1_label = tk.Label(entry_panel, text="Num. of Stars")
+                gsf_s1t1_label.grid(row=1, column=1)
+
+                gsf_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                gsf_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if gsf_s1t1.get("1.0","end-1c"):
+                        command = "generate_starfield " + gsf_s1t1.get("1.0","end-1c")
+                    else:
+                        command = "generate_starfield"
+                        
+                    add_to_buffer(command)
+
+                gsf_s1_button = tk.Button(entry_panel, text="Gen. Strfld.", command=generate_s1)
+                gsf_s1_button.grid(row=2, column=0)
             
             elif cmd_a == "create_vessel":
                 cv_help = tk.Label(entry_panel, text="'create_vessel' command adds a new space vessel to the simulation.")
@@ -1873,6 +1901,13 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
         point_size_button.grid(row=current_row, column=1)
+        current_row += 1
+        generate_starfield_button = tk.Button(cmd_window, text="Gen. Starfield", command=lambda:enter_cmd("generate_starfield"))
+        generate_starfield_button.config(width=15, height=1)
+        generate_starfield_button.grid(row=current_row, column=0)
+        clear_starfield_button = tk.Button(cmd_window, text="Clear Starfield", command=lambda:add_to_buffer("clear_starfield"))
+        clear_starfield_button.config(width=15, height=1)
+        clear_starfield_button.grid(row=current_row, column=1)
 
         current_row += 1
         selective_precision_commands_label = tk.Label(cmd_window, text="Selective Precision")

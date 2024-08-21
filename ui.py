@@ -3,7 +3,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from vector3 import *
 
-def drawPoint2D(x, y, color, camera):
+def drawPoint2D(x, y, color, camera, far_clip):
+    normalized_dist = far_clip * 0.5
+    
     glPushMatrix()
 
     glTranslate(-camera.get_pos().x,
@@ -14,18 +16,21 @@ def drawPoint2D(x, y, color, camera):
 
     glBegin(GL_POINTS)
 
-    x1 = x * 100
-    y1 = y * 100
+    x1 = x * 0.1 * normalized_dist
+    y1 = y * 0.1 * normalized_dist
 
-    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-normalized_dist) * camera.get_orient().m31,
+               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-normalized_dist) * camera.get_orient().m32,
+               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-normalized_dist) * camera.get_orient().m33)
 
     glEnd()
     
     glPopMatrix()
 
-def drawLine2D(x1, y1, x2, y2, color, camera):
+def drawLine2D(x1, y1, x2, y2, color, camera, far_clip):
+
+    normalized_dist = far_clip * 0.5
+    
     glPushMatrix()
     glTranslate(-camera.get_pos().x,
                 -camera.get_pos().y,
@@ -35,17 +40,17 @@ def drawLine2D(x1, y1, x2, y2, color, camera):
     
     glBegin(GL_LINES)
 
-    x1 = x1 * 100
-    y1 = y1 * 100
-    x2 = x2 * 100
-    y2 = y2 * 100
-    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    x1 = x1 * 0.1 * normalized_dist
+    y1 = y1 * 0.1 * normalized_dist
+    x2 = x2 * 0.1 * normalized_dist
+    y2 = y2 * 0.1 * normalized_dist
+    glVertex3f(x1 * camera.get_orient().m11 + y1 * camera.get_orient().m21 + (-normalized_dist) * camera.get_orient().m31,
+               x1 * camera.get_orient().m12 + y1 * camera.get_orient().m22 + (-normalized_dist) * camera.get_orient().m32,
+               x1 * camera.get_orient().m13 + y1 * camera.get_orient().m23 + (-normalized_dist) * camera.get_orient().m33)
     
-    glVertex3f(x2 * camera.get_orient().m11 + y2 * camera.get_orient().m21 + (-1000) * camera.get_orient().m31,
-               x2 * camera.get_orient().m12 + y2 * camera.get_orient().m22 + (-1000) * camera.get_orient().m32,
-               x2 * camera.get_orient().m13 + y2 * camera.get_orient().m23 + (-1000) * camera.get_orient().m33)
+    glVertex3f(x2 * camera.get_orient().m11 + y2 * camera.get_orient().m21 + (-normalized_dist) * camera.get_orient().m31,
+               x2 * camera.get_orient().m12 + y2 * camera.get_orient().m22 + (-normalized_dist) * camera.get_orient().m32,
+               x2 * camera.get_orient().m13 + y2 * camera.get_orient().m23 + (-normalized_dist) * camera.get_orient().m33)
     glEnd()
     glPopMatrix()
 
@@ -384,7 +389,7 @@ alphanumerics = {"0": AN_0(),
                  "Z": AN_Z(),
                  " ": AN_SPACE()}
 
-def render_numbers(numstring, color, start_pt, cam, font_size=0.5):
+def render_numbers(numstring, color, start_pt, cam, font_size=0.5, far_clip=1e6):
     global numbers
     
     draw_start_x = start_pt[0]
@@ -398,7 +403,7 @@ def render_numbers(numstring, color, start_pt, cam, font_size=0.5):
                 y1 = start_pt[1] + font_size * line()[0][1]
                 x2 = draw_start_x + font_size * line()[1][0]
                 y2 = start_pt[1] + font_size * line()[1][1]
-                drawLine2D(x1, y1, x2, y2, color, cam)
+                drawLine2D(x1, y1, x2, y2, color, cam, far_clip)
 
         else:
             x = draw_start_x
@@ -407,7 +412,7 @@ def render_numbers(numstring, color, start_pt, cam, font_size=0.5):
 
         draw_start_x += font_size + spacing
 
-def render_AN(render_string, color, start_pt, cam, font_size=0.1):
+def render_AN(render_string, color, start_pt, cam, font_size=0.1, far_clip=1e6):
     global alphanumerics
 
     render_string = render_string.upper()
@@ -424,14 +429,14 @@ def render_AN(render_string, color, start_pt, cam, font_size=0.1):
                     y1 = start_pt[1] + font_size * -line()[0][1]
                     x2 = draw_start_x + font_size * line()[1][0]
                     y2 = start_pt[1] + font_size * -line()[1][1]
-                    drawLine2D(x1, y1, x2, y2, color, cam)
+                    drawLine2D(x1, y1, x2, y2, color, cam, far_clip)
             except:
                 pass
 
         elif char == ".":
             x = draw_start_x
             y = start_pt[1] - font_size * 4
-            drawPoint2D(x, y, color, cam)
+            drawPoint2D(x, y, color, cam, far_clip)
 
         else:
             # it is a space or unknown char
