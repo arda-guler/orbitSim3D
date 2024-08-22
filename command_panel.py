@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
@@ -1699,249 +1700,272 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 dlt_s1_button = tk.Button(entry_panel, text="Delete L-T Effect", command=generate_s1)
                 dlt_s1_button.grid(row=2, column=0)
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
                 
         cmd_window = tk.Tk()
         cmd_window.protocol("WM_DELETE_WINDOW", on_command_window_close)
         cmd_window.title("Commands")
+        cmd_window.geometry("408x640")
+
+        # scrolling window
+        main_frame = tk.Frame(cmd_window, height=640)
+        main_frame.grid(row=0, column=0)
+
+        canvas = tk.Canvas(main_frame, height=640)
+        canvas.grid(row=0, column=0)
+
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        scrollbar.grid(row=0, column=1, rowspan=999, sticky="ns")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+        scrollable_frame = tk.Frame(canvas)
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        # mouse scroll wheel
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
         # why no 'sender' functionality, tkinter!?
         # anyway, here comes a wall of button definitions
         # it better look decent at runtime, at least...
 
         current_row = 0
-        output_commands_label = tk.Label(cmd_window, text="Output Management")
+        output_commands_label = tk.Label(scrollable_frame, text="Output Management")
         output_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        show_button = tk.Button(cmd_window, text="Show", command=lambda:enter_cmd("show"))
+        show_button = tk.Button(scrollable_frame, text="Show", command=lambda:enter_cmd("show"))
         show_button.config(width=15,height=1)
         show_button.grid(row=current_row, column=0)
-        hide_button = tk.Button(cmd_window, text="Hide", command=lambda:enter_cmd("hide"))
+        hide_button = tk.Button(scrollable_frame, text="Hide", command=lambda:enter_cmd("hide"))
         hide_button.config(width=15,height=1)
         hide_button.grid(row=current_row, column=1)
-        clear_button = tk.Button(cmd_window, text="Clear", command=lambda:enter_cmd("clear"))
+        clear_button = tk.Button(scrollable_frame, text="Clear", command=lambda:enter_cmd("clear"))
         clear_button.config(width=15,height=1)
         clear_button.grid(row=current_row, column=2)
 
         current_row += 1
-        vessel_commands_label = tk.Label(cmd_window, text="Vessel")
+        vessel_commands_label = tk.Label(scrollable_frame, text="Vessel")
         vessel_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_vessel_button = tk.Button(cmd_window, text="Create Vessel", command=lambda:enter_cmd("create_vessel"))
+        create_vessel_button = tk.Button(scrollable_frame, text="Create Vessel", command=lambda:enter_cmd("create_vessel"))
         create_vessel_button.config(width=15,height=1)
         create_vessel_button.grid(row=current_row, column=0)
-        delete_vessel_button = tk.Button(cmd_window, text="Delete Vessel", command=lambda:enter_cmd("delete_vessel"))
+        delete_vessel_button = tk.Button(scrollable_frame, text="Delete Vessel", command=lambda:enter_cmd("delete_vessel"))
         delete_vessel_button.config(width=15,height=1)
         delete_vessel_button.grid(row=current_row, column=1)
-        fragment_button = tk.Button(cmd_window, text="Fragment", command=lambda:enter_cmd("fragment"))
+        fragment_button = tk.Button(scrollable_frame, text="Fragment", command=lambda:enter_cmd("fragment"))
         fragment_button.config(width=15,height=1)
         fragment_button.grid(row=current_row, column=2)
         current_row += 1
-        create_proximity_zone_button = tk.Button(cmd_window, text="Create Prox. Zn.", command=lambda:enter_cmd("create_proximity_zone"))
+        create_proximity_zone_button = tk.Button(scrollable_frame, text="Create Prox. Zn.", command=lambda:enter_cmd("create_proximity_zone"))
         create_proximity_zone_button.config(width=15, height=1)
         create_proximity_zone_button.grid(row=current_row, column=0)
-        delete_proximity_zone_button = tk.Button(cmd_window, text="Delete Prox. Zn.", command=lambda: enter_cmd("delete_proximity_zone"))
+        delete_proximity_zone_button = tk.Button(scrollable_frame, text="Delete Prox. Zn.", command=lambda: enter_cmd("delete_proximity_zone"))
         delete_proximity_zone_button.config(width=15, height=1)
         delete_proximity_zone_button.grid(row=current_row, column=1)
 
         current_row += 1
-        mnv_commands_label = tk.Label(cmd_window, text="Maneuver")
+        mnv_commands_label = tk.Label(scrollable_frame, text="Maneuver")
         mnv_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_maneuver_button = tk.Button(cmd_window, text="Create Maneuver", command=lambda:enter_cmd("create_maneuver"))
+        create_maneuver_button = tk.Button(scrollable_frame, text="Create Maneuver", command=lambda:enter_cmd("create_maneuver"))
         create_maneuver_button.config(width=15,height=1)
         create_maneuver_button.grid(row=current_row, column=0)
-        delete_maneuver_button = tk.Button(cmd_window, text="Delete Maneuver", command=lambda:enter_cmd("delete_maneuver"))
+        delete_maneuver_button = tk.Button(scrollable_frame, text="Delete Maneuver", command=lambda:enter_cmd("delete_maneuver"))
         delete_maneuver_button.config(width=15,height=1)
         delete_maneuver_button.grid(row=current_row, column=1)
 
         current_row += 1
-        rad_press_commands_label = tk.Label(cmd_window, text="Non-gravitational Perturbations")
+        rad_press_commands_label = tk.Label(scrollable_frame, text="Non-gravitational Perturbations")
         rad_press_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        apply_rad_press_button = tk.Button(cmd_window, text="Apply Rad. Press.", command=lambda:enter_cmd("apply_radiation_pressure"))
+        apply_rad_press_button = tk.Button(scrollable_frame, text="Apply Rad. Press.", command=lambda:enter_cmd("apply_radiation_pressure"))
         apply_rad_press_button.config(width=15,height=1)
         apply_rad_press_button.grid(row=current_row, column=0)
-        remove_rad_press_button = tk.Button(cmd_window, text="Remove Rad. Press.", command=lambda:enter_cmd("remove_radiation_pressure"))
+        remove_rad_press_button = tk.Button(scrollable_frame, text="Remove Rad. Press.", command=lambda:enter_cmd("remove_radiation_pressure"))
         remove_rad_press_button.config(width=15,height=1)
         remove_rad_press_button.grid(row=current_row, column=1)
         current_row += 1
-        apply_atmo_drag_button = tk.Button(cmd_window, text="Apply Atmo. Drag", command=lambda:enter_cmd("apply_atmospheric_drag"))
+        apply_atmo_drag_button = tk.Button(scrollable_frame, text="Apply Atmo. Drag", command=lambda:enter_cmd("apply_atmospheric_drag"))
         apply_atmo_drag_button.config(width=15,height=1)
         apply_atmo_drag_button.grid(row=current_row, column=0)
-        remove_atmo_drag_button = tk.Button(cmd_window, text="Remove Atmo. Drag", command=lambda:enter_cmd("remove_atmospheric_drag"))
+        remove_atmo_drag_button = tk.Button(scrollable_frame, text="Remove Atmo. Drag", command=lambda:enter_cmd("remove_atmospheric_drag"))
         remove_atmo_drag_button.config(width=15,height=1)
         remove_atmo_drag_button.grid(row=current_row, column=1)
 
         current_row += 1
-        proj_commands_label = tk.Label(cmd_window, text="Orbit Projection")
+        proj_commands_label = tk.Label(scrollable_frame, text="Orbit Projection")
         proj_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_projection_button = tk.Button(cmd_window, text="Create Projection", command=lambda:enter_cmd("create_projection"))
+        create_projection_button = tk.Button(scrollable_frame, text="Create Projection", command=lambda:enter_cmd("create_projection"))
         create_projection_button.config(width=15,height=1)
         create_projection_button.grid(row=current_row, column=0)
-        delete_projection_button = tk.Button(cmd_window, text="Delete Projection", command=lambda:enter_cmd("delete_projection"))
+        delete_projection_button = tk.Button(scrollable_frame, text="Delete Projection", command=lambda:enter_cmd("delete_projection"))
         delete_projection_button.config(width=15,height=1)
         delete_projection_button.grid(row=current_row, column=1)
-        update_projection_button = tk.Button(cmd_window, text="Update Projection", command=lambda:enter_cmd("update_projection"))
+        update_projection_button = tk.Button(scrollable_frame, text="Update Projection", command=lambda:enter_cmd("update_projection"))
         update_projection_button.config(width=15,height=1)
         update_projection_button.grid(row=current_row, column=2)
 
         current_row += 1
-        resource_commands_label = tk.Label(cmd_window, text="Resource Management")
+        resource_commands_label = tk.Label(scrollable_frame, text="Resource Management")
         resource_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_resource_button = tk.Button(cmd_window, text="Create Resource", command=lambda:enter_cmd("create_resource"))
+        create_resource_button = tk.Button(scrollable_frame, text="Create Resource", command=lambda:enter_cmd("create_resource"))
         create_resource_button.config(width=15, height=1)
         create_resource_button.grid(row=current_row, column=0)
-        delete_resource_button = tk.Button(cmd_window, text="Delete Resource", command=lambda:enter_cmd("delete_resource"))
+        delete_resource_button = tk.Button(scrollable_frame, text="Delete Resource", command=lambda:enter_cmd("delete_resource"))
         delete_resource_button.config(width=15, height=1)
         delete_resource_button.grid(row=current_row, column=1)
 
         current_row += 1
-        plot_commands_label = tk.Label(cmd_window, text="Plotting")
+        plot_commands_label = tk.Label(scrollable_frame, text="Plotting")
         plot_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_plot_button = tk.Button(cmd_window, text="Create Plot", command=lambda:enter_cmd("create_plot"))
+        create_plot_button = tk.Button(scrollable_frame, text="Create Plot", command=lambda:enter_cmd("create_plot"))
         create_plot_button.config(width=15,height=1)
         create_plot_button.grid(row=current_row, column=0)
-        delete_plot_button = tk.Button(cmd_window, text="Delete Plot", command=lambda:enter_cmd("delete_plot"))
+        delete_plot_button = tk.Button(scrollable_frame, text="Delete Plot", command=lambda:enter_cmd("delete_plot"))
         delete_plot_button.config(width=15,height=1)
         delete_plot_button.grid(row=current_row, column=1)
 
         current_row += 1
-        barycenter_commands_label = tk.Label(cmd_window, text="Barycenters")
+        barycenter_commands_label = tk.Label(scrollable_frame, text="Barycenters")
         barycenter_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_barycenter_button = tk.Button(cmd_window, text="Create Barycenter", command=lambda:enter_cmd("create_barycenter"))
+        create_barycenter_button = tk.Button(scrollable_frame, text="Create Barycenter", command=lambda:enter_cmd("create_barycenter"))
         create_barycenter_button.grid(row=current_row, column=0)
         create_barycenter_button.config(width=15, height=1)
-        delete_barycenter_button = tk.Button(cmd_window, text="Delete Barycenter", command=lambda:enter_cmd("delete_barycenter"))
+        delete_barycenter_button = tk.Button(scrollable_frame, text="Delete Barycenter", command=lambda:enter_cmd("delete_barycenter"))
         delete_barycenter_button.grid(row=current_row, column=1)
         delete_barycenter_button.config(width=15, height=1)
 
         current_row += 1
-        batch_commands_label = tk.Label(cmd_window, text="File Operations")
+        batch_commands_label = tk.Label(scrollable_frame, text="File Operations")
         batch_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        read_batch_button = tk.Button(cmd_window, text="Read Batch", command=lambda:enter_cmd("batch"))
+        read_batch_button = tk.Button(scrollable_frame, text="Read Batch", command=lambda:enter_cmd("batch"))
         read_batch_button.config(width=15,height=1)
         read_batch_button.grid(row=current_row, column=0)
-        export_button = tk.Button(cmd_window, text="Export Scenario", command=lambda:enter_cmd("export"))
+        export_button = tk.Button(scrollable_frame, text="Export Scenario", command=lambda:enter_cmd("export"))
         export_button.config(width=15,height=1)
         export_button.grid(row=current_row, column=1)
 
         current_row += 1
-        cam_commands_label = tk.Label(cmd_window, text="Camera Controls")
+        cam_commands_label = tk.Label(scrollable_frame, text="Camera Controls")
         cam_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        cam_strafe_speed_button = tk.Button(cmd_window, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
+        cam_strafe_speed_button = tk.Button(scrollable_frame, text="Cam. Strafe Speed", command=lambda:enter_cmd("cam_strafe_speed"))
         cam_strafe_speed_button.config(width=15,height=1)
         cam_strafe_speed_button.grid(row=current_row, column=0)
-        lock_cam_button = tk.Button(cmd_window, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
+        lock_cam_button = tk.Button(scrollable_frame, text="Lock Camera", command=lambda:enter_cmd("lock_cam"))
         lock_cam_button.config(width=15,height=1)
         lock_cam_button.grid(row=current_row, column=1)
-        unlock_cam_button = tk.Button(cmd_window, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
+        unlock_cam_button = tk.Button(scrollable_frame, text="Unlock Camera", command=lambda:add_to_buffer("unlock_cam"))
         unlock_cam_button.config(width=15,height=1)
         unlock_cam_button.grid(row=current_row, column=2)
         current_row += 1
-        cam_rotate_speed_button = tk.Button(cmd_window, text="Cam. Rotate Speed", command=lambda:enter_cmd("cam_rotate_speed"))
+        cam_rotate_speed_button = tk.Button(scrollable_frame, text="Cam. Rotate Speed", command=lambda:enter_cmd("cam_rotate_speed"))
         cam_rotate_speed_button.config(width=15,height=1)
         cam_rotate_speed_button.grid(row=current_row, column=0)
 
         current_row += 1
-        time_commands_label = tk.Label(cmd_window, text="Time Controls")
+        time_commands_label = tk.Label(scrollable_frame, text="Time Controls")
         time_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        delta_t_button = tk.Button(cmd_window, text="Delta T", command=lambda:enter_cmd("delta_t"))
+        delta_t_button = tk.Button(scrollable_frame, text="Delta T", command=lambda:enter_cmd("delta_t"))
         delta_t_button.config(width=15,height=1)
         delta_t_button.grid(row=current_row, column=0)
-        cycle_time_button = tk.Button(cmd_window, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
+        cycle_time_button = tk.Button(scrollable_frame, text="Cycle Time", command=lambda:enter_cmd("cycle_time"))
         cycle_time_button.config(width=15, height=1)
         cycle_time_button.grid(row=current_row, column=1)
-        output_rate_button = tk.Button(cmd_window, text="Output Rate", command=lambda:enter_cmd("output_rate"))
+        output_rate_button = tk.Button(scrollable_frame, text="Output Rate", command=lambda:enter_cmd("output_rate"))
         output_rate_button.config(width=15, height=1)
         output_rate_button.grid(row=current_row, column=2)
         current_row += 1
-        autodt_button = tk.Button(cmd_window, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
+        autodt_button = tk.Button(scrollable_frame, text="Auto-Dt", command=lambda:enter_cmd("auto_dt"))
         autodt_button.config(width=15, height=1)
         autodt_button.grid(row=current_row, column=1)
-        rapid_compute_button = tk.Button(cmd_window, text="Rapid Compute", command=lambda:enter_cmd("rapid_compute"))
+        rapid_compute_button = tk.Button(scrollable_frame, text="Rapid Compute", command=lambda:enter_cmd("rapid_compute"))
         rapid_compute_button.config(width=15, height=1)
         rapid_compute_button.grid(row=current_row, column=2)
 
         current_row += 1
-        solver_commands_label = tk.Label(cmd_window, text="Solver Controls")
+        solver_commands_label = tk.Label(scrollable_frame, text="Solver Controls")
         solver_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        solver_type_button = tk.Button(cmd_window, text="Solver Type", command=lambda:enter_cmd("solver_type"))
+        solver_type_button = tk.Button(scrollable_frame, text="Solver Type", command=lambda:enter_cmd("solver_type"))
         solver_type_button.config(width=15,height=1)
         solver_type_button.grid(row=current_row, column=0)
-        tolerance_button = tk.Button(cmd_window, text="Tolerance", command=lambda:enter_cmd("tolerance"))
+        tolerance_button = tk.Button(scrollable_frame, text="Tolerance", command=lambda:enter_cmd("tolerance"))
         tolerance_button.config(width=15,height=1)
         tolerance_button.grid(row=current_row, column=1)
 
         current_row += 1
-        misc_commands_label = tk.Label(cmd_window, text="Miscellaneous")
+        misc_commands_label = tk.Label(scrollable_frame, text="Miscellaneous")
         misc_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        note_button = tk.Button(cmd_window, text="Note", command=lambda:enter_cmd("note"))
+        note_button = tk.Button(scrollable_frame, text="Note", command=lambda:enter_cmd("note"))
         note_button.config(width=15, height=1)
         note_button.grid(row=current_row, column=0)
-        vessel_body_collision_button = tk.Button(cmd_window, text="Vessel-Body Colsn.", command=lambda:enter_cmd("vessel_body_collision"))
+        vessel_body_collision_button = tk.Button(scrollable_frame, text="Vessel-Body Colsn.", command=lambda:enter_cmd("vessel_body_collision"))
         vessel_body_collision_button.config(width=15, height=1)
         vessel_body_collision_button.grid(row=current_row, column=1)
 
         current_row += 1
-        graphics_commands_label = tk.Label(cmd_window, text="Graphics")
+        graphics_commands_label = tk.Label(scrollable_frame, text="Graphics")
         graphics_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        draw_mode_button = tk.Button(cmd_window, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
+        draw_mode_button = tk.Button(scrollable_frame, text="Draw Mode", command=lambda:enter_cmd("draw_mode"))
         draw_mode_button.config(width=15, height=1)
         draw_mode_button.grid(row=current_row, column=0)
-        point_size_button = tk.Button(cmd_window, text="Point Size", command=lambda:enter_cmd("point_size"))
+        point_size_button = tk.Button(scrollable_frame, text="Point Size", command=lambda:enter_cmd("point_size"))
         point_size_button.config(width=15, height=1)
         point_size_button.grid(row=current_row, column=1)
         current_row += 1
-        generate_starfield_button = tk.Button(cmd_window, text="Gen. Starfield", command=lambda:enter_cmd("generate_starfield"))
+        generate_starfield_button = tk.Button(scrollable_frame, text="Gen. Starfield", command=lambda:enter_cmd("generate_starfield"))
         generate_starfield_button.config(width=15, height=1)
         generate_starfield_button.grid(row=current_row, column=0)
-        clear_starfield_button = tk.Button(cmd_window, text="Clear Starfield", command=lambda:add_to_buffer("clear_starfield"))
+        clear_starfield_button = tk.Button(scrollable_frame, text="Clear Starfield", command=lambda:add_to_buffer("clear_starfield"))
         clear_starfield_button.config(width=15, height=1)
         clear_starfield_button.grid(row=current_row, column=1)
 
         current_row += 1
-        selective_precision_commands_label = tk.Label(cmd_window, text="Selective Precision")
+        selective_precision_commands_label = tk.Label(scrollable_frame, text="Selective Precision")
         selective_precision_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        lock_origin_button = tk.Button(cmd_window, text="Lock Origin", command=lambda:enter_cmd("lock_origin"))
+        lock_origin_button = tk.Button(scrollable_frame, text="Lock Origin", command=lambda:enter_cmd("lock_origin"))
         lock_origin_button.config(width=15, height=1)
         lock_origin_button.grid(row=current_row, column=0)
-        unlock_origin_button = tk.Button(cmd_window, text="Unlock Origin", command=lambda:add_to_buffer("unlock_origin"))
+        unlock_origin_button = tk.Button(scrollable_frame, text="Unlock Origin", command=lambda:add_to_buffer("unlock_origin"))
         unlock_origin_button.config(width=15, height=1)
         unlock_origin_button.grid(row=current_row, column=1)
         current_row += 1
-        lock_scene_rot_button = tk.Button(cmd_window, text="Lock Scene Rot.", command=lambda:enter_cmd("lock_scene_rot"))
+        lock_scene_rot_button = tk.Button(scrollable_frame, text="Lock Scene Rot.", command=lambda:enter_cmd("lock_scene_rot"))
         lock_scene_rot_button.config(width=15, height=1)
         lock_scene_rot_button.grid(row=current_row, column=0)
-        unlock_scene_rot_button = tk.Button(cmd_window, text="Unlk. Sn. Rt.", command=lambda:add_to_buffer("unlock_scene_rot"))
+        unlock_scene_rot_button = tk.Button(scrollable_frame, text="Unlk. Sn. Rt.", command=lambda:add_to_buffer("unlock_scene_rot"))
         unlock_scene_rot_button.config(width=15, height=1)
         unlock_scene_rot_button.grid(row=current_row, column=1)
 
         current_row += 1
-        general_relativity_commands_label = tk.Label(cmd_window, text="General Relativity")
+        general_relativity_commands_label = tk.Label(scrollable_frame, text="General Relativity")
         general_relativity_commands_label.grid(row=current_row, column=0, columnspan=3)
         current_row += 1
-        create_sch_button = tk.Button(cmd_window, text="Create Schwrzchld.", command=lambda:enter_cmd("create_schwarzschild"))
+        create_sch_button = tk.Button(scrollable_frame, text="Create Schwrzchld.", command=lambda:enter_cmd("create_schwarzschild"))
         create_sch_button.config(width=15, height=1)
         create_sch_button.grid(row=current_row, column=0)
-        delete_sch_button = tk.Button(cmd_window, text="Delete Schwrzchld.", command=lambda:enter_cmd("delete_schwarzschild"))
+        delete_sch_button = tk.Button(scrollable_frame, text="Delete Schwrzchld.", command=lambda:enter_cmd("delete_schwarzschild"))
         delete_sch_button.config(width=15, height=1)
         delete_sch_button.grid(row=current_row, column=1)
         current_row += 1
-        create_lt_button = tk.Button(cmd_window, text="Create Lense-Thrng.", command=lambda:enter_cmd("create_lensethirring"))
+        create_lt_button = tk.Button(scrollable_frame, text="Create Lense-Thrng.", command=lambda:enter_cmd("create_lensethirring"))
         create_lt_button.config(width=15, height=1)
         create_lt_button.grid(row=current_row, column=0)
-        delete_lt_button = tk.Button(cmd_window, text="Delete Lense-Thrng.", command=lambda:enter_cmd("delete_lensethirring"))
+        delete_lt_button = tk.Button(scrollable_frame, text="Delete Lense-Thrng.", command=lambda:enter_cmd("delete_lensethirring"))
         delete_lt_button.config(width=15, height=1)
         delete_lt_button.grid(row=current_row, column=1)
     
