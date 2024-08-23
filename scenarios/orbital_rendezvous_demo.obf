@@ -1,5 +1,5 @@
 solver_type 3
-show grid
+show polar_grid
 move_cam_to 2000 3000 5000
 rotate_cam_by y 18
 rotate_cam_by x -30
@@ -10,7 +10,7 @@ show Yang vel Earth YANG_VEL
 show target_signal value TARGET_SIGNAL_STRENGTH
 t=2770 update_projection p1
 t=9230 update_projection p1
-t=11000 hide grid
+t=11000 hide polar_grid
 t=15638 update_projection p1
 t=15640 show Yang dist Yin TARGET_DIST
 t=15640 show Yang vel_mag Yin TARGET_VEL

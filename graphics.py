@@ -66,14 +66,21 @@ def drawGridPlane(cam, bodies, vessels):
 def drawPolarGridPlane(cam, bodies, vessels, angular_divisions=64):
     if cam.pos.y != 0:
         radial_spacing = 10**(int(math.log(abs(cam.pos.y), 10)) + 3)
-        scene_radial_spacing = radial_spacing * visual_scaling_factor
 
-        cam_planar_dist = (cam.pos.x**2 + cam.pos.z**2)**0.5
-        N = max(int(cam_planar_dist / scene_radial_spacing * 2) + 1, 24)
+        N = 1e6 # random value above 64
+        while N > 64:
+            scene_radial_spacing = radial_spacing * visual_scaling_factor
+
+            cam_planar_dist = (cam.pos.x**2 + cam.pos.z**2)**0.5
+            N = max(int(cam_planar_dist / scene_radial_spacing * 2) + 1, 24)
+
+            if N > 64:
+                radial_spacing *= 10
+            
         dtheta = 2 * math.pi / angular_divisions
 
         glColor(0.3, 0.3, 0.3)
-        
+            
         for i in range(N + 1):
             ang_points = []
             glBegin(GL_LINES)
@@ -101,6 +108,20 @@ def drawPolarGridPlane(cam, bodies, vessels, angular_divisions=64):
             glEnd()
     else:
         radial_spacing = 0
+
+    glBegin(GL_LINES)
+    for b in bodies:
+        glColor(b.get_color()[0] * 0.9, b.get_color()[1] * 0.9, b.get_color()[2] * 0.9)
+        glVertex3f(b.get_draw_pos().x, 0, b.get_draw_pos().z)
+        glVertex3f(b.get_draw_pos().x, b.get_draw_pos().y, b.get_draw_pos().z)
+
+    for v in vessels:
+        glColor(v.get_color()[0] * 0.9, v.get_color()[1] * 0.9, v.get_color()[2] * 0.9)
+        glVertex3f(v.get_draw_pos().x, 0, v.get_draw_pos().z)
+        glVertex3f(v.get_draw_pos().x, v.get_draw_pos().y, v.get_draw_pos().z)
+    glEnd()
+
+    return radial_spacing
 
 def drawBodies(bodies, active_cam, draw_mode):
 
@@ -466,7 +487,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
         spacing = drawGridPlane(active_cam, bodies, vessels)
 
     if polar_grid_active:
-        drawPolarGridPlane(active_cam, bodies, vessels)
+        radial_spacing = drawPolarGridPlane(active_cam, bodies, vessels)
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
@@ -495,7 +516,11 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
 
     if grid_active and spacing:
         spacing_exp = int(math.log(spacing, 10) + 0.5)
-        render_AN("GRID SPACING 1e" + str(spacing_exp) + " M", (1, 0, 0), [-11.5, 5.5], active_cam, 0.1, far_clip)
+        render_AN("CARTEZIAN GRID 1e" + str(spacing_exp) + " M", (1, 0, 0), [-11.5, 5.5], active_cam, 0.1, far_clip)
+
+    if polar_grid_active and radial_spacing:
+        radial_spacing_exp = int(math.log(radial_spacing, 10) + 0.5)
+        render_AN("RADIAL GRID 1e" + str(radial_spacing_exp) + " M", (1, 0, 0), [-11.5, 6.5], active_cam, 0.1, far_clip)
 
     if scene_rot_target:
         render_AN("ROTATING REFERENCE FRAME", (1, 0, 0), [-11.5, -5.5], active_cam, 0.1, far_clip)

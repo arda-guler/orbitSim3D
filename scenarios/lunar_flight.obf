@@ -3,7 +3,7 @@ delta_t 10
 output_rate 1000
 create_projection p1 Luna Earth
 create_plot RMAG dist lunar-orbiter Earth 10 600000
-show grid
+show polar_grid
 move_cam_by 0 45000 35000
 rotate_cam_by x -40
 show lunar-orbiter dist Earth R_EARTH

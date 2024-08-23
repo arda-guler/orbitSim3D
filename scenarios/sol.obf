@@ -10,5 +10,5 @@ create_projection p7 Uranus Sol
 create_projection p8 Neptune Sol
 lock_cam Sol
 cam_strafe_speed 500000
-show grid
+show polar_grid
 ;
