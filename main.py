@@ -1300,6 +1300,7 @@ def main(scn_filename=None, start_time=0):
     accept_keyboard_input = True
     speed_input_locked = False
     grid_active = False
+    polar_grid_active = False
     cycle_dt = 1
 
     if autostarfield:
@@ -1518,6 +1519,8 @@ def main(scn_filename=None, start_time=0):
                             labels_visible = 1
                         elif command[1] == "grid":
                             grid_active = True
+                        elif command[1] == "polar_grid":
+                            polar_grid_active = True
 
                     else:
                         print("Wrong number of arguments for command 'show'.")
@@ -1531,6 +1534,8 @@ def main(scn_filename=None, start_time=0):
                         labels_visible = 0
                     elif command[1] == "grid":
                         grid_active = False
+                    elif command[1] == "polar_grid":
+                        polar_grid_active = False
                     else:
                         for i in range(len(output_buffer)):
                             if output_buffer[i][0] == command[1]:
@@ -2707,7 +2712,8 @@ def main(scn_filename=None, start_time=0):
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
             drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories,
-                      draw_mode, labels_visible, scene_lock, point_size, grid_active, scene_rot_target, starfield, far_clip)
+                      draw_mode, labels_visible, scene_lock, point_size, grid_active, polar_grid_active, scene_rot_target,
+                      starfield, far_clip)
             glfw.swap_buffers(window)
             
         cycle_dt = time.perf_counter() - cycle_start

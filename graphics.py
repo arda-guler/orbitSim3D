@@ -63,6 +63,45 @@ def drawGridPlane(cam, bodies, vessels):
 
     return spacing
 
+def drawPolarGridPlane(cam, bodies, vessels, angular_divisions=64):
+    if cam.pos.y != 0:
+        radial_spacing = 10**(int(math.log(abs(cam.pos.y), 10)) + 3)
+        scene_radial_spacing = radial_spacing * visual_scaling_factor
+
+        cam_planar_dist = (cam.pos.x**2 + cam.pos.z**2)**0.5
+        N = max(int(cam_planar_dist / scene_radial_spacing * 2) + 1, 24)
+        dtheta = 2 * math.pi / angular_divisions
+
+        glColor(0.3, 0.3, 0.3)
+        
+        for i in range(N + 1):
+            ang_points = []
+            glBegin(GL_LINES)
+            for j in range(angular_divisions):
+                theta = dtheta * j
+                x = math.cos(theta)
+                z = math.sin(theta)
+                r = i * scene_radial_spacing
+
+                if i == N:
+                    glVertex3f(0, 0, 0)
+                    glVertex3f(x * r, 0, z * r)
+                ang_points.append([x * r, 0, z * r])
+
+            glEnd()
+            glBegin(GL_LINE_STRIP)
+            # tangential lines
+            for j in range(1, angular_divisions):
+                glVertex3f(ang_points[j-1][0], 0, ang_points[j-1][2])
+                glVertex3f(ang_points[j][0], 0, ang_points[j][2])
+
+            glVertex3f(ang_points[-1][0], 0, ang_points[-1][2])
+            glVertex3f(ang_points[0][0], 0, ang_points[0][2])
+
+            glEnd()
+    else:
+        radial_spacing = 0
+
 def drawBodies(bodies, active_cam, draw_mode):
 
     for b in bodies:
@@ -410,7 +449,8 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
 def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1,
-              labels_visible=True, scene_lock=None, point_size=2, grid_active=False, scene_rot_target=None, starfield=[], far_clip=1e6):
+              labels_visible=True, scene_lock=None, point_size=2, grid_active=False, polar_grid_active=False, scene_rot_target=None,
+              starfield=[], far_clip=1e6):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
     # and it won't look like a ridiculous mess on screen
@@ -424,6 +464,9 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
 
     if grid_active:
         spacing = drawGridPlane(active_cam, bodies, vessels)
+
+    if polar_grid_active:
+        drawPolarGridPlane(active_cam, bodies, vessels)
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
