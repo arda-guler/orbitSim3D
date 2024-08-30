@@ -5,7 +5,7 @@ from tkinter import ttk
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
-                      proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
+                      proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num):
     command_buffer = []
 
@@ -55,6 +55,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
         for res in resources:
             objects_text += "RESOURCE: " + res.get_name() + "\n"
+
+        for obs in observations:
+            objects_text += "OBSERVATION: " + obs.get_name() + "\n"
             
         for pl in plots:
             objects_text += "PLOTTER: " + pl.get_name() + "\n"
@@ -376,23 +379,43 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_s7_button.config(width=20, height=1)
 
                 # option 8
-                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
-                show_traj_button.grid(row=15, column=0)
-                show_traj_button.config(width=20,height=1)
+                show_s8t1_label = tk.Label(entry_panel, text="Observation")
+                show_s8t2_label = tk.Label(entry_panel, text="Display Label")
+                show_s8t1_label.grid(row=15, column=1)
+                show_s8t2_label.grid(row=15, column=2)
+
+                show_s8t1 = tk.Text(entry_panel, width=20, height=1)
+                show_s8t2 = tk.Text(entry_panel, width=20, height=1)
+                show_s8t1.grid(row=16, column=1)
+                show_s8t2.grid(row=16, column=2)
+
+                def generate_s8():
+                    if show_s8t1.get("1.0", "end-1c") and show_s8t2.get("1.0", "end-1c"):
+                        command = "show " + show_s8t1.get("1.0", "end-1c") + " " + show_s8t2.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                show_s8_button = tk.Button(entry_panel, text="Show Obsrv. Data", command=generate_s8)
+                show_s8_button.grid(row=16, column=0)
+                show_s8_button.config(width=20, height=1)
 
                 # option 9
-                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
-                show_labels_button.grid(row=15, column=1)
-                show_labels_button.config(width=20,height=1)
+                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
+                show_traj_button.grid(row=17, column=0)
+                show_traj_button.config(width=20,height=1)
 
                 # option 10
-                show_grid_button = tk.Button(entry_panel, text="Show Grid", command=lambda:add_to_buffer("show grid"))
-                show_grid_button.grid(row=15, column=2)
-                show_grid_button.config(width=20, height=1)
+                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
+                show_labels_button.grid(row=17, column=1)
+                show_labels_button.config(width=20,height=1)
 
                 # option 11
-                show_polar_grid_button = tk.Button(entry_panel, text="Show Plr. Grid", command=lambda:add_to_buffer("show polar_grid"))
-                show_polar_grid_button.grid(row=15, column=3)
+                show_grid_button = tk.Button(entry_panel, text="Show Grid", command=lambda:add_to_buffer("show grid"))
+                show_grid_button.grid(row=17, column=2)
+                show_grid_button.config(width=20, height=1)
+
+                # option 12
+                show_polar_grid_button = tk.Button(entry_panel, text="Show Polar Grid", command=lambda:add_to_buffer("show polar_grid"))
+                show_polar_grid_button.grid(row=17, column=3)
                 show_polar_grid_button.config(width=20, height=1)
 
             elif cmd_a == "hide":
@@ -1710,6 +1733,98 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 dlt_s1_button = tk.Button(entry_panel, text="Delete L-T Effect", command=generate_s1)
                 dlt_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "create_observation":
+                create_observation_help = tk.Label(entry_panel, text="'create_observation' command adds an observation setup to calculate observation ephemerides of a target from an observer.")
+                create_observation_help.grid(row=0, column=0, columnspan=10)
+
+                cobs_s1t1_label = tk.Label(entry_panel, text="Name")
+                cobs_s1t1_label.grid(row=1, column=1)
+
+                cobs_s1t2_label = tk.Label(entry_panel, text="Observer")
+                cobs_s1t2_label.grid(row=1, column=2)
+
+                cobs_s1t3_label = tk.Label(entry_panel, text="Target")
+                cobs_s1t3_label.grid(row=1, column=3)
+
+                cobs_s1t4_label = tk.Label(entry_panel, text="Equinox Axis")
+                cobs_s1t4_label.grid(row=1, column=4)
+
+                cobs_s1t5_label = tk.Label(entry_panel, text="On-Plane Axis")
+                cobs_s1t5_label.grid(row=1, column=5)
+
+                cobs_s1t6_label = tk.Label(entry_panel, text="Pole Axis")
+                cobs_s1t6_label.grid(row=1, column=6)
+
+                cobs_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t1.grid(row=2, column=1)
+
+                cobs_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t2.grid(row=2, column=2)
+
+                cobs_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t3.grid(row=2, column=3)
+
+                cobs_s1t4 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t4.grid(row=2, column=4)
+
+                cobs_s1t5 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t5.grid(row=2, column=5)
+
+                cobs_s1t6 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s1t6.grid(row=2, column=6)
+
+                def generate_s1():
+                    if cobs_s1t1.get("1.0","end-1c") and cobs_s1t2.get("1.0","end-1c") and cobs_s1t3.get("1.0","end-1c") and cobs_s1t4.get("1.0","end-1c") and cobs_s1t5.get("1.0","end-1c") and cobs_s1t6.get("1.0","end-1c"):
+                        command = "create_observation " + cobs_s1t1.get("1.0","end-1c") + " " + cobs_s1t2.get("1.0","end-1c") + " " + cobs_s1t3.get("1.0","end-1c") + " " + cobs_s1t4.get("1.0","end-1c") + " " + cobs_s1t5.get("1.0","end-1c") + " " + cobs_s1t6.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                cobs_s1_button = tk.Button(entry_panel, text="Crt. Observ.", command=generate_s1)
+                cobs_s1_button.grid(row=2, column=0)
+
+                # --- s2 ---
+                cobs_s2t1_label = tk.Label(entry_panel, text="Name")
+                cobs_s2t1_label.grid(row=3, column=1)
+
+                cobs_s2t2_label = tk.Label(entry_panel, text="Observer")
+                cobs_s2t2_label.grid(row=3, column=2)
+
+                cobs_s2t3_label = tk.Label(entry_panel, text="Target")
+                cobs_s2t3_label.grid(row=3, column=3)
+
+                cobs_s2t1 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s2t1.grid(row=4, column=1)
+
+                cobs_s2t2 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s2t2.grid(row=4, column=2)
+
+                cobs_s2t3 = tk.Text(entry_panel, width=20, height=1)
+                cobs_s2t3.grid(row=4, column=3)
+
+                def generate_s2():
+                    if cobs_s2t1.get("1.0","end-1c") and cobs_s2t2.get("1.0","end-1c") and cobs_s2t3.get("1.0","end-1c"):
+                        command = "create_observation " + cobs_s2t1.get("1.0","end-1c") + " " + cobs_s2t2.get("1.0","end-1c") + " " + cobs_s2t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                cobs_s2_button = tk.Button(entry_panel, text="Cr. Obs. (Def. Ax.)", command=generate_s2)
+                cobs_s2_button.grid(row=4, column=0)
+
+            elif cmd_a == "delete_observation":
+                dobs_help = tk.Label(entry_panel, text="'delete_observation' command removes an observation setup from the simulation.")
+                dobs_help.grid(row=0, column=0, columnspan=10)
+
+                dobs_s1t1_label = tk.Label(entry_panel, text="Obsrv. Name")
+                dobs_s1t1_label.grid(row=1, column=1)
+                dobs_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                dobs_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if dobs_s1t1.get("1.0","end-1c"):
+                        command = "delete_observation " + dobs_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                dobs_s1_button = tk.Button(entry_panel, text="Delete Obsrv.", command=generate_s1)
+                dobs_s1_button.grid(row=2, column=0)
+
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1*(event.delta/120)), "units")
                 
@@ -1829,6 +1944,17 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         delete_resource_button = tk.Button(scrollable_frame, text="Delete Resource", command=lambda:enter_cmd("delete_resource"))
         delete_resource_button.config(width=15, height=1)
         delete_resource_button.grid(row=current_row, column=1)
+
+        current_row += 1
+        observation_commands_label = tk.Label(scrollable_frame, text="Observations")
+        observation_commands_label.grid(row=current_row, column=0, columnspan=3)
+        current_row += 1
+        create_observation_button = tk.Button(scrollable_frame, text="Create Obsv.", command=lambda:enter_cmd("create_observation"))
+        create_observation_button.config(width=15, height=1)
+        create_observation_button.grid(row=current_row, column=0)
+        delete_observation_button = tk.Button(scrollable_frame, text="Delete Obsv.", command=lambda:enter_cmd("delete_observation"))
+        delete_observation_button.config(width=15, height=1)
+        delete_observation_button.grid(row=current_row, column=1)
 
         current_row += 1
         plot_commands_label = tk.Label(scrollable_frame, text="Plotting")

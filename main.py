@@ -32,6 +32,7 @@ from proximity import *
 from resource import *
 from general_relativity import *
 from test_propagator import *
+from observation import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -57,6 +58,7 @@ schwarzschilds = []
 lensethirrings = []
 proximity_zones = []
 resources = []
+observations = []
 
 starfield = []
 
@@ -121,7 +123,8 @@ def read_batch(batch_path):
 
 def clear_scene():
     global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources,\
-           plots, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, sim_time
+           plots, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, observations,\
+           sim_time
 
     objs = []
     vessels = []
@@ -136,11 +139,12 @@ def clear_scene():
     atmospheric_drags = []
     schwarzschilds = []
     lensethirrings = []
+    observations = []
     sim_time = 0
 
 def import_scenario(scn_filename):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags,\
-           schwarzschilds, lensethirrings, proximity_zones, resources, sim_time
+           schwarzschilds, lensethirrings, observations, proximity_zones, resources, sim_time
 
     clear_scene()
 
@@ -326,11 +330,17 @@ def import_scenario(scn_filename):
             new_lt = GR_LenseThirring(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]), eval(line[4]))
             lensethirrings.append(new_lt)
             print("Loading Lense-Thirring effect:", new_lt.name)
+
+        elif line[0] == "OBS":
+            new_obs = observation(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]))
+            observations.append(new_obs)
+            print("Loading observation:", new_obs.name)
             
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, proximity_zones, sim_time, command_history
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags,\
+           schwarzschilds, lensethirrings, observations, proximity_zones, sim_time, command_history
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -465,6 +475,14 @@ def export_scenario(scn_filename, verbose=True):
         for lt in lensethirrings:
             lt_save_string = "GR1|" + lt.name + "|" + lt.body.get_name() + "|" + lt.vessel.get_name() + "|" + str(lt.J) + "\n"
             scn_file.write(lt_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing observation setups...")
+        for obs in observations:
+            obs_save_string = "OBS|" + obs.name + "|" + obs.observer.get_name() + "|" + obs.obj.get_name() + "|" + str(obs.axes[0].tolist()).replace(" ", "") + "|" + str(obs.axes[1].tolist()).replace(" ", "") + "|" + str(obs.axes[2].tolist()).replace(" ", "") + "\n"
+            scn_file.write(obs_save_string)
 
         scn_file.write("\n")
 
@@ -1068,6 +1086,7 @@ def create_schwarzschild(sch_name, body, vessel):
     if find_schwarzschild_by_name(sch_name):
         print("A Schwarzschild effect with this name already exists. Please pick another name for the new effect.\n")
         input("Press Enter to continue...")
+        return
 
     try:
         new_sch = GR_Schwarzschild(sch_name, body, vessel)
@@ -1102,6 +1121,7 @@ def create_lensethirring(lt_name, body, vessel, J):
     if find_lensethirring_by_name(lt_name):
         print("A Lense-Thirring effect with this name already exists. Please pick another name for the new effect.\n")
         input("Press Enter to continue...")
+        return
 
     try:
         new_lt = GR_LenseThirring(lt_name, body, vessel, J)
@@ -1120,6 +1140,41 @@ def delete_lensethirring(lt_name):
 
     lensethirrings.remove(lt_tbd)
     del lt_tbd
+
+def find_observation_by_name(obs_name):
+    global observations
+
+    for obs in observations:
+        if obs.name == obs_name:
+            return obs
+
+    return None
+
+def create_observation(obs_name, observer, target, axes=[vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1)]):
+    global observations
+    
+    if find_observation_by_name(obs_name):
+        print("An observation by this name already exists. Please pick a new name for the new observation.")
+        input("Press Enter to continue...")
+        return
+
+    try:
+        new_obs = observation(obs_name, observer, target, axes)
+        observations.append(new_obs)
+    except:
+        print("Could not create new observation:", obs_name)
+
+def delete_observation(obs_name):
+    global observations
+    obs_tbd = find_observation_by_name(obs_name)
+
+    if not obs_tbd:
+        print("Observation not found!")
+        time.sleep(2)
+        return
+
+    observations.remove(obs_tbd)
+    del obs_tbd
 
 def vessel_body_crash(v, b):
     # a vessel has crashed into a celestial body. We will convert the vessel object
@@ -1193,7 +1248,7 @@ def get_active_cam():
     return cameras[0]
 
 def rotate_scene(pivot, target, dt):
-    global vessels, bodies, objs, projections, starfield
+    global vessels, bodies, objs, observations, projections, starfield
 
     # get the rotation vector
     rotation_vector = vec3()
@@ -1229,6 +1284,11 @@ def rotate_scene(pivot, target, dt):
         p.draw_an = rot_mtx.dot(p.draw_an)
         p.draw_dn = rot_mtx.dot(p.draw_dn)
 
+    # keep observation axes locked to stars
+    for obs in observations:
+        for i_vec in range(3):
+            obs.axes[i_vec] = rot_mtx.dot(obs.axes[i_vec])
+
     for idx_s in range(len(starfield)):
         starfield[idx_s] = rot_mtx.dot(vec3(lst=starfield[idx_s])).tolist()
 
@@ -1255,7 +1315,7 @@ def clear_starfield():
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
-           proximity_zones, schwarzschilds, lensethirrings, gvar_fov, gvar_near_clip, gvar_far_clip,\
+           proximity_zones, schwarzschilds, lensethirrings, observations, gvar_fov, gvar_near_clip, gvar_far_clip,\
            starfield
 
     # read config to get start values
@@ -1387,7 +1447,7 @@ def main(scn_filename=None, start_time=0):
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
-                                                       proximity_zones, projections, resources, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
+                                                       proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
                                                        cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num)
                     if panel_commands:
                         for panel_command in panel_commands:
@@ -1510,6 +1570,15 @@ def main(scn_filename=None, start_time=0):
                                 
                         else:
                             print("Object/maneuver/projection not found.")
+                            time.sleep(2)
+
+                    elif len(command) == 3:
+                        if find_observation_by_name(command[1]):
+                            obs = find_observation_by_name(command[1])
+                            output_buffer.append([command[2], "params", obs, "obs"])
+
+                        else:
+                            print("Observation not found.")
                             time.sleep(2)
 
                     elif len(command) == 2:
@@ -1868,6 +1937,25 @@ def main(scn_filename=None, start_time=0):
                     print("Lense-Thirring effects currently in simulation:\n")
                     for lt in lensethirrings:
                         print(lt.name)
+                    input("Press Enter to continue...")
+
+                # CREATE_OBSERVATION
+                elif command[0] == "create_observation":
+                    if len(command) == 7:
+                        create_observation(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]),
+                                           vec3(lst=eval(command[4])), vec3(lst=eval(command[5])), vec3(lst=eval(command[6])))
+                    else:
+                        create_observation(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]))
+
+                # DELETE_OBSERVATION
+                elif command[0] == "delete_observation":
+                    delete_observation(command[1])
+
+                # GET_OBSERVATIONS
+                elif command[0] == "get_observations":
+                    print("Observation setups currently in simulation:")
+                    for obs in observations:
+                        print(obs.name)
                     input("Press Enter to continue...")
 
                 # GET_OBJECTS command
@@ -2566,6 +2654,10 @@ def main(scn_filename=None, start_time=0):
             res.update_occultation(bodies)
             res.update_value(delta_t)
 
+        # update observations
+        for obs in observations:
+            obs.calculate(delta_t)
+
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -2695,6 +2787,10 @@ def main(scn_filename=None, start_time=0):
                     elif element[1] == "delta" and element[3] == "res":
                         print(element[0], element[2].last_delta)
 
+                    # observations
+                    elif element[1] == "params" and element[3] == "obs":
+                        print(element[0], element[2].get_params_str())
+
                     # note taking
                     elif element[1] == "note":
                         print(element[0], element[2])
@@ -2702,6 +2798,7 @@ def main(scn_filename=None, start_time=0):
                     print("")
 
                 except:
+                    # print("ERROR with following output element:", element)
                     output_buffer.remove(element)
                     del element
                     

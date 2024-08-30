@@ -30,7 +30,8 @@ for line in scn_lines:
         result_line += line[10] + "|"
         result_line += line[11] + "|"
         result_line += line[12] + "|"
-        result_line += line[13]
+        result_line += line[13] + "|"
+        result_line += line[14]
 
     result_text += result_line + "\n"
 

@@ -50,7 +50,10 @@ The list of special characters is given below;
 - Lines starting in R are for radiation pressure effects,
 - Lines starting in A are for atmospheric drag effects,
 - Lines starting in P are for proximity zones,
-- Lines starting in U are for resources.
+- Lines starting in U are for resources,
+- Lines starting in OBS are for observation setups,
+- Lines starting in GR0 are for Schwarzschild components of general relativity corrections,
+- Lines starting in GR1 are for frame-dragging components of general relativity corrections.
 
 Although exporting scenarios through OS3D is usually convenient, sometimes, you might want to make quick little changes to a scenario or engineer all the little details of your digital universe; for which you might want to modify scenario files by hand. For this, the necessary information is given below.
 
@@ -121,6 +124,24 @@ P|zone_name|vessel|vessel_size(m, radius)|zone_size(m, radius)
 The syntax for denoting custom resources is as follows;
 ```
 U|resource_name|initial_value|equation_type(polynomial/logarithmic/power, incremental/absolute)|variable|object1|object2|equation_coefficients|value_min_max_limits
+```
+
+### Observation
+The syntax for denoting an observation setup is as follows;
+```
+OBS|obs_name|observer_name|target_name|axis1|axis2|axis3
+```
+
+### General Relativity - Schwarzschild Component
+The syntax for denoting the Schwarzschild component of a general relativity correction is;
+```
+GR0|effect_name|massive_body|affected_object
+```
+
+### General Relativity - Lense-Thirring (Frame-Dragging) Component
+The syntax for denoting the frame-dragging component of a general relativity correction is;
+```
+GR1|effect_name|massive_body|affected_object|specific_angular_momentum
 ```
 
 ## [Example Scenarios](https://github.com/arda-guler/orbitSim3D/tree/master/scenarios)
