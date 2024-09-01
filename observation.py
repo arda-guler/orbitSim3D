@@ -23,13 +23,13 @@ class observation:
 
         # normally, in ICRF:
         # x is vernal equinox
-        # y is some other vector
+        # y is some other planar vector
         # z is pole
 
         # in OS3D:
         # z is vernal equinox
         # y is pole
-        # x is some other thing
+        # x is some other planar vector
         # (to match OpenGL)
 
         # convert to ICRF for convenience
@@ -42,6 +42,10 @@ class observation:
         z = rel_pos_y
 
         r = (x**2 + y**2 + z**2)**0.5
+
+        # the sort of calculations below calculate the "apparent" sky position rather than the "astrometric"
+        # positions - be careful while validating with other software! (e.g. using JPL Horizons API, you can specify
+        # which one of those you wish to print out)
         
         RA = math.atan2(y, x)
         
@@ -66,13 +70,24 @@ class observation:
     def get_degrees(self):
         return math.degrees(self.RA), math.degrees(self.DEC), math.degrees(self.RA_rate), math.degrees(self.DEC_rate)
 
+    def get_degrees_pos_only(self):
+        return math.degrees(self.RA), math.degrees(self.DEC)
+
     def get_params_str(self):
-        if self.RA_rate and self.DEC_rate:
+        if self.RA_rate != None and self.DEC_rate != None:
             RA, DEC, RAr, DECr = self.get_degrees()
             
             output = "\nObservation of " + self.obj.get_name() + " from " + self.observer.get_name() + ":\n"
             output += "RA: " + str(RA) + " deg, DEC: " + str(DEC) + " deg\n"
             output += "RA rate: " + str(RAr) + " deg/s, DEC rate: " + str(DECr) + " deg/s\n"
+            output += "\nPseudo-ICRF Base Vectors:\n Equinox (X): " + str(self.axes[0]) + " Plane Definer (Y): " + str(self.axes[1]) + " Pole (Z): " + str(self.axes[2]) + "\n"
+
+        elif self.RA and self.DEC:
+            RA, DEC = self.get_degrees_pos_only()
+
+            output = "\nObservation of " + self.obj.get_name() + " from " + self.observer.get_name() + ":\n"
+            output += "RA: " + str(RA) + " deg, DEC: " + str(DEC) + " deg\n"
+            output += "Calculating angular rates...\n"
             output += "\nPseudo-ICRF Base Vectors:\n Equinox (X): " + str(self.axes[0]) + " Plane Definer (Y): " + str(self.axes[1]) + " Pole (Z): " + str(self.axes[2]) + "\n"
 
         else:
