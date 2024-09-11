@@ -4,7 +4,8 @@ import math
 
 class body():
     def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient,
-                 day_length, rot_axis, J2, luminosity, atmos_sea_level_density, atmos_scale_height):
+                 day_length, rot_axis, J2, luminosity, atmos_sea_level_density, atmos_scale_height,
+                 point_mass_cloud=[]):
         self.name = name
         self.model = model
         self.model_path = model_path
@@ -20,6 +21,10 @@ class body():
         self.luminosity = luminosity # used for calculating radiation pressure due to Sun etc. (Watts)
         self.atmos_sea_level_density = atmos_sea_level_density
         self.atmos_scale_height = atmos_scale_height
+        self.point_mass_cloud = point_mass_cloud # used for modeling bodies with non-uniform lumpy mass distributions
+
+        if self.point_mass_cloud:
+            self.check_pmc()
 
         self.traj_history = []
         self.draw_pos = self.pos * visual_scaling_factor
@@ -94,6 +99,56 @@ class body():
     def get_orient(self):
         return self.orient
 
+    def check_pmc(self):
+        # normally we don't reaallly want to print anything outside of main.py
+        # but this can be an exception since it works only at initialization
+        total_mass = sum([m[1] for m in self.point_mass_cloud])
+        if abs(total_mass - self.mass) > self.mass * 1e-4:
+            print("\nThe total mass of the point-mass-cloud of body " + self.get_name() + " does not match its mass!\nThe point-mass-cloud will be removed.\n")
+            input("Press Enter to continue...")
+            self.point_mass_cloud = []
+
+        CoM_x = sum([m[0][0] * m[1] for m in self.point_mass_cloud])
+        CoM_y = sum([m[0][1] * m[1] for m in self.point_mass_cloud])
+        CoM_z = sum([m[0][2] * m[1] for m in self.point_mass_cloud])
+
+        CoM = vec3(CoM_x, CoM_y, CoM_z)
+        
+        if CoM.mag() > self.radius * 1e-4:
+            print("\nThe center of mass of the point-mass-cloud of body " + self.get_name() + " does not lie at the object's center!\nThe point-mass-cloud will be removed.\n")
+            input("Press Enter to continue...")
+            self.point_mass_cloud = []
+
+        # if all is well, correct the miniscule amount of error in the center-of-mass by shifting all point masses by a little
+        for m in self.point_mass_cloud:
+            m[0] = m[0] - CoM
+
+    def get_pm_abs(self, idx_pm):
+        # get absolute position of the point mass (as they are stored in the form of relative
+        # positions normally (that also helps reduce numerical errors))
+        pm_rel_pos = self.point_mass_cloud[idx_pm][0]
+        pm_abs_pos = self.pos + self.orient.vx() * pm_rel_pos[0] + self.orient.vy() * pm_rel_pos[1] + self.orient.vz() * pm_rel_pos[2]
+
+        pm_mass = self.point_mass_cloud[idx_pm][1]
+        
+        return pm_abs_pos, pm_mass
+
+    def pmc_to_str(self):
+        # turn the point-mass-cloud data to a text-exportable format
+        if not self.point_mass_cloud:
+            return "[]"
+
+        output = "["
+        
+        for idx_pm, pm in enumerate(self.point_mass_cloud):
+            output += "[" + str(pm[0].tolist()) + "," + str(pm[1]) + "]"
+            if idx_pm < len(self.point_mass_cloud) - 1:
+                output += ","
+
+        output += "]"
+        
+        return output
+
     def rotate_body(self, rotation):
         self.orient = self.orient.rotate_legacy(rotation)
 
@@ -105,8 +160,18 @@ class body():
         return (obj.pos - self.pos).normalized()
 
     def get_gravity_by(self, body):
-        grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
-        grav_vec = self.get_unit_vector_towards(body) * grav_mag
+        if not body.point_mass_cloud:
+            grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
+            grav_vec = self.get_unit_vector_towards(body) * grav_mag
+
+        else:
+            grav_vec = vec3(0, 0, 0)
+
+            # iterate over point mass elements and add their gravitational contribution
+            for idx_pm in range(len(body.point_mass_cloud)):
+                pm_pos, pm_mass = body.get_pm_abs(idx_pm)
+                grav_mag = (grav_const * pm_mass)/(((self.pos - pm_pos).mag())**2)
+                grav_vec = grav_vec + (pm_pos - self.pos).normalized() * grav_mag
         
         return grav_vec
 

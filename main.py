@@ -11,6 +11,7 @@ import re
 import sys
 import random
 import glob
+import ast
 
 from graphics import *
 from vessel_class import *
@@ -146,6 +147,17 @@ def import_scenario(scn_filename):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags,\
            schwarzschilds, lensethirrings, observations, proximity_zones, resources, sim_time
 
+    def construct_point_mass_cloud(pmc_str):
+        # this is a bit of an operation unfortunately, but should be more readable to the user
+        data_list = ast.literal_eval(pmc_str)
+        point_mass_cloud = []
+
+        for pos_lst, scalar in data_list:
+            pos = vec3(lst=pos_lst)
+            point_mass_cloud.append([pos, scalar])
+
+        return point_mass_cloud
+
     clear_scene()
 
     try:
@@ -210,7 +222,9 @@ def import_scenario(scn_filename):
 
                             float(line[12]), # luminosity
 
-                            float(line[13]), float(line[14])) # atmosphere
+                            float(line[13]), float(line[14]), # atmosphere
+
+                            construct_point_mass_cloud(line[15])) # point-mass-cloud
             
             bodies.append(new_body)
             objs.append(new_body)
@@ -376,7 +390,7 @@ def export_scenario(scn_filename, verbose=True):
                                str(b.get_radius()) + "|" + str(b.get_color()) + "|" + str(b.get_pos().tolist()) + "|" +\
                                str(b.get_vel().tolist()) + "|" + str(b.get_orient().tolist()) + "|" + str(b.get_day_length()) + "|" + str(b.get_rot_axis().tolist()) + "|" +\
                                str(b.get_J2()) + "|" + str(b.luminosity) + "|" + str(b.atmos_sea_level_density) + "|" +\
-                               str(b.atmos_scale_height) + "\n"
+                               str(b.atmos_scale_height) + "|" + b.pmc_to_str() + "\n"
             scn_file.write(body_save_string)
 
         scn_file.write("\n")

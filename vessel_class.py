@@ -84,32 +84,42 @@ class vessel():
                          (x_diff * body.orient.m31) + (y_diff * body.orient.m32) + (z_diff * body.orient.m33)])
 
     def get_gravity_by(self, body):
-        grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
-        grav_vec = self.get_unit_vector_towards(body) * grav_mag
+        if not body.point_mass_cloud:
+            grav_mag = (grav_const * body.get_mass())/((self.get_dist_to(body))**2)
+            grav_vec = self.get_unit_vector_towards(body) * grav_mag
 
-        # Apply J2 perturbation
-        # https://www.vcalc.com/equation/?uuid=1e5aa6ea-95a3-11e7-9770-bc764e2038f2
-        if body.get_J2():
-            # (3 J2 mu R_body^2) / (2 R^5)
-            J2_mult_numerator = (3*body.get_J2()*(grav_const*body.get_mass())*body.get_radius()**2)
-            J2_mult_denominator = 2 * self.get_dist_to(body)**5
-            J2_mult = J2_mult_numerator / J2_mult_denominator
+            # Apply J2 perturbation
+            # https://www.vcalc.com/equation/?uuid=1e5aa6ea-95a3-11e7-9770-bc764e2038f2
+            if body.get_J2():
+                # (3 J2 mu R_body^2) / (2 R^5)
+                J2_mult_numerator = (3*body.get_J2()*(grav_const*body.get_mass())*body.get_radius()**2)
+                J2_mult_denominator = 2 * self.get_dist_to(body)**5
+                J2_mult = J2_mult_numerator / J2_mult_denominator
 
-            R_squared = self.get_dist_to(body)**2
-            Z_squared = self.get_body_centered_coords(body).y**2
-            X = self.get_body_centered_coords(body).x
-            Y = self.get_body_centered_coords(body).z
-            Z = self.get_body_centered_coords(body).y
-            J2_perturbation_accel = vec3(lst=[(((5*(Z_squared/R_squared))-1) * X),
-                                              (((5*(Z_squared/R_squared))-3) * Z),
-                                              (((5*(Z_squared/R_squared))-1) * Y)])
+                R_squared = self.get_dist_to(body)**2
+                Z_squared = self.get_body_centered_coords(body).y**2
+                X = self.get_body_centered_coords(body).x
+                Y = self.get_body_centered_coords(body).z
+                Z = self.get_body_centered_coords(body).y
+                J2_perturbation_accel = vec3(lst=[(((5*(Z_squared/R_squared))-1) * X),
+                                                  (((5*(Z_squared/R_squared))-3) * Z),
+                                                  (((5*(Z_squared/R_squared))-1) * Y)])
 
-            J2_perturbation_accel = J2_perturbation_accel * J2_mult
+                J2_perturbation_accel = J2_perturbation_accel * J2_mult
 
-            grav_vec = vec3(lst=[grav_vec.x + (J2_perturbation_accel.x * body.orient.m11) + (J2_perturbation_accel.y * body.orient.m21) + (J2_perturbation_accel.z * body.orient.m31),
-                                 grav_vec.y + (J2_perturbation_accel.x * body.orient.m12) + (J2_perturbation_accel.y * body.orient.m22) + (J2_perturbation_accel.z * body.orient.m32),
-                                 grav_vec.z + (J2_perturbation_accel.x * body.orient.m13) + (J2_perturbation_accel.y * body.orient.m23) + (J2_perturbation_accel.z * body.orient.m33)])
+                grav_vec = vec3(lst=[grav_vec.x + (J2_perturbation_accel.x * body.orient.m11) + (J2_perturbation_accel.y * body.orient.m21) + (J2_perturbation_accel.z * body.orient.m31),
+                                     grav_vec.y + (J2_perturbation_accel.x * body.orient.m12) + (J2_perturbation_accel.y * body.orient.m22) + (J2_perturbation_accel.z * body.orient.m32),
+                                     grav_vec.z + (J2_perturbation_accel.x * body.orient.m13) + (J2_perturbation_accel.y * body.orient.m23) + (J2_perturbation_accel.z * body.orient.m33)])
         
+        else: # point-mass-cloud overrides J2 since it should be of higher accuracy (if else, why even use it?)
+            grav_vec = vec3(0, 0, 0)
+
+            # iterate over point mass elements and add their gravitational contribution
+            for idx_pm in range(len(body.point_mass_cloud)):
+                pm_pos, pm_mass = body.get_pm_abs(idx_pm)
+                grav_mag = (grav_const * pm_mass)/(((self.pos - pm_pos).mag())**2)
+                grav_vec = grav_vec + (pm_pos - self.pos).normalized() * grav_mag
+
         return grav_vec
 
     def get_gravity_mag_by(self, body):
