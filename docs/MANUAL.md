@@ -46,7 +46,7 @@ Instead of using Kepler's Laws, which are quite useful and accurate for most two
 
 For numerical integration, OS3D uses the simple and fast **Symplectic Euler** by default, and also has built-in **Velocity Verlet**, **Yoshida 4th Order** and **Yoshida 8th Order** solvers for those who wish better accuracy without giving up time step size. This choice of built-in methods were due to their energy conservation characteristics, so that simulations that run for very long durations will still give plausible results - though *some* inaccuracies are inevitable regardless. (The default solver can be changed via the 'Configure OS3D' option at start-up menu. If you want to use something like RK89 for a short trajectory simulation, you can implement it in solver.py with relative ease.)
 
-Given a J2 value on scenario setup, the simulation can also account for the oblateness of celestial bodies and apply J2 perturbations.
+Given a J2 value on scenario setup, the simulation can also account for the oblateness of celestial bodies and apply J2 perturbations. For objects that generate more complex gravitational fields (Luna, lumpy asteroids etc.), "point mass clouds" can be used.
 
 Given the required parameters, the simulation can account for atmospheric drag. The orbital decay due to atmospheric drag can be estimated for the planning of station-keeping boost burns or to decide on the best altitude for an acceptable decay rate while staying in close enough proximity of a planet.
 
