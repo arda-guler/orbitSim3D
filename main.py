@@ -1336,7 +1336,8 @@ def main(scn_filename=None, start_time=0):
     sim_time, delta_t, cycle_time, output_rate, cam_pos_x, cam_pos_y, cam_pos_z, cam_strafe_speed, cam_rotate_speed,\
     window_x, window_y, fov, near_clip, far_clip, cam_yaw_right, cam_yaw_left, cam_pitch_down, cam_pitch_up, cam_roll_cw, cam_roll_ccw,\
     cam_strafe_left, cam_strafe_right, cam_strafe_forward, cam_strafe_backward, cam_strafe_up, cam_strafe_down, cam_increase_speed, cam_decrease_speed, warn_cycle_time,\
-    maneuver_auto_dt, draw_mode, point_size, labels_visible, vessel_body_collision, batch_autoload, solver_type, tolerance, default_star_num, autostarfield = read_current_config()
+    maneuver_auto_dt, draw_mode, point_size, labels_visible, pmcs_visible, vessel_body_collision, batch_autoload, solver_type, tolerance,\
+    default_star_num, autostarfield = read_current_config()
 
     # set global vars
     gvar_fov = fov
@@ -1600,6 +1601,8 @@ def main(scn_filename=None, start_time=0):
                             show_trajectories = True
                         elif command[1] == "labels":
                             labels_visible = 1
+                        elif command[1] == "pmcs":
+                            pmcs_visible = 1
                         elif command[1] == "grid":
                             grid_active = True
                         elif command[1] == "polar_grid":
@@ -1615,6 +1618,8 @@ def main(scn_filename=None, start_time=0):
                         show_trajectories = False
                     elif command[1] == "labels":
                         labels_visible = 0
+                    elif command[1] == "pmcs":
+                        pmcs_visible = 0
                     elif command[1] == "grid":
                         grid_active = False
                     elif command[1] == "polar_grid":
@@ -2220,12 +2225,17 @@ def main(scn_filename=None, start_time=0):
                             print("Syntax Option 6: show <projection_name> <(attrib_name/params)> <display_label>\n")
                             print("Syntax Option 7: show traj (enables trajectory trails)\n")
                             print("Syntax Option 8: show grid (enables xz plane grid)\n")
+                            print("Syntax Option 9: show polar_grid (enables xz plane grid in polar coordinates)\n")
+                            print("Syntax Option 10: show labels (enables text labels for objects)\n")
+                            print("Syntax Option 11: show pmcs (shows point-mass-clouds)\n")
                             input("Press Enter to continue...")
                         elif command[1] == "hide":
                             print("\n'hide' command removes an output element from the command prompt/terminal.\n")
                             print("Syntax Option 1: hide <display_label>\n")
                             print("Syntax Option 2: hide traj (disables trajectory trails)\n")
                             print("Syntax Option 3: hide grid (disables xz plane grid)\n")
+                            print("Syntax Option 4: hide polar_grid (disables xz plane grid, polar coordinates)\n")
+                            print("Syntax Option 5: hide pmcs (hides point-mass-clouds)\n")
                             input("Press Enter to continue...")
                         elif command[1] == "clear":
                             print("\n'clear' command removes all output element from the command prompt/terminal.\n")
@@ -2823,7 +2833,7 @@ def main(scn_filename=None, start_time=0):
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
             drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories,
-                      draw_mode, labels_visible, scene_lock, point_size, grid_active, polar_grid_active, scene_rot_target,
+                      draw_mode, labels_visible, pmcs_visible, scene_lock, point_size, grid_active, polar_grid_active, scene_rot_target,
                       starfield, far_clip)
             glfw.swap_buffers(window)
             

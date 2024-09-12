@@ -418,6 +418,11 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_polar_grid_button.grid(row=17, column=3)
                 show_polar_grid_button.config(width=20, height=1)
 
+                # option 13
+                show_pmcs_button = tk.Button(entry_panel, text="Show PMCs", command=lambda:add_to_buffer("show pmcs"))
+                show_pmcs_button.grid(row=17, column=4)
+                show_pmcs_button.config(width=20, height=1)
+
             elif cmd_a == "hide":
                 hide_help = tk.Label(entry_panel, text="'hide' command removes an output element from the command prompt/terminal.")
                 hide_help.grid(row=0, column=0, columnspan=10)
@@ -452,6 +457,10 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 hide_s5_button = tk.Button(entry_panel, text="Hide Plr. Grid", command=lambda:add_to_buffer("hide polar_grid"))
                 hide_s5_button.grid(row=5, column=1)
                 hide_s5_button.config(width=20, height=1)
+
+                hide_s6_button = tk.Button(entry_panel, text="Hide PMCs", command=lambda:add_to_buffer("hide pmcs"))
+                hide_s6_button.grid(row=5, column=2)
+                hide_s6_button.config(width=20, height=1)
 
             elif cmd_a == "clear":
                 clear_help = tk.Label(entry_panel, text="'clear' command can remove all output element from the command prompt/terminal,\nremove all objects from the simulation, or clear trajectory trails up to current simulation time.")

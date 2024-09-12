@@ -123,7 +123,7 @@ def drawPolarGridPlane(cam, bodies, vessels, angular_divisions=64):
 
     return radial_spacing
 
-def drawBodies(bodies, active_cam, draw_mode):
+def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
 
     for b in bodies:
         glColor(b.get_color()[0], b.get_color()[1], b.get_color()[2])
@@ -172,6 +172,70 @@ def drawBodies(bodies, active_cam, draw_mode):
                     glEnd()
 
         glPopMatrix()
+
+        if pmcs_visible and b.point_mass_cloud:
+            for idx_pm in range(len(b.point_mass_cloud)):
+                abs_pos, pm_mass = b.get_pm_abs(idx_pm)
+                draw_pos = abs_pos * visual_scaling_factor
+                cam_dist = (-draw_pos - active_cam.get_pos()).mag()
+                crossline_length = pm_mass / b.mass * 1500 # yes, 500 is arbitrary
+                
+                # glColor(b.get_color()) -- we already did this
+                glPushMatrix()
+                glTranslate(draw_pos.x, draw_pos.y, draw_pos.z)
+                glBegin(GL_LINES)
+
+                # this creates an octahedron
+                #
+                # ...
+                # trust me
+                glVertex3f(-crossline_length * 0.5, 0, 0)
+                glVertex3f(crossline_length * 0.5, 0, 0)
+
+                glVertex3f(0, -crossline_length * 0.5, 0)
+                glVertex3f(0, crossline_length * 0.5, 0)
+
+                glVertex3f(0, 0, -crossline_length * 0.5)
+                glVertex3f(0, 0, crossline_length * 0.5)
+
+                glVertex3f(0, 0, -crossline_length * 0.5)
+                glVertex3f(0, crossline_length * 0.5, 0)
+
+                glVertex3f(0, 0, crossline_length * 0.5)
+                glVertex3f(0, crossline_length * 0.5, 0)
+
+                glVertex3f(crossline_length * 0.5, 0, 0)
+                glVertex3f(0, crossline_length * 0.5, 0)
+
+                glVertex3f(-crossline_length * 0.5, 0, 0)
+                glVertex3f(0, crossline_length * 0.5, 0)
+
+                glVertex3f(0, 0, -crossline_length * 0.5)
+                glVertex3f(0, -crossline_length * 0.5, 0)
+
+                glVertex3f(0, 0, crossline_length * 0.5)
+                glVertex3f(0, -crossline_length * 0.5, 0)
+
+                glVertex3f(crossline_length * 0.5, 0, 0)
+                glVertex3f(0, -crossline_length * 0.5, 0)
+
+                glVertex3f(-crossline_length * 0.5, 0, 0)
+                glVertex3f(0, -crossline_length * 0.5, 0)
+
+                glVertex3f(-crossline_length * 0.5, 0, 0)
+                glVertex3f(0, 0, crossline_length * 0.5)
+
+                glVertex3f(crossline_length * 0.5, 0, 0)
+                glVertex3f(0, 0, crossline_length * 0.5)
+
+                glVertex3f(-crossline_length * 0.5, 0, 0)
+                glVertex3f(0, 0, -crossline_length * 0.5)
+
+                glVertex3f(crossline_length * 0.5, 0, 0)
+                glVertex3f(0, 0, -crossline_length * 0.5)
+
+                glEnd()
+                glPopMatrix()
 
 def drawVessels(vessels, active_cam, draw_mode):
 
@@ -470,7 +534,7 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
 def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1,
-              labels_visible=True, scene_lock=None, point_size=2, grid_active=False, polar_grid_active=False, scene_rot_target=None,
+              labels_visible=True, pmcs_visible=True, scene_lock=None, point_size=2, grid_active=False, polar_grid_active=False, scene_rot_target=None,
               starfield=[], far_clip=1e6):
     
     # sort the objects by their distance to the camera so we can draw the ones in the front last
@@ -492,7 +556,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
     drawBarycenters(barycenters, active_cam)
-    drawBodies(bodies, active_cam, draw_mode)
+    drawBodies(bodies, active_cam, draw_mode, pmcs_visible)
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)
 
