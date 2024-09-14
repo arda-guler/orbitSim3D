@@ -70,8 +70,10 @@ def edit_scenario(filename):
         tf13 = add_entry_field(wnd_add_body, "Sea Lvl. Atmo. Dens. (kg m-3)", c_column)
         c_column += 1
         tf14 = add_entry_field(wnd_add_body, "Scale Height (m)", c_column)
+        c_column += 1
+        tf15 = add_entry_field(wnd_add_body, "Point Mass Cloud", c_column)
 
-        tfs = [tf1, tf2, tf3, tf4, tf5, tf6, tf7, tf8, tf9, tf10, tf11, tf12, tf13, tf14]
+        tfs = [tf1, tf2, tf3, tf4, tf5, tf6, tf7, tf8, tf9, tf10, tf11, tf12, tf13, tf14, tf15]
 
         btn_add_body = tk.Button(wnd_add_body, text="Add Body", command=do_add_body)
         btn_add_body.grid(row=2, column=0, columnspan=13)
