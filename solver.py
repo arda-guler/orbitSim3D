@@ -2,7 +2,7 @@ import copy
 
 from vector3 import *
 
-def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
+def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t):
 
     for rp in radiation_pressures:
         rp.update_occultation(bodies)
@@ -15,6 +15,11 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
         ad.update_mass(maneuvers, sim_time, delta_t)
         accel = ad.calc_accel()
         ad.vessel.update_vel(accel, delta_t)
+        # do not update vessel position in this 'for' loop, we did not apply all accelerations!
+
+    for sh in spherical_harmonics:
+        accel = sh.gottliebnorm_accel()
+        sh.vessel.update_vel(accel, delta_t)
         # do not update vessel position in this 'for' loop, we did not apply all accelerations!
 
     # GR
@@ -62,7 +67,7 @@ def SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drag
     for sp in surface_points:
         sp.update_state_vectors(delta_t)
 
-def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
+def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t):
     
     # update masses and occultation calculations
     for ad in atmospheric_drags:
@@ -94,6 +99,13 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         if m.vessel in vessels:
             v_idx = vessels.index(m.vessel)
             accel_vec = m.get_accel(sim_time, delta_t)
+            vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
+
+    # calculate vessel acccelerations due to spherical harmonics perturbations
+    for sh in spherical_harmonics:
+        if sh.vessel in vessels:
+            v_idx = vessels.index(sh.vessel)
+            accel_vec = sh.gottliebnorm_accel()
             vessel_accels_1[v_idx] = vessel_accels_1[v_idx] + accel_vec
 
     # calculate vessel accelerations due to atmospheric drag
@@ -154,6 +166,13 @@ def VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags
         if m.vessel in vessels:
             v_idx = vessels.index(m.vessel)
             accel_vec = m.get_accel((sim_time + delta_t), delta_t)
+            vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
+
+    # calculate vessel acccelerations due to spherical harmonics perturbations
+    for sh in spherical_harmonics:
+        if sh.vessel in vessels:
+            v_idx = vessels.index(sh.vessel)
+            accel_vec = sh.gottliebnorm_accel()
             vessel_accels_2[v_idx] = vessel_accels_2[v_idx] + accel_vec
 
     # calculate vessel accelerations due to atmospheric drag
@@ -218,7 +237,7 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         rp.update_occultation(bodies)
         rp.update_mass(maneuvers, sim_time, delta_t)
 
-    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
+    def compute_accels_at_state(vessels, bodies, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t):
         vessel_accels = [vec3(0, 0, 0)] * len(vessels)
         body_accels = [vec3(0, 0, 0)] * len(bodies)
 
@@ -240,6 +259,13 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
             if m.vessel in vessels:
                 v_idx = vessels.index(m.vessel)
                 accel_vec = m.get_accel(sim_time, delta_t)
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel acccelerations due to spherical harmonics perturbations
+        for sh in spherical_harmonics:
+            if sh.vessel in vessels:
+                v_idx = vessels.index(sh.vessel)
+                accel_vec = sh.gottliebnorm_accel()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         # calculate vessel accelerations due to atmospheric drag
@@ -327,7 +353,7 @@ def Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         v.update_traj_history()
         v.update_draw_traj_history()
 
-def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t):
+def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t):
     # update masses and occultation calculations
     for ad in atmospheric_drags:
         ad.update_mass(maneuvers, sim_time, delta_t)
@@ -358,6 +384,13 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
             if m.vessel in vessels:
                 v_idx = vessels.index(m.vessel)
                 accel_vec = m.get_accel(sim_time, delta_t)
+                vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
+
+        # calculate vessel acccelerations due to spherical harmonics perturbations
+        for sh in spherical_harmonics:
+            if sh.vessel in vessels:
+                v_idx = vessels.index(sh.vessel)
+                accel_vec = sh.gottliebnorm_accel()
                 vessel_accels[v_idx] = vessel_accels[v_idx] + accel_vec
 
         # calculate vessel accelerations due to atmospheric drag
@@ -450,7 +483,7 @@ def Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         v.update_traj_history()
         v.update_draw_traj_history()
 
-def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t,
+def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t,
              solver_type=0, tolerance=1e-8):
 
     c_delta_t = delta_t
@@ -477,6 +510,7 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         c_vessels = copylist(vessels)
         c_surface_points = copylist(surface_points)
         c_maneuvers = copylist(maneuvers)
+        c_spherical_harmonics = copylist(spherical_harmonics)
         c_atmospheric_drags = copylist(atmospheric_drags)
         c_radiation_pressures = copylist(radiation_pressures)
         c_schwarzschilds = copylist(schwarzschilds)
@@ -485,13 +519,13 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
 
         # solve the step using delta_t
         if solver_type == 0:
-            SymplecticEuler(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+            SymplecticEuler(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_spherical_harmonics, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
         elif solver_type == 1:
-            VelocityVerlet(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+            VelocityVerlet(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_spherical_harmonics, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
         elif solver_type == 2:
-            Yoshida4(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+            Yoshida4(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_spherical_harmonics, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
         else:
-            Yoshida8(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
+            Yoshida8(c_bodies, c_vessels, c_surface_points, c_maneuvers, c_atmospheric_drags, c_radiation_pressures, c_spherical_harmonics, c_schwarzschilds, c_lensethirrings, c_sim_time, c_delta_t)
 
         # save results
         d1_positions = []
@@ -506,6 +540,7 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         z_vessels = copylist(vessels)
         z_surface_points = copylist(surface_points)
         z_maneuvers = copylist(maneuvers)
+        z_spherical_harmonics = copylist(spherical_harmonics)
         z_atmospheric_drags = copylist(atmospheric_drags)
         z_radiation_pressures = copylist(radiation_pressures)
         z_schwarzschilds = copylist(schwarzschilds)
@@ -513,17 +548,17 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         z_sim_time = sim_time
 
         if solver_type == 0:
-            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
-            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            SymplecticEuler(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
         elif solver_type == 1:
-            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
-            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            VelocityVerlet(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
         elif solver_type == 2:
-            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
-            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida4(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
         else:
-            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
-            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
+            Yoshida8(z_bodies, z_vessels, z_surface_points, z_maneuvers, z_atmospheric_drags, z_radiation_pressures, z_spherical_harmonics, z_schwarzschilds, z_lensethirrings, z_sim_time, z_delta_t)
 
         # save results
         d2_positions = []
@@ -556,13 +591,13 @@ def adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radi
         warn = True
 
     if solver_type == 0:
-        SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+        SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
     elif solver_type == 1:
-        VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+        VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
     elif solver_type == 2:
-        Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+        Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
     elif solver_type == 3:
-        Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+        Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
     
     return delta_t, increase_delta_t, warn
     

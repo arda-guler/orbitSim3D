@@ -4,7 +4,7 @@ from tkinter import ttk
 # There are probably better ways to code this, but it works just as well as you'd want.
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
-def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
+def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, spherical_harmonics, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                       proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num):
     command_buffer = []
@@ -34,6 +34,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
         for m in maneuvers:
             objects_text += "MANEUVER: " + m.get_name() + "\n"
+
+        for sh in spherical_harmonics:
+            objects_text += "SPHERICAL HARMONICS: " + sh.get_name() + "\n"
 
         for rp in radiation_pressures:
             objects_text += "RADIATION PRESSURE: " + rp.get_name() + "\n"
@@ -399,28 +402,48 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 show_s8_button.config(width=20, height=1)
 
                 # option 9
-                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
-                show_traj_button.grid(row=17, column=0)
-                show_traj_button.config(width=20,height=1)
+                show_s9t1_label = tk.Label(entry_panel, text="Sphr. Harm.")
+                show_s9t2_label= tk.Label(entry_panel, text="Display Label")
+                show_s9t1_label.grid(row=17, column=1)
+                show_s9t2_label.grid(row=17, column=2)
+
+                show_s9t1 = tk.Text(entry_panel, width=20, height=1)
+                show_s9t2 = tk.Text(entry_panel, width=20, height=1)
+                show_s9t1.grid(row=18, column=1)
+                show_s9t2.grid(row=18, column=2)
+
+                def generate_s9():
+                    if show_s9t1.get("1.0", "end-1c") and show_s9t2.get("1.0", "end-1c"):
+                        command = "show " + show_s9t1.get("1.0", "end-1c") + " " + show_s9t2.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                show_s9_button = tk.Button(entry_panel, text="Show Sph. Harm. Data", command=generate_s9)
+                show_s9_button.grid(row=18, column=0)
+                show_s9_button.config(width=20, height=1)
 
                 # option 10
-                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
-                show_labels_button.grid(row=17, column=1)
-                show_labels_button.config(width=20,height=1)
+                show_traj_button = tk.Button(entry_panel, text="Show Trajectories", command=lambda:add_to_buffer("show traj"))
+                show_traj_button.grid(row=19, column=0)
+                show_traj_button.config(width=20,height=1)
 
                 # option 11
-                show_grid_button = tk.Button(entry_panel, text="Show Grid", command=lambda:add_to_buffer("show grid"))
-                show_grid_button.grid(row=17, column=2)
-                show_grid_button.config(width=20, height=1)
+                show_labels_button = tk.Button(entry_panel, text="Show Labels", command=lambda:add_to_buffer("show labels"))
+                show_labels_button.grid(row=19, column=1)
+                show_labels_button.config(width=20,height=1)
 
                 # option 12
-                show_polar_grid_button = tk.Button(entry_panel, text="Show Polar Grid", command=lambda:add_to_buffer("show polar_grid"))
-                show_polar_grid_button.grid(row=17, column=3)
-                show_polar_grid_button.config(width=20, height=1)
+                show_grid_button = tk.Button(entry_panel, text="Show Grid", command=lambda:add_to_buffer("show grid"))
+                show_grid_button.grid(row=19, column=2)
+                show_grid_button.config(width=20, height=1)
 
                 # option 13
+                show_polar_grid_button = tk.Button(entry_panel, text="Show Polar Grid", command=lambda:add_to_buffer("show polar_grid"))
+                show_polar_grid_button.grid(row=19, column=3)
+                show_polar_grid_button.config(width=20, height=1)
+
+                # option 14
                 show_pmcs_button = tk.Button(entry_panel, text="Show PMCs", command=lambda:add_to_buffer("show pmcs"))
-                show_pmcs_button.grid(row=17, column=4)
+                show_pmcs_button.grid(row=19, column=4)
                 show_pmcs_button.config(width=20, height=1)
 
             elif cmd_a == "hide":
@@ -784,6 +807,54 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 dm_s1_button = tk.Button(entry_panel, text="Delete Maneuver", command=generate_s1)
                 dm_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "create_spherical_harmonics":
+                csh_help = tk.Label(entry_panel, text="'create_spherical_harmonics' command sets up a spherical harmonics model around a body affecting a vessel.")
+                csh_help.grid(row=0, column=0, columnspan=10)
+
+                csh_s1t1_label = tk.Label(entry_panel, text="Sph. Harm. Name")
+                csh_s1t2_label = tk.Label(entry_panel, text="Vessel")
+                csh_s1t3_label = tk.Label(entry_panel, text="Body")
+                csh_s1t4_label = tk.Label(entry_panel, text="Model File")
+                csh_s1t1_label.grid(row=1, column=1)
+                csh_s1t2_label.grid(row=1, column=2)
+                csh_s1t3_label.grid(row=1, column=3)
+                csh_s1t4_label.grid(row=1, column=4)
+
+                csh_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                csh_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                csh_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                csh_s1t4 = tk.Text(entry_panel, width=20, height=1)
+                csh_s1t1.grid(row=2, column=1)
+                csh_s1t2.grid(row=2, column=2)
+                csh_s1t3.grid(row=2, column=3)
+                csh_s1t4.grid(row=2, column=4)
+
+                def generate_s1():
+                    if csh_s1t1.get("1.0", "end-1c") and csh_s1t2.get("1.0", "end-1c") and csh_s1t3.get("1.0", "end-1c") and csh_s1t4.get("1.0", "end-1c"):
+                        command = "create_spherical_harmonics " + csh_s1t1.get("1.0", "end-1c") + " " + csh_s1t2.get("1.0", "end-1c") + " " + csh_s1t3.get("1.0", "end-1c") + " " + csh_s1t4.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                csh_s1_button = tk.Button(entry_panel, text="Create Sph. Harm.", command=generate_s1)
+                csh_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "remove_spherical_harmonics":
+                rsh_help = tk.Label(entry_panel, text="'remove_spherical_harmonics' command removes a spherical harmonics model from the simulation.")
+                rsh_help.grid(row=0, column=0, columnspan=10)
+
+                rsh_s1t1_label = tk.Label(entry_panel, text="Sph. Harm. Name")
+                rsh_s1t1_label.grid(row=1, column=1)
+
+                rsh_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                rsh_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if rsh_s1t1.get("1.0", "end-1c"):
+                        command = "remove_spherical_harmonics " + rsh_s1t1.get("1.0", "end-1c")
+                        add_to_buffer(command)
+
+                rsh_s1_button = tk.Button(entry_panel, text="Remove Sph. Harm.", command=generate_s1)
+                rsh_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "apply_radiation_pressure":
                 arp_help = tk.Label(entry_panel, text="'apply_radiation_pressure' command sets up a radiation pressure effect on a vessel.")
@@ -1910,6 +1981,17 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         delete_maneuver_button = tk.Button(scrollable_frame, text="Delete Maneuver", command=lambda:enter_cmd("delete_maneuver"))
         delete_maneuver_button.config(width=15,height=1)
         delete_maneuver_button.grid(row=current_row, column=1)
+
+        current_row += 1
+        sh_commands_label = tk.Label(scrollable_frame, text="Spherical Harmonics")
+        sh_commands_label.grid(row=current_row, column=0, columnspan=3)
+        current_row += 1
+        create_sh_button = tk.Button(scrollable_frame, text="Create Sph. Harm.", command=lambda:enter_cmd("create_spherical_harmonics"))
+        create_sh_button.config(width=15,height=1)
+        create_sh_button.grid(row=current_row, column=0)
+        remove_sh_button = tk.Button(scrollable_frame, text="Remove Sph. Harm.", command=lambda:enter_cmd("remove_spherical_harmonics"))
+        remove_sh_button.config(width=15,height=1)
+        remove_sh_button.grid(row=current_row, column=1)
 
         current_row += 1
         rad_press_commands_label = tk.Label(scrollable_frame, text="Non-gravitational Perturbations")

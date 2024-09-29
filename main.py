@@ -25,6 +25,7 @@ from orbit import *
 from plot import *
 from command_panel import *
 from config_utils import *
+from spherical_harmonics_model import *
 from radiation_pressure import *
 from atmospheric_drag import *
 # from vector3 import *
@@ -53,6 +54,7 @@ plots = []
 cameras = []
 
 maneuvers = []
+spherical_harmonics = []
 radiation_pressures = []
 atmospheric_drags = []
 schwarzschilds = []
@@ -124,8 +126,8 @@ def read_batch(batch_path):
 
 def clear_scene():
     global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources,\
-           plots, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, observations,\
-           sim_time
+           plots, spherical_harmonics, radiation_pressures, atmospheric_drags, schwarzschilds,\
+           lensethirrings, observations, sim_time
 
     objs = []
     vessels = []
@@ -136,6 +138,7 @@ def clear_scene():
     barycenters = []
     resources = []
     plots = []
+    spherical_harmonics = []
     radiation_pressures = []
     atmospheric_drags = []
     schwarzschilds = []
@@ -144,8 +147,8 @@ def clear_scene():
     sim_time = 0
 
 def import_scenario(scn_filename):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags,\
-           schwarzschilds, lensethirrings, observations, proximity_zones, resources, sim_time
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, spherical_harmonics, radiation_pressures,\
+           atmospheric_drags, schwarzschilds, lensethirrings, observations, proximity_zones, resources, sim_time
 
     def construct_point_mass_cloud(pmc_str):
         # this is a bit of an operation unfortunately, but should be more readable to the user
@@ -299,6 +302,12 @@ def import_scenario(scn_filename):
             objs.append(new_bc)
             print("Loading barycenter:", new_bc.get_name())
 
+        # include spherical harmonics data
+        elif line[0] == "SH":
+            new_sh = spherical_harmonics_model(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]), line[4])
+            spherical_harmonics.append(new_sh)
+            print("Loading spherical harmonics:", new_sh.get_name())
+
         # import radiation pressure data
         elif line[0] == "R":
             if line[6] in preset_orientations:
@@ -353,8 +362,9 @@ def import_scenario(scn_filename):
     main(scn_filename, start_time)
 
 def export_scenario(scn_filename, verbose=True):
-    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags,\
-           schwarzschilds, lensethirrings, observations, proximity_zones, sim_time, command_history
+    global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, spherical_harmonics,\
+           radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, observations,\
+           proximity_zones, sim_time, command_history
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -447,6 +457,14 @@ def export_scenario(scn_filename, verbose=True):
         for res in resources:
             res_save_string = "U|" + res.get_name() + "|" + str(res.value) + "|" + res.equation + "|" + res.variable + "|" + res.obj1.name + "|" + res.obj2.name + "|" + str(res.coeffs) + "|" + str(res.limits) + "\n"
             scn_file.write(res_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing spherical harmonics...")
+        for sh in spherical_harmonics:
+            sh_save_string = "SH|" + sh.get_name() + "|" + sh.vessel.get_name() + "|" + sh.body.get_name() + "|" + sh.filepath + "\n"
+            scn_file.write(sh_save_string)
 
         scn_file.write("\n")
 
@@ -579,6 +597,42 @@ def find_maneuver_by_name(mnv_name):
     for m in maneuvers:
         if m.name == mnv_name:
             result = m
+            break
+
+    return result
+
+def create_spherical_harmonics(sh_name, sh_vessel, sh_body, sh_filepath):
+    global spherical_harmonics
+
+    if find_spherical_harmonics_by_name(sh_name):
+        print("A spherical harmonics model with this name already exists. Please pick another name for the new model.\n")
+        input("Press Enter to continue...")
+        return
+
+    new_sh = spherical_harmonics_model(sh_name, sh_vessel, sh_body, sh_filepath)
+    spherical_harmonics.append(new_sh)
+
+def remove_spherical_harmonics(sh_name):
+    global spherical_harmonics
+
+    sh = find_spherical_harmonics_by_name(sh_name)
+
+    if not sh:
+        print("Spherical harmonics model not found!")
+        time.sleep(2)
+        return
+
+    spherical_harmonics.remove(sh)
+    del sh
+
+def find_spherical_harmonics_by_name(sh_name):
+    global spherical_harmonics
+
+    result = None
+
+    for sh in spherical_harmonics:
+        if sh.name == sh_name:
+            result = sh
             break
 
     return result
@@ -1328,7 +1382,7 @@ def clear_starfield():
 
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
-           plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
+           plots, resources, cameras, barycenters, spherical_harmonics, radiation_pressures, atmospheric_drags,\
            proximity_zones, schwarzschilds, lensethirrings, observations, gvar_fov, gvar_near_clip, gvar_far_clip,\
            starfield
 
@@ -1461,7 +1515,7 @@ def main(scn_filename=None, start_time=0):
                     frame_command = True
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
-                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
+                    panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, spherical_harmonics, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
                                                        proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
                                                        cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num)
                     if panel_commands:
@@ -1591,6 +1645,10 @@ def main(scn_filename=None, start_time=0):
                         if find_observation_by_name(command[1]):
                             obs = find_observation_by_name(command[1])
                             output_buffer.append([command[2], "params", obs, "obs"])
+
+                        elif find_spherical_harmonics_by_name(command[1]):
+                            sh = find_spherical_harmonics_by_name(command[1])
+                            output_buffer.append([command[2], "params", sh, "sh"])
 
                         else:
                             print("Observation not found.")
@@ -1767,6 +1825,25 @@ def main(scn_filename=None, start_time=0):
                     else:
                         print("Wrong number of arguments for command 'delete_maneuver'.\n")
                         time.sleep(2)
+
+                # CREATE_SPHERICAL_HARMONICS command
+                elif command[0] == "create_spherical_harmonics":
+                    if len(command) == 5:
+                        create_spherical_harmonics(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]), command[4])
+                    else:
+                        print("Wrong number of arguments for command 'create_spherical_harmonics'.\n")
+                        time.sleep(2)
+
+                # REMOVE_SPHERICAL_HARMONICS command
+                elif command[0] == "remove_spherical_harmonics":
+                    remove_spherical_harmonics(command[1])
+
+                # GET_SPHERICAL_HARMONICS command
+                elif command[0] == "get_spherical_harmonics":
+                    print("Spherical harmonics models currently in simulation:")
+                    for sh in spherical_harmonics:
+                        print(sh.name)
+                    input("Press Enter to continue...")
 
                 # APPLY_RADIATION_PRESSURE command
                 elif command[0] == "apply_radiation_pressure":
@@ -2199,6 +2276,7 @@ def main(scn_filename=None, start_time=0):
                         print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                         print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
                         print("delete_plot, display_plot, get_plots, create_resource, delete_resource, get_resources,")
+                        print("create_spherical_harmonics, remove_spherical_harmonics, get_spherical_harmonics,")
                         print("create_schwarzschild, delete_schwarzschild, get_schwarzschild, create_lensethirring, delete_lensethirring,")
                         print("get_lensethirrings, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove, auto_dt_clear, get_auto_dt_buffer,")
                         print("draw_mode, point_size, create_barycenter, delete_barycenter, export,")
@@ -2314,6 +2392,18 @@ def main(scn_filename=None, start_time=0):
                         elif command[1] == "delete_maneuver":
                             print("\n'delete_maneuver' command removes a maneuver from the simulation.\n")
                             print("Syntax: delete_maneuver <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_spherical_harmonics":
+                            print("\n'create_spherical_harmonics' command sets up a spherical harmonics model around a body affecting a vessel.\n")
+                            print("Syntax: create_spherical_harmonics <name> <vessel> <body> <model_filename>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "remove_spherical_harmonics":
+                            print("\n'remove_spherical_harmonics' command removes a spherical harmonics model from the simulation.\n")
+                            print("Syntax: remove_spherical_harmonics <name>")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_spherical_harmonics":
+                            print("\n'get_spherical_harmonics' command prints out a list of all spherical harmonics models currently in simulation.\n")
+                            print("Syntax: get_spherical_harmonics")
                             input("Press Enter to continue...")
                         elif command[1] == "apply_radiation_pressure":
                             print("\n'apply_radiation_pressure' command sets up a radiation pressure effect on a vessel.\n")
@@ -2612,15 +2702,15 @@ def main(scn_filename=None, start_time=0):
         increase_delta_t = False
         adaptive_warning = False
         if solver_type == 0:
-            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+            SymplecticEuler(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 1:
-            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+            VelocityVerlet(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 2:
-            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+            Yoshida4(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
         elif solver_type == 3:
-            Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t)
+            Yoshida8(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t)
         else:
-            delta_t, increase_delta_t, adaptive_warning = adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, schwarzschilds, lensethirrings, sim_time, delta_t, solver_type-4, tolerance)
+            delta_t, increase_delta_t, adaptive_warning = adaptive(bodies, vessels, surface_points, maneuvers, atmospheric_drags, radiation_pressures, spherical_harmonics, schwarzschilds, lensethirrings, sim_time, delta_t, solver_type-4, tolerance)
 
         if solver_type > 3 and output_rate != 1:
             output_rate = 1
@@ -2813,6 +2903,10 @@ def main(scn_filename=None, start_time=0):
 
                     # observations
                     elif element[1] == "params" and element[3] == "obs":
+                        print(element[0], element[2].get_params_str())
+
+                    # spherical harmonics
+                    elif element[1] == "params" and element[3] == "sh":
                         print(element[0], element[2].get_params_str())
 
                     # note taking
