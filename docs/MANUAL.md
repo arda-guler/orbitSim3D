@@ -117,6 +117,8 @@ There are only two configuration files;
 
 - observation.py: Calculates angular position and angular rate observation ephemeris for a target seen by an observer.
 
+- surface_coverage.py: Computes the section of the surface of a body visible from a vessel.
+
 - plot.py: Plot class that handles plotting of variables in certain time intervals on user's demand.
 
 - test_propagator.py: Runs a positional error check on the orbit propagator configuration of your choice using an n-body model of the Solar System and comparing it against JPL Horizons ephemeris.
