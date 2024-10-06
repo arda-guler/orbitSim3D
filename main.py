@@ -1257,7 +1257,7 @@ def vessel_body_crash(v, b):
     # a vessel has crashed into a celestial body. We will convert the vessel object
     # into a surface point on the body (a crash site) and remove all references to
     # the vessel object
-    global maneuvers, surface_points, plots, proximity_zones, batch_commands
+    global maneuvers, surface_points, plots, proximity_zones, surface_coverages, batch_commands
 
     for m in maneuvers:
         if m.vessel == v or m.frame_body == v:
@@ -1271,6 +1271,10 @@ def vessel_body_crash(v, b):
     for pz in proximity_zones:
         if pz.vessel == v:
             delete_proximity_zone(pz.name)
+
+    for sc in surface_coverages:
+        if sc.vessel == v:
+            remove_surface_coverage(sc.name)
 
     # orbit projections can stay since their calculation time is known
 

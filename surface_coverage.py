@@ -28,7 +28,6 @@ class surface_coverage:
         R_b = self.body.get_radius()
 
         if r_mag <= R_b:
-            print("WTF")
             return None, None
         
         d_tangent = (r_mag**2 - R_b**2)**0.5
