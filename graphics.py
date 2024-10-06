@@ -406,6 +406,42 @@ def drawSurfacePoints(surface_points, active_cam):
             glEnd()
             glPopMatrix()
 
+def drawSurfaceCoverages(surface_coverages, active_cam):
+
+    for sc in surface_coverages:
+        if sc.b != None:
+            camera_distance = (-sc.body.get_draw_pos() - active_cam.get_pos()).mag()
+            camera_physical_distance = camera_distance / visual_scaling_factor
+
+            # only draw if the body does not appear too small on the screen
+            if math.degrees(math.atan(sc.body.get_radius()*2/camera_physical_distance)) < 1.5:
+                return
+
+            # calc. drawing centerpoint of circle
+            center = sc.vessel.get_draw_pos() + sc.vessel.get_unit_vector_towards(sc.body) * sc.b * visual_scaling_factor
+
+            if abs((sc.vessel.pos - sc.body.pos).normalized().dot(vec3(0, 1, 0))) < 1:
+                plane_maker = vec3(0, 1, 0)
+            else:
+                plane_maker = vec3(1, 0, 0)
+
+            axis = (sc.vessel.pos - sc.body.pos).normalized()
+            h_vec0 = axis.cross(plane_maker)
+            
+            circle_poly = 256 # how many 'edges' a circle should have
+
+            glColor(sc.vessel.get_color()[0], sc.vessel.get_color()[1], sc.vessel.get_color()[2])
+            glPushMatrix()
+            glBegin(GL_LINE_STRIP)
+            for i in range(circle_poly + 1):
+                theta = i / circle_poly * 2 * math.pi
+                h_vec = h_vec0.rotate(axis, theta)
+                point_pos = center + h_vec * sc.h * visual_scaling_factor
+                glVertex3f(point_pos.x, point_pos.y, point_pos.z)
+
+            glEnd()
+            glPopMatrix()
+
 def drawBarycenters(barycenters, active_cam):
 
     for bc in barycenters:
@@ -533,7 +569,7 @@ def drawRapidCompute(cam, size=0.2):
     render_AN("RAPID COMPUTE ACTIVE", (1,0,0), [-5, 0.5], cam, size)
     render_AN("PLEASE BE PATIENT", (1,0,0), [-3, -0.5], cam, size/1.5)
 
-def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, active_cam, show_trajectories=True, draw_mode=1,
+def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, surface_coverages, active_cam, show_trajectories=True, draw_mode=1,
               labels_visible=True, pmcs_visible=True, scene_lock=None, point_size=2, grid_active=False, polar_grid_active=False, scene_rot_target=None,
               starfield=[], far_clip=1e6):
     
@@ -557,6 +593,7 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     # for convenience
     drawBarycenters(barycenters, active_cam)
     drawBodies(bodies, active_cam, draw_mode, pmcs_visible)
+    drawSurfaceCoverages(surface_coverages, active_cam)
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)
 

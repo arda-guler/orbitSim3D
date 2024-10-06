@@ -10,4 +10,10 @@ show lunar-orbiter dist Earth R_EARTH
 show lunar-orbiter vel_mag Earth V_EARTH
 show lunar-orbiter dist Luna R_LUNA
 show lunar-orbiter vel_mag Luna V_LUNA
+t=250000 move_cam_to 0 5000 -150000
+t=250000 rotate_cam_by x 40
+t=250000 rotate_cam_by y 220
+t=567520 create_surface_coverage luna-sc lunar-orbiter Luna
+t=567521 create_plot scplot surface_coverage luna-sc _ 567520 100000000
+t=568000 display_plot scplot
 ;

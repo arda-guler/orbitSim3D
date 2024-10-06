@@ -1,3 +1,5 @@
+import math
+
 class vec3:
     def __init__(self, x=0, y=0, z=0, *, lst=None):
         
@@ -68,3 +70,16 @@ class vec3:
     def tolist(self):
         return [self.x, self.y, self.z]
 
+    def rotate(self, axis, angle):
+        axis = axis.normalized()
+        
+        # Rodrigues' rotation formula
+        cos_theta = math.cos(angle)
+        sin_theta = math.sin(angle)
+        dot_product = self.dot(axis)
+        
+        term1 = self * cos_theta
+        term2 = axis.cross(self) * sin_theta
+        term3 = axis * dot_product * (1 - cos_theta)
+        
+        return term1 + term2 + term3

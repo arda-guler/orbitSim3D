@@ -50,6 +50,8 @@ class plot:
                 lon = gpos[1]
                 self.x_list.append(lon)
                 self.y_list.append(lat)
+            elif self.var == "surface_coverage":
+                self.y_list, self.x_list = self.obj1.generate_plot_points()
             elif self.var == "pos_x":
                 self.x_list.append(time)
                 if self.obj2:
@@ -88,9 +90,10 @@ class plot:
                     self.y_list.append(self.obj1.vel.z)
 
     def display(self):
-        if self.var != "groundtrack":
+        if self.var != "groundtrack" and self.var != "surface_coverage":
             plt.plot(self.x_list, self.y_list)
-        else:
+            
+        elif self.var == "groundtrack":
             try:
                 img_path = "data/images/surface_maps/" + self.obj2.name.lower() + ".png"
                 img = plt.imread(img_path)
@@ -101,6 +104,19 @@ class plot:
             plt.scatter(self.x_list, self.y_list)
             plt.xlim(-180, 180)
             plt.ylim(-90, 90)
+
+        elif self.var == "surface_coverage":
+            try:
+                img_path = "data/images/surface_maps/" + self.obj2.name.lower() + ".png"
+                img = plt.imread(img_path)
+                plt.imshow(img, extent=[-180, 180, -90, 90])
+            except FileNotFoundError:
+                pass
+
+            plt.plot(self.x_list, self.y_list)
+            plt.xlim(-180, 180)
+            plt.ylim(-90, 90)
+            
         plt.xlabel(self.x_axis)
         plt.ylabel(self.y_axis)
         plt.title(self.title)

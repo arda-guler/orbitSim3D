@@ -5,8 +5,9 @@ from tkinter import ttk
 # For loops create evil bugs for some reason, so I just did a lot of copy-pasting as a substitude.
 
 def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
-                      proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                      cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num):
+                      proximity_zones, surface_coverages, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time,
+                      output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance,
+                      starfield, default_star_num):
     command_buffer = []
 
     def on_panel_close():
@@ -58,6 +59,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
         for obs in observations:
             objects_text += "OBSERVATION: " + obs.get_name() + "\n"
+
+        for sc in surface_coverages:
+            objects_text += "SURFACE COV.: " + sc.get_name() + "\n"
             
         for pl in plots:
             objects_text += "PLOTTER: " + pl.get_name() + "\n"
@@ -1038,7 +1042,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 drs_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "create_plot":
-                cpl_help = tk.Label(entry_panel, text="'create_plot' command adds a plotter to the simulation to plot some value against simulation time.")
+                cpl_help = tk.Label(entry_panel, text="'create_plot' command adds a plotter to the simulation to plot some value against simulation time.\nNote: If you are creating a surface coverage plot, enter any placeholder for 'Object 2' field.")
                 cpl_help.grid(row=0, column=0, columnspan=10)
                 # option 1
                 cpl_s1t1_label = tk.Label(entry_panel, text="Plotter Name")
@@ -1119,6 +1123,24 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
 
                 dpl_s1_button = tk.Button(entry_panel, text="Delete Plotter", command=generate_s1)
                 dpl_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "display_plot":
+                dsp1_help = tk.Label(entry_panel, text="'display_plot' command displays a plotter with matplotlib.")
+                dsp1_help.grid(row=0, column=0, columnspan=10)
+
+                dsp1_s1t1_label = tk.Label(entry_panel, text="Plotter Name")
+                dsp1_s1t1_label.grid(row=1, column=1)
+
+                dspl_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                dspl_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if dspl_s1t1.get("1.0","end-1c"):
+                        command = "display_plot " + dspl_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                dspl_s1_button = tk.Button(entry_panel, text="Display Plot", command=generate_s1)
+                dspl_s1_button.grid(row=2, column=0)
 
             elif cmd_a == "create_proximity_zone":
                 cpz_help = tk.Label(entry_panel, text="'create_proximity_zone' command creates a proximity zone around a vessel that keeps track of close passes and collisions with other vessels.")
@@ -1834,6 +1856,50 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
                 dobs_s1_button = tk.Button(entry_panel, text="Delete Obsrv.", command=generate_s1)
                 dobs_s1_button.grid(row=2, column=0)
 
+            elif cmd_a == "create_surface_coverage":
+                csc_help = tk.Label(entry_panel, text="'create_surface_coverage' command adds a surface coverage computation to the\nsimulation to compute how much of the surface of a body is visible from a vessel.")
+                csc_help.grid(row=0, column=0, columnspan=10)
+
+                csc_s1t1_label = tk.Label(entry_panel, text="Surf. Cov. Name")
+                csc_s1t2_label = tk.Label(entry_panel, text="Vessel Name")
+                csc_s1t3_label = tk.Label(entry_panel, text="Body Name")
+                csc_s1t1_label.grid(row=1, column=1)
+                csc_s1t2_label.grid(row=1, column=2)
+                csc_s1t3_label.grid(row=1, column=3)
+
+                csc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                csc_s1t2 = tk.Text(entry_panel, width=20, height=1)
+                csc_s1t3 = tk.Text(entry_panel, width=20, height=1)
+                csc_s1t1.grid(row=2, column=1)
+                csc_s1t2.grid(row=2, column=2)
+                csc_s1t3.grid(row=2, column=3)
+
+                def generate_s1():
+                    if csc_s1t1.get("1.0","end-1c") and csc_s1t2.get("1.0","end-1c") and csc_s1t3.get("1.0","end-1c"):
+                        command = "create_surface_coverage " + csc_s1t1.get("1.0","end-1c") + " " + csc_s1t2.get("1.0","end-1c") + " " + csc_s1t3.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                csc_s1_button = tk.Button(entry_panel, text="Crt. Surf. Cov.", command=generate_s1)
+                csc_s1_button.grid(row=2, column=0)
+
+            elif cmd_a == "remove_surface_coverage":
+                rsc_help = tk.Label(entry_panel, text="'remove_surface_coverage' removes a surface coverage computation from the simulation.")
+                rsc_help.grid(row=0, column=0, columnspan=10)
+
+                rsc_s1t1_label = tk.Label(entry_panel, text="Surf. Cov. Name")
+                rsc_s1t1_label.grid(row=1, column=1)
+
+                rsc_s1t1 = tk.Text(entry_panel, width=20, height=1)
+                rsc_s1t1.grid(row=2, column=1)
+
+                def generate_s1():
+                    if rsc_s1t1.get("1.0","end-1c"):
+                        command = "remove_surface_coverage " + rsc_s1t1.get("1.0","end-1c")
+                        add_to_buffer(command)
+
+                rsc_s1_button = tk.Button(entry_panel, text="Rmv. Surf. Cov.", command=generate_s1)
+                rsc_s1_button.grid(row=2, column=0)
+                
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1*(event.delta/120)), "units")
                 
@@ -1964,6 +2030,13 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         delete_observation_button = tk.Button(scrollable_frame, text="Delete Obsv.", command=lambda:enter_cmd("delete_observation"))
         delete_observation_button.config(width=15, height=1)
         delete_observation_button.grid(row=current_row, column=1)
+        current_row += 1
+        create_surface_coverage_button = tk.Button(scrollable_frame, text="Crt. Surf. Cov.", command=lambda:enter_cmd("create_surface_coverage"))
+        create_surface_coverage_button.config(width=15, height=1)
+        create_surface_coverage_button.grid(row=current_row, column=0)
+        remove_surface_coverage_button = tk.Button(scrollable_frame, text="Rmv. Surf. Cov.", command=lambda:enter_cmd("remove_surface_coverage"))
+        remove_surface_coverage_button.config(width=15, height=1)
+        remove_surface_coverage_button.grid(row=current_row, column=1)
 
         current_row += 1
         plot_commands_label = tk.Label(scrollable_frame, text="Plotting")
@@ -1975,6 +2048,9 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
         delete_plot_button = tk.Button(scrollable_frame, text="Delete Plot", command=lambda:enter_cmd("delete_plot"))
         delete_plot_button.config(width=15,height=1)
         delete_plot_button.grid(row=current_row, column=1)
+        display_plot_button = tk.Button(scrollable_frame, text="Display Plot", command=lambda:enter_cmd("display_plot"))
+        display_plot_button.config(width=15, height=1)
+        display_plot_button.grid(row=current_row, column=2)
 
         current_row += 1
         barycenter_commands_label = tk.Label(scrollable_frame, text="Barycenters")

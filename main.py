@@ -34,6 +34,7 @@ from resource import *
 from general_relativity import *
 from test_propagator import *
 from observation import *
+from surface_coverage import *
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -60,6 +61,7 @@ lensethirrings = []
 proximity_zones = []
 resources = []
 observations = []
+surface_coverages = []
 
 starfield = []
 
@@ -124,8 +126,8 @@ def read_batch(batch_path):
 
 def clear_scene():
     global objs, vessels, bodies, projections, maneuvers, surface_points, barycenters, resources,\
-           plots, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings, observations,\
-           sim_time
+           plots, radiation_pressures, atmospheric_drags, proximity_zones, schwarzschilds, lensethirrings,\
+           observations, surface_coverages, sim_time
 
     objs = []
     vessels = []
@@ -138,14 +140,17 @@ def clear_scene():
     plots = []
     radiation_pressures = []
     atmospheric_drags = []
+    proximity_zones = []
     schwarzschilds = []
     lensethirrings = []
     observations = []
+    surface_coverages = []
     sim_time = 0
 
 def import_scenario(scn_filename):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, atmospheric_drags,\
-           schwarzschilds, lensethirrings, observations, proximity_zones, resources, sim_time
+           schwarzschilds, lensethirrings, observations, surface_coverages, proximity_zones,\
+           resources, sim_time
 
     def construct_point_mass_cloud(pmc_str):
         # this is a bit of an operation unfortunately, but should be more readable to the user
@@ -327,6 +332,12 @@ def import_scenario(scn_filename):
             proximity_zones.append(new_pz)
             print("Loading proximity zone:", new_pz.name)
 
+        # import surface coverage data
+        elif line[0] == "SC":
+            new_sc = surface_coverage(line[1], find_obj_by_name(line[2]), find_obj_by_name(line[3]))
+            surface_coverages.append(new_sc)
+            print("Loading surface coverage:", new_sc.name)
+
         # import resource data
         elif line[0] == "U":
             new_res = resource(line[1], float(line[2]), line[3], line[4], find_obj_by_name(line[5]), find_obj_by_name(line[6]), eval(line[7]), eval(line[8]))
@@ -354,7 +365,7 @@ def import_scenario(scn_filename):
 
 def export_scenario(scn_filename, verbose=True):
     global objs, vessels, bodies, surface_points, maneuvers, barycenters, resources, radiation_pressures, atmospheric_drags,\
-           schwarzschilds, lensethirrings, observations, proximity_zones, sim_time, command_history
+           schwarzschilds, lensethirrings, observations, surface_coverages, proximity_zones, sim_time, command_history
 
     os.makedirs("scenarios/", exist_ok=True)
 
@@ -439,6 +450,14 @@ def export_scenario(scn_filename, verbose=True):
                 bc_save_string += b.get_name() + ","
             bc_save_string = bc_save_string[:-1]+"\n"
             scn_file.write(bc_save_string)
+
+        scn_file.write("\n")
+
+        if verbose:
+            print("Writing surface coverages...")
+        for sc in surface_coverages:
+            sc_save_string = "SC|" + sc.name + "|" + sc.get_vessel().get_name() + "|" + sc.get_body().get_name() + "\n"
+            scn_file.write(sc_save_string)
 
         scn_file.write("\n")
 
@@ -872,6 +891,12 @@ def create_plot(name, variable, obj1_name, obj2_name, start_time=-1, end_time=-1
         new_plot = plot(name, "Longitude", [], "Latitude", [], obj1, obj2, "groundtrack",
                         start_time, end_time)
 
+    elif variable == "surface_coverage":
+        obj1 = find_surface_coverage_by_name(obj1_name)
+        obj2 = obj1.body
+        new_plot = plot(name, "Longitude", [], "Latitude", [], obj1, obj2, "surface_coverage",
+                        start_time, end_time)
+
     elif variable == "pos_x":
         obj1 = find_obj_by_name(obj1_name)
         if not obj2_name == "None":
@@ -945,6 +970,44 @@ def delete_plot(name):
 
     plots.remove(plot_tbd)
     del plot_tbd
+
+def find_surface_coverage_by_name(name):
+    global surface_coverages
+
+    result = None
+
+    for sc in surface_coverages:
+        if sc.get_name() == name:
+            result = sc
+            break
+
+    return result
+
+def create_surface_coverage(name, vessel, body):
+    global surface_coverages
+
+    if find_surface_coverage_by_name(name):
+        print("A surface coverage computation with this name already exists. Please pick another name for the new surface coverage computation.\n")
+        input("Press Enter to continue...")
+        return
+
+    try:
+        new_sc = surface_coverage(name, vessel, body)
+        surface_coverages.append(new_sc)
+    except:
+        print("Could not create surface coverage:", name)
+
+def remove_surface_coverage(name):
+    global surface_coverages
+
+    sc_tbd = find_surface_coverage_by_name(name)
+    if not sc_tbd:
+        print("Surface coverage computation not found.\n")
+        time.sleep(2)
+        return
+
+    surface_coverages.remove(sc_tbd)
+    del sc_tbd
 
 def find_barycenter_by_name(name):
     global barycenters
@@ -1329,7 +1392,7 @@ def clear_starfield():
 def main(scn_filename=None, start_time=0):
     global vessels, bodies, surface_points, projections, objs, sim_time, batch_commands, command_history,\
            plots, resources, cameras, barycenters, radiation_pressures, atmospheric_drags,\
-           proximity_zones, schwarzschilds, lensethirrings, observations, gvar_fov, gvar_near_clip, gvar_far_clip,\
+           proximity_zones, schwarzschilds, lensethirrings, observations, surface_coverages, gvar_fov, gvar_near_clip, gvar_far_clip,\
            starfield
 
     # read config to get start values
@@ -1462,8 +1525,9 @@ def main(scn_filename=None, start_time=0):
 
                 elif keyboard.is_pressed("p") and not rapid_compute_flag:
                     panel_commands = use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, radiation_pressures, atmospheric_drags, schwarzschilds, lensethirrings,
-                                                       proximity_zones, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time, output_rate, cam_strafe_speed,
-                                                       cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance, starfield, default_star_num)
+                                                       proximity_zones, surface_coverages, projections, resources, observations, plots, auto_dt_buffer, sim_time, delta_t, cycle_time,
+                                                       output_rate, cam_strafe_speed, cam_rotate_speed, rapid_compute_buffer, scene_lock, scene_rot_target, solver_type, tolerance,
+                                                       starfield, default_star_num)
                     if panel_commands:
                         for panel_command in panel_commands:
                             panel_command = panel_command.split(" ")
@@ -1977,6 +2041,21 @@ def main(scn_filename=None, start_time=0):
                         print(obs.name)
                     input("Press Enter to continue...")
 
+                # CREATE_SURFACE_COVERAGE
+                elif command[0] == "create_surface_coverage":
+                    create_surface_coverage(command[1], find_obj_by_name(command[2]), find_obj_by_name(command[3]))
+
+                # REMOVE_SURFACE_COVERAGE
+                elif command[0] == "remove_surface_coverage":
+                    remove_surface_coverage(command[1])
+
+                # GET_SURFACE_COVERAGES
+                elif command[0] == "get_surface_coverages":
+                    print("Surface coverage computations currently in the simulation:\n")
+                    for sc in surface_coverages:
+                        print(sc.name, "\n")
+                    input("Press Enter to continue...")
+
                 # GET_OBJECTS command
                 elif command[0] == "get_objects":
                     print("Objects currently in simulation:\n")
@@ -2199,6 +2278,7 @@ def main(scn_filename=None, start_time=0):
                         print("create_vessel, delete_vessel, fragment, get_objects, create_maneuver, delete_maneuver, get_maneuvers,")
                         print("batch, note, create_projection, delete_projection, update_projection, get_projections, create_plot,")
                         print("delete_plot, display_plot, get_plots, create_resource, delete_resource, get_resources,")
+                        print("create_observation, delete_observation, get_observations, create_surface_coverage, remove_surface_coverage, get_surface_coverages,")
                         print("create_schwarzschild, delete_schwarzschild, get_schwarzschild, create_lensethirring, delete_lensethirring,")
                         print("get_lensethirrings, output_rate, lock_cam, unlock_cam, auto_dt, auto_dt_remove, auto_dt_clear, get_auto_dt_buffer,")
                         print("draw_mode, point_size, create_barycenter, delete_barycenter, export,")
@@ -2347,6 +2427,7 @@ def main(scn_filename=None, start_time=0):
                             print("\n'create_plot' command adds a plotter to the simulation to plot some value against simulation time")
                             print("during some interval. It will display automatically when finished, or on demand with 'display_plot' command.")
                             print("Syntax: create_plot <name> <variable> <obj_1_name> <obj_2_name> (+ <start_time> <end_time>)")
+                            print("\nFor surface coverage plots, <obj_2_name> field is unused, but you must enter a placeholder. (e.g. '_' character)\n")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_plot":
                             print("\n'delete_plot' command removes a plotter from the simulation.\n")
@@ -2357,48 +2438,73 @@ def main(scn_filename=None, start_time=0):
                             print("Syntax: display_plot <name>")
                             input("Press Enter to continue...")
                         elif command[1] == "create_barycenter":
-                            print("'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
+                            print("\n'create_barycenter' marks the barycenter of multiple celestial bodies and allows for calculations\nrelative to that imaginary point in space.")
                             print("Syntax: create_barycenter <name> <bodies (separate names with single space)>")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_barycenter":
-                            print("'delete_barycenter' removes a previously marked barycenter.")
+                            print("\n'delete_barycenter' removes a previously marked barycenter.")
                             print("Syntax: delete_barycenter <name>")
                             input("Press Enter to continue...")
+                        elif command[1] == "create_observation":
+                            print("\n'create_observation' command adds an observation setup to calculate observation ephemerides of a target from an observer.")
+                            print("Syntax Option 1: create_observation <obs_name> <observer> <target> <equinox_axis> <on_plane_axis> <pole_axis>")
+                            print("Syntax Option 2: create_observation <obs_name> <observer> <target> (uses scene axes)\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "delete_observation":
+                            print("\n'delete_observation' command removes an observation setup from the simulation.")
+                            print("Syntax: delete_observation <obs_name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_observations":
+                            print("\n'get_observations' command prints out the observation setups currently in the simulation.")
+                            print("Syntax: get_observations\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "create_surface_coverage":
+                            print("\n'create_surface_coverage' command adds a surface coverage computation to the\nsimulation to compute how much of the surface of a body is visible from a vessel.")
+                            print("Syntax: create_surface_coverage <name> <vessel> <body>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "remove_surface_coverage":
+                            print("\n'remove_surface_coverage' removes a surface coverage computation from the simulation.")
+                            print("Syntax: remove_surface_coverage <name>\n")
+                            input("Press Enter to continue...")
+                        elif command[1] == "get_surface_coverages":
+                            print("\n'get_surface_coverages' prints out a list of surface coverages currently in the simulation.")
+                            print("Syntax: get_surface_coverages")
+                            input("Press Enter to continue...")
                         elif command[1] == "create_resource":
-                            print("'create_resource' command adds a resource item to the simulation to keep track of\nresources such as the stored energy aboard a vessel or the signal strength between\nvessels.")
+                            print("\n'create_resource' command adds a resource item to the simulation to keep track of\nresources such as the stored energy aboard a vessel or the signal strength between\nvessels.")
                             # name, value, equation, variable, obj1, obj2, coeffs, limits
                             print("Syntax: create_resource <name> <init_value> <equation_type> <equation_variable> <object_1> <object_2> <list_of_coefficients> <min_max_limits>")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_resource":
-                            print("'delete_resource' command removes a resource item from the simulation.")
+                            print("\n'delete_resource' command removes a resource item from the simulation.")
                             print("Syntax: delete_resources <name>")
                             input("Press Enter to continue...")
                         elif command[1] == "get_resources":
-                            print("'get_resources' command prints out the names of resource items currently in the simulation.")
+                            print("\n'get_resources' command prints out the names of resource items currently in the simulation.")
                             print("Syntax: get_resources")
                             input("Press Enter to continue...")
                         elif command[1] == "create_schwarzschild":
-                            print("'create_schwarzschild' command adds a Schwarzschild component of the general relativity effects near a massive body.")
+                            print("\n'create_schwarzschild' command adds a Schwarzschild component of the general relativity effects near a massive body.")
                             print("Syntax: create_schwarzschild <name> <massive_body_name> <vessel_name>")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_schwarzschild":
-                            print("'delete_schwarzschild' command removes a Schwarzschild component of the general relativity effect near a massive body from the simulation.")
+                            print("\n'delete_schwarzschild' command removes a Schwarzschild component of the general relativity effect near a massive body from the simulation.")
                             print("Syntax: delete_schwarzschild <name>")
                             input("Press Enter to continue...")
                         elif command[1] == "get_schwarzschilds":
-                            print("'get_schwarzschild' command lists Schwarzschild components of the general relativity effect near massive bodies in the simulation.")
+                            print("\n'get_schwarzschild' command lists Schwarzschild components of the general relativity effect near massive bodies in the simulation.")
                             print("Syntax: get_schwarzschilds")
                             input("Press Enter to continue...")
                         elif command[1] == "create_lensethirring":
-                            print("'create_lensethirring' command adds a frame-dragging component of the general relativity effects near a massive body.")
+                            print("\n'create_lensethirring' command adds a frame-dragging component of the general relativity effects near a massive body.")
                             print("Syntax: create_lensethirring <name> <massive_body_name> <vessel_name> <specific_angular_momentum>")
                             input("Press Enter to continue...")
                         elif command[1] == "delete_lensethirring":
-                            print("'delete_lensethirring' command removes a frame-dragging component of the general relativity effect near a massive body from the simulation.")
+                            print("\n'delete_lensethirring' command removes a frame-dragging component of the general relativity effect near a massive body from the simulation.")
                             print("Syntax: delete_lensethirring <name>")
                             input("Press Enter to continue...")
                         elif command[1] == "get_lensethirrings":
-                            print("'get_lensethirrings' command lists frame-dragging components of the general relativity effect near massive bodies in the simulation.")
+                            print("\n'get_lensethirrings' command lists frame-dragging components of the general relativity effect near massive bodies in the simulation.")
                             print("Syntax: get_lensethirrings")
                             input("Press Enter to continue...")
                         elif command[1] == "get_objects":
@@ -2682,6 +2788,10 @@ def main(scn_filename=None, start_time=0):
         for obs in observations:
             obs.calculate(delta_t)
 
+        # update surface coverages
+        for sc in surface_coverages:
+            sc.update()
+
         # update plots
         for p in plots:
             p.update(sim_time)
@@ -2832,7 +2942,7 @@ def main(scn_filename=None, start_time=0):
             # do the actual drawing
 
             # drawOrigin() -- maybe it'll be useful for debugging one day
-            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, get_active_cam(), show_trajectories,
+            drawScene(bodies, vessels, surface_points, barycenters, projections, maneuvers, surface_coverages, get_active_cam(), show_trajectories,
                       draw_mode, labels_visible, pmcs_visible, scene_lock, point_size, grid_active, polar_grid_active, scene_rot_target,
                       starfield, far_clip)
             glfw.swap_buffers(window)
