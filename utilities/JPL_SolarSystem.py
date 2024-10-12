@@ -120,13 +120,13 @@ for i in range(1, 10): # 1 to 10 for Mercury - Neptune and Sol (10)
             print("Error 400 Bad Request")
 
         elif response.status_code == 405:
-            print("Error 400 Method Not Allowed")
+            print("Error 405 Method Not Allowed")
 
         elif response.status_code == 500:
-            print("Error 400 Internal Server Error")
+            print("Error 500 Internal Server Error")
 
         elif response.status_code == 503:
-            print("Error 400 Server Unavailable")
+            print("Error 503 Server Unavailable")
 
     except:
         print(useful_text)
