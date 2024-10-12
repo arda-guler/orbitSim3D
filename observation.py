@@ -54,7 +54,7 @@ class observation:
         # otherwise it is going to calculate the angle from whatever the elevation above the xz-plane is
         DEC = math.asin(z / r)
 
-        if self.RA and self.DEC:
+        if self.RA != None and self.DEC != None:
             RA_rate = (RA - self.RA) / dt
             DEC_rate = (DEC - self.DEC) / dt
         else:
