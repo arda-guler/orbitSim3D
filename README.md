@@ -2,7 +2,7 @@
 
 Sophisticated astrodynamics and space mission simulator.
 
-![introB](https://user-images.githubusercontent.com/80536083/178114746-7824188d-e437-4438-ad3a-dd32e9ef6eba.png)
+![OS3D_cover](https://github.com/user-attachments/assets/21a5a518-c06e-4511-8e4f-cc5deacbbcf1)
 
 Simulate n-body trajectories, calculate Keplerian orbits, perform orbital maneuvers, apply perturbations, manage custom resources such as power generation, display or plot variables with as much customization as you want.
 Create scenario or batch files to share your simulations, export data or get rid of repetitive tasks.
