@@ -13,6 +13,7 @@
   - keyboard
   - matplotlib
   - numpy
+  - Pillow
 
 See [requirements.txt](https://github.com/arda-guler/orbitSim3D/blob/master/requirements.txt) for a list of packages that are known to work along with **Python 3.10**.
 
