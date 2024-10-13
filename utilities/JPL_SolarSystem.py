@@ -12,15 +12,15 @@ import re
 
 filenames = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Sol"]
 
-headers = ["B|Mercury|data/models/minimercury.obj|330200000000000000000000|2440000|[0.87,0.80,0.77]|",
-           "B|Venus|data/models/minivenus.obj|4868500000000000000000000|6051840|[1.0,0.93,0.69]|",
-           "B|Earth|data/models/miniearth.obj|5972190000000000000000000|6371000|[0.04,0.15,0.85]|",
-           "B|Mars|data/models/minimars.obj|641710000000000000000000|3389920|[0.91,0.31,0.23]|",
-           "B|Jupiter|data/models/minijupiter.obj|1898187220000000000000000000|69911000|[0.90,0.79,0.72]|",
-           "B|Saturn|data/models/minisaturn.obj|568340000000000000000000000|60268000|[0.97,0.89,0.84]|",
-           "B|Uranus|data/models/miniuranus.obj|86813000000000000000000000|25362000|[0.60,0.76,0.71]|",
-           "B|Neptune|data/models/minineptune.obj|102409000000000000000000000|24624000|[0.50,0.64,0.85]|",
-           "B|Sol|data/models/minisol.obj|1988500000000000000000000000000|695700000|[1.0,0.94,0.12]|"]
+headers = ["B|Mercury|data/models/minimercury.obj|None|330200000000000000000000|2440000|[0.87,0.80,0.77]|",
+           "B|Venus|data/models/minivenus.obj|None|4868500000000000000000000|6051840|[1.0,0.93,0.69]|",
+           "B|Earth|data/models/miniearth.obj|None|5972190000000000000000000|6371000|[0.04,0.15,0.85]|",
+           "B|Mars|data/models/minimars.obj|None|641710000000000000000000|3389920|[0.91,0.31,0.23]|",
+           "B|Jupiter|data/models/minijupiter.obj|None|1898187220000000000000000000|69911000|[0.90,0.79,0.72]|",
+           "B|Saturn|data/models/minisaturn.obj|None|568340000000000000000000000|60268000|[0.97,0.89,0.84]|",
+           "B|Uranus|data/models/miniuranus.obj|None|86813000000000000000000000|25362000|[0.60,0.76,0.71]|",
+           "B|Neptune|data/models/minineptune.obj|None|102409000000000000000000000|24624000|[0.50,0.64,0.85]|",
+           "B|Sol|data/models/minisol.obj|None|1988500000000000000000000000000|695700000|[1.0,0.94,0.12]|"]
 
 footers = ["|[[1,0,0],[0,1,0],[0,0,1]]|0|[0,1,0]|0|0|0|0",
            "|[[1,0,0],[0,1,0],[0,0,1]]|0|[0,1,0]|0|0|0|0",

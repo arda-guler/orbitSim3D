@@ -1,14 +1,16 @@
 from math_utils import *
 from vector3 import *
+from graphics import *
 import math
 
 class body():
-    def __init__(self, name, model, model_path, mass, radius, color, pos, vel, orient,
+    def __init__(self, name, model, model_path, surface_map_path, mass, radius, color, pos, vel, orient,
                  day_length, rot_axis, J2, luminosity, atmos_sea_level_density, atmos_scale_height,
-                 point_mass_cloud=[]):
+                 point_mass_cloud):
         self.name = name
         self.model = model
         self.model_path = model_path
+        self.surface_map_path = surface_map_path
         self.mass = mass
         self.radius = radius
         self.color = color
@@ -28,6 +30,34 @@ class body():
 
         self.traj_history = []
         self.draw_pos = self.pos * visual_scaling_factor
+
+        if self.surface_map_path != None:
+            # do additional processing of Wavefront obj for surface texture rendering
+            # first, get the list of vertex texture coordinates
+            self.us = []
+            self.vs = []
+
+            self.vtx_tex_mapping = {}
+            with open(self.model_path, "r") as f:
+                lines = f.readlines()
+
+                for line in lines:
+                    if line.startswith("vt"):
+                        line = line.strip().split()
+                        u = float(line[1])
+                        v = float(line[2])
+
+                        self.us.append(u)
+                        self.vs.append(v)
+
+                # now get the vertex-coordinate mapping
+                for line in lines:
+                    if line.startswith("f"):
+                        line = line.strip().split()
+                        for i in range(1, 4): # 1, 2, 3
+                            vertex_bunch = line[i]
+                            vertex_bunch = vertex_bunch.split("/")
+                            self.vtx_tex_mapping[int(vertex_bunch[0]) - 1] = int(vertex_bunch[1]) - 1
 
     def get_name(self):
         return self.name
@@ -98,6 +128,16 @@ class body():
 
     def get_orient(self):
         return self.orient
+
+    def get_surface_map_path(self):
+        if self.surface_map_path != None:
+            return self.surface_map_path
+        else:
+            return "None"
+
+    def load_surface_map(self):
+        if self.surface_map_path != None:
+            self.surface_map = loadTexture(self.surface_map_path)
 
     def check_pmc(self):
         # normally we don't reaallly want to print anything outside of main.py

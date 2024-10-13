@@ -1,3 +1,4 @@
+draw_mode 1
 move_cam_by 0 3000 20000
 rotate_cam_by x -10
 note FRAME_OF_REFERENCE Rotating the frame of reference, please wait...

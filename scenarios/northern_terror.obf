@@ -1,3 +1,4 @@
+draw_mode 1
 auto_dt 10 1000
 auto_dt 47000 100
 auto_dt 47700 10

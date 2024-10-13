@@ -13,25 +13,27 @@ for line in scn_lines:
         result_line += "B|"
         result_line += line[1] + "|" # name
         result_line += line[2] + "|" # model
-        result_line += line[3] + "|" # mass
-        result_line += line[4] + "|" # radius
-        result_line += line[5] + "|" # color
+        result_line += line[3] + "|" # surface map
+        result_line += line[4] + "|" # mass
+        result_line += line[5] + "|" # radius
+        result_line += line[6] + "|" # color
 
-        # line[6] is pos in meters
-        line[6] = line[6][1:-1].split(",")
-        result_line += "[" + line[6][1] + "," + line[6][2] + "," + line[6][0] + "]|"
-
-        # line[7] is vel in meters per second
+        # line[7] is pos in meters
         line[7] = line[7][1:-1].split(",")
         result_line += "[" + line[7][1] + "," + line[7][2] + "," + line[7][0] + "]|"
 
-        result_line += line[8] + "|" # orientation
-        result_line += line[9] + "|"
+        # line[8] is vel in meters per second
+        line[8] = line[8][1:-1].split(",")
+        result_line += "[" + line[8][1] + "," + line[8][2] + "," + line[8][0] + "]|"
+
+        result_line += line[9] + "|" # orientation
         result_line += line[10] + "|"
         result_line += line[11] + "|"
         result_line += line[12] + "|"
         result_line += line[13] + "|"
-        result_line += line[14]
+        result_line += line[14] + "|"
+        result_line += line[15] + "|"
+        result_line += line[16]
 
     result_text += result_line + "\n"
 

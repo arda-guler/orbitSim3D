@@ -17,7 +17,7 @@
 ;
 
 ;Celestial bodies
-B|Luna|data/models/miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|[0,1,0]|0|0|0|0|[]
+B|Luna|data/models/miniluna.obj|data/images/surface_maps/luna.png|73420000000000000000000|1737000|[0.8,0.8,0.8]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|[0,1,0]|0|0|0|0|[]
 
 ;Vessels
 V|ascent-module|data/models/minilander.obj|[0.0,0.8,0.7]|[0,0,1737010]|[0,0,0]

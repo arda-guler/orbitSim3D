@@ -1,7 +1,9 @@
 import OpenGL
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from OpenGL.GLUT import *
 import math
+from PIL import Image
 
 from math_utils import *
 from vector3 import *
@@ -19,6 +21,27 @@ def drawOrigin():
     glVertex3f(0,0,0)
     glVertex3f(0,0,1000)
     glEnd()
+
+def loadTexture(texture_path):
+    image = Image.open(texture_path)
+    image = image.convert("RGBA")
+
+    img_data = image.tobytes()
+    width, height = image.size
+
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+    glBindTexture(GL_TEXTURE_2D, 0)
+
+    return texture_id
 
 def drawGridPlane(cam, bodies, vessels):
     if cam.pos.y != 0:
@@ -126,9 +149,18 @@ def drawPolarGridPlane(cam, bodies, vessels, angular_divisions=64):
 def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
 
     for b in bodies:
-        glColor(b.get_color()[0], b.get_color()[1], b.get_color()[2])
+
+        if (draw_mode == 1 or draw_mode == 2) and b.surface_map_path != None:
+            glColor(1, 1, 1)
+        else:
+            glColor(b.get_color()[0], b.get_color()[1], b.get_color()[2])
 
         b.update_draw_pos()
+
+        # texture_path = "data/images/surface_maps/earth.png"
+        # texture_id = loadTexture(texture_path)
+        if b.surface_map_path:
+            texture_id = b.surface_map
         
         glPushMatrix()
         glTranslatef(b.get_draw_pos().x, b.get_draw_pos().y, b.get_draw_pos().z)
@@ -144,18 +176,40 @@ def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
             glEnd()
 
         else:
+            
             for mesh in b.model.mesh_list:
                 
                 if draw_mode == 1 or draw_mode == 2:
-                    glPolygonMode(GL_FRONT, GL_FILL)
-                    glBegin(GL_POLYGON)
-                    for face in mesh.faces:
-                        for vertex_i in face:
-                            vertex_i = b.model.vertices[vertex_i]
-                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
-                            vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
-                            glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
-                    glEnd()
+                    if b.surface_map_path:
+                        glEnable(GL_TEXTURE_2D)
+                        glBindTexture(GL_TEXTURE_2D, texture_id)
+                        glPolygonMode(GL_FRONT, GL_FILL)
+                        glBegin(GL_TRIANGLES)
+                        for face in mesh.faces:
+                            for vertex_i in face:
+                                u = b.us[b.vtx_tex_mapping[vertex_i]]
+                                v = b.vs[b.vtx_tex_mapping[vertex_i]]
+                                
+                                vertex_i = b.model.vertices[vertex_i]
+                                vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
+                                vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
+
+                                glTexCoord2f(u, v)
+                                glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+                        glEnd()
+                        glBindTexture(GL_TEXTURE_2D, 0)
+                        glDisable(GL_TEXTURE_2D)
+                    else:
+                        glPolygonMode(GL_FRONT, GL_FILL)
+                        glBegin(GL_TRIANGLES)
+                        for face in mesh.faces:
+                            for vertex_i in face:
+                                vertex_i = b.model.vertices[vertex_i]
+                                vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
+                                vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
+
+                                glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+                        glEnd()
                             
                 if draw_mode == 0 or draw_mode == 2:
                     glPolygonMode(GL_FRONT, GL_LINE)
@@ -172,6 +226,8 @@ def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
                     glEnd()
 
         glPopMatrix()
+
+        # glDeleteTextures([texture_id])
 
         if pmcs_visible and b.point_mass_cloud:
             for idx_pm in range(len(b.point_mass_cloud)):
@@ -583,16 +639,25 @@ def drawScene(bodies, vessels, surface_points, barycenters, projections, maneuve
     if starfield:
         drawStarfield(starfield, active_cam, far_clip)
 
-    if grid_active:
-        spacing = drawGridPlane(active_cam, bodies, vessels)
+    if draw_mode == 0:
+        if grid_active:
+            spacing = drawGridPlane(active_cam, bodies, vessels)
 
-    if polar_grid_active:
-        radial_spacing = drawPolarGridPlane(active_cam, bodies, vessels)
+        if polar_grid_active:
+            radial_spacing = drawPolarGridPlane(active_cam, bodies, vessels)
 
     # now we can draw, but make sure vessels behind the bodies are drawn in front too
     # for convenience
     drawBarycenters(barycenters, active_cam)
     drawBodies(bodies, active_cam, draw_mode, pmcs_visible)
+
+    if draw_mode == 1 or draw_mode == 2:
+        if grid_active:
+            spacing = drawGridPlane(active_cam, bodies, vessels)
+
+        if polar_grid_active:
+            radial_spacing = drawPolarGridPlane(active_cam, bodies, vessels)
+    
     drawSurfaceCoverages(surface_coverages, active_cam)
     drawSurfacePoints(surface_points, active_cam)
     drawVessels(vessels, active_cam, draw_mode)

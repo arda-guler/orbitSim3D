@@ -47,33 +47,35 @@ def edit_scenario(filename):
         c_column += 1
         tf2 = add_entry_field(wnd_add_body, "Model", c_column)
         c_column += 1
-        tf3 = add_entry_field(wnd_add_body, "Mass (kg)", c_column)
+        tf3 = add_entry_field(wnd_add_body, "Srf. Map", c_column)
         c_column += 1
-        tf4 = add_entry_field(wnd_add_body, "Radius (m)", c_column)
+        tf4 = add_entry_field(wnd_add_body, "Mass (kg)", c_column)
         c_column += 1
-        tf5 = add_entry_field(wnd_add_body, "Color (r, g, b)", c_column)
+        tf5 = add_entry_field(wnd_add_body, "Radius (m)", c_column)
         c_column += 1
-        tf6 = add_entry_field(wnd_add_body, "Position (m, m, m)", c_column)
+        tf6 = add_entry_field(wnd_add_body, "Color (r, g, b)", c_column)
         c_column += 1
-        tf7 = add_entry_field(wnd_add_body, "Velocity (m/s, m/s, m/s)", c_column)
+        tf7 = add_entry_field(wnd_add_body, "Position (m, m, m)", c_column)
         c_column += 1
-        tf8 = add_entry_field(wnd_add_body, "Orientation (3x3 matrix)", c_column)
+        tf8 = add_entry_field(wnd_add_body, "Velocity (m/s, m/s, m/s)", c_column)
         c_column += 1
-        tf9 = add_entry_field(wnd_add_body, "Day Length (s)", c_column)
+        tf9 = add_entry_field(wnd_add_body, "Orientation (3x3 matrix)", c_column)
         c_column += 1
-        tf10 = add_entry_field(wnd_add_body, "Rot. Axis", c_column)
+        tf10 = add_entry_field(wnd_add_body, "Day Length (s)", c_column)
         c_column += 1
-        tf11 = add_entry_field(wnd_add_body, "J2 Coefficient", c_column)
+        tf11 = add_entry_field(wnd_add_body, "Rot. Axis", c_column)
         c_column += 1
-        tf12 = add_entry_field(wnd_add_body, "Luminosity (W)", c_column)
+        tf12 = add_entry_field(wnd_add_body, "J2 Coefficient", c_column)
         c_column += 1
-        tf13 = add_entry_field(wnd_add_body, "Sea Lvl. Atmo. Dens. (kg m-3)", c_column)
+        tf13 = add_entry_field(wnd_add_body, "Luminosity (W)", c_column)
         c_column += 1
-        tf14 = add_entry_field(wnd_add_body, "Scale Height (m)", c_column)
+        tf14 = add_entry_field(wnd_add_body, "Sea Lvl. Atmo. Dens. (kg m-3)", c_column)
         c_column += 1
-        tf15 = add_entry_field(wnd_add_body, "Point Mass Cloud", c_column)
+        tf15 = add_entry_field(wnd_add_body, "Scale Height (m)", c_column)
+        c_column += 1
+        tf16 = add_entry_field(wnd_add_body, "Point Mass Cloud", c_column)
 
-        tfs = [tf1, tf2, tf3, tf4, tf5, tf6, tf7, tf8, tf9, tf10, tf11, tf12, tf13, tf14, tf15]
+        tfs = [tf1, tf2, tf3, tf4, tf5, tf6, tf7, tf8, tf9, tf10, tf11, tf12, tf13, tf14, tf15, tf16]
 
         btn_add_body = tk.Button(wnd_add_body, text="Add Body", command=do_add_body)
         btn_add_body.grid(row=2, column=0, columnspan=13)
