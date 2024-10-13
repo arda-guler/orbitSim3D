@@ -20,22 +20,29 @@ Although scenarios can keep all the data for the accurate replay of a space miss
 The best way to create scenarios is to design them in OS3D using the command panel and export them via the 'export' command, leaving the hassle of using the somewhat harsh syntax to the software, since OSF files are formatted in a very specific way for OS3D to parse and understand. An example is shown below;
 
 ```
-;Celestial bodies
-B|Earth|data\models\miniearth.obj|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|0|0
-B|Luna|data\models\miniluna.obj|73420000000000000000000|1737000|[0.8,0.8,0.8]|[346410000,10,-200000000]|[-483,0,-836.5]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|0|0
+;  LUNAR_FLIGHT.OSF
+;  Author: arda-guler
+;
+; This is basically a copy of the Ex_LunarTransfer scenario,
+; an example scenario in NASA's GMAT.
+;
+; Showcases n-body gravity model, impulsive maneuvers,
+; out-of-plane transfer.
+;
 
-;Vessels
-V|lunar-orbiter|data\models\miniprobe.obj|[0.0,0.8,0.7]|[-590131,-10,6745234]|[7622,0,667]
+; Celestial bodies
+B|Earth|data/models/miniearth.obj|None|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|[0,1,0]|0|0|0|0|[]
+B|Luna|data/models/miniluna.obj|None|73420000000000000000000|1737000|[0.8,0.8,0.8]|[349792.3033081594e3, 124291.1992883908e3, 137633.9092677312e3,]|[0.3750805314463571e3, 0.0943667821404095e3, -0.91379894576409e3]|[[1,0,0],[0,1,0],[0,0,1]]|2360592|[0,1,0]|0|0|0|0|[]
 
-;Maneuvers
-M|mnv_tli|const_accel|lunar-orbiter|Earth|prograde|10|50|315
-M|mnv_loi1|const_accel|lunar-orbiter|Luna|retrograde_dynamic|10|399300|50
+; Vessels
+V|lunar-orbiter|data/models/miniprobe.obj|[0.0,0.8,0.7]|[75679.87867537055e3, 21487.63875187856e3, -137380.1984338506e3]|[-0.4462753967758019e3, 0.08561205662877103e3, -0.2324532014235503e3]
 
-;Surface points
-S|science-target|Luna|[1,0,0]|[10,50,0]
+; Maneuvers
+M|mnv_toiV|impulsive|lunar-orbiter|Earth|[0.8750263, -0.1674253, 0.4541999]|0.14676929889e3|119984
+M|mnv_toiN|impulsive|lunar-orbiter|Earth|[0.4754356, 0.1362572, -0.8691345]|0.046042675892e3|119984
+M|mnv_toiB|impulsive|lunar-orbiter|Earth|[0.08362709, 0.9764583, 0.1988286]|0.090223244097e3|119984
 
-;Barycenters
-C|earth-luna-bc|Earth,Luna
+M|mnv_loi|impulsive|lunar-orbiter|Luna|retrograde|652|567520
 
 ```
 
@@ -60,7 +67,7 @@ Although exporting scenarios through OS3D is usually convenient, sometimes, you 
 ### Celestial Bodies
 The syntax for denoting celestial bodies is as follows;
 ```
-B|body_name|body_model|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_rotation_axis(vector3)|body_J2|body_luminosity
+B|body_name|body_model|body_surface_map(or 'None')|body_mass(kg)|body_radius(m)|body_color([r,g,b])|body_position([m,m,m])|body_velocity([m/s,m/s,m/s])|body_orientation(matrix3x3)|body_day_length(s)|body_rotation_axis(vector3)|body_J2|body_luminosity|sea_level_atmos_density(kg m-3)|atmos_scale_height(m)|point_mass_cloud_list
 ```
 
 If J2, day length or luminosity are unknown, they should be set to 0. If orientation is not known or irrelevant to the simulation, the best option is to set it as a 3x3 identity matrix, i.e. [[1,0,0],[0,1,0],[0,0,1]]
@@ -130,6 +137,12 @@ U|resource_name|initial_value|equation_type(polynomial/logarithmic/power, increm
 The syntax for denoting an observation setup is as follows;
 ```
 OBS|obs_name|observer_name|target_name|axis1|axis2|axis3
+```
+
+### Surface Coverage
+The syntax for denoting a surface coverage computation is as follows;
+```
+SC|sc_name|vessel_name|body_name
 ```
 
 ### General Relativity - Schwarzschild Component
