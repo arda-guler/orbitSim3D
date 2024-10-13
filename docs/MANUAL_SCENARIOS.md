@@ -59,6 +59,7 @@ The list of special characters is given below;
 - Lines starting in P are for proximity zones,
 - Lines starting in U are for resources,
 - Lines starting in OBS are for observation setups,
+- Lines starting in SC are for surface coverage computations,
 - Lines starting in GR0 are for Schwarzschild components of general relativity corrections,
 - Lines starting in GR1 are for frame-dragging components of general relativity corrections.
 
