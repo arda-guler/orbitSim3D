@@ -185,10 +185,11 @@ def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
                         glBindTexture(GL_TEXTURE_2D, texture_id)
                         glPolygonMode(GL_FRONT, GL_FILL)
                         glBegin(GL_TRIANGLES)
+                        vcount = 0
                         for face in mesh.faces:
                             for vertex_i in face:
-                                u = b.us[b.vtx_tex_mapping[vertex_i]]
-                                v = b.vs[b.vtx_tex_mapping[vertex_i]]
+                                u = b.us[b.vtx_tex_mapping[vcount]]
+                                v = b.vs[b.vtx_tex_mapping[vcount]]
                                 
                                 vertex_i = b.model.vertices[vertex_i]
                                 vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
@@ -196,6 +197,8 @@ def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
 
                                 glTexCoord2f(u, v)
                                 glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+
+                                vcount += 1
                         glEnd()
                         glBindTexture(GL_TEXTURE_2D, 0)
                         glDisable(GL_TEXTURE_2D)

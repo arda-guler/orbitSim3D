@@ -37,7 +37,7 @@ class body():
             self.us = []
             self.vs = []
 
-            self.vtx_tex_mapping = {}
+            self.vtx_tex_mapping = []
             with open(self.model_path, "r") as f:
                 lines = f.readlines()
 
@@ -57,7 +57,8 @@ class body():
                         for i in range(1, 4): # 1, 2, 3
                             vertex_bunch = line[i]
                             vertex_bunch = vertex_bunch.split("/")
-                            self.vtx_tex_mapping[int(vertex_bunch[0]) - 1] = int(vertex_bunch[1]) - 1
+                            self.vtx_tex_mapping.append(int(vertex_bunch[1]) - 1)
+                            # self.vtx_tex_mapping[int(vertex_bunch[0]) - 1] = int(vertex_bunch[1]) - 1
 
     def get_name(self):
         return self.name
