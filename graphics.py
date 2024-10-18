@@ -176,57 +176,68 @@ def drawBodies(bodies, active_cam, draw_mode, pmcs_visible):
             glEnd()
 
         else:
-            
-            for mesh in b.model.mesh_list:
-                
-                if draw_mode == 1 or draw_mode == 2:
-                    if b.surface_map_path:
-                        glEnable(GL_TEXTURE_2D)
-                        glBindTexture(GL_TEXTURE_2D, texture_id)
-                        glPolygonMode(GL_FRONT, GL_FILL)
-                        glBegin(GL_TRIANGLES)
-                        vcount = 0
-                        for face in mesh.faces:
-                            for vertex_i in face:
-                                u = b.us[b.vtx_tex_mapping[vcount]]
-                                v = b.vs[b.vtx_tex_mapping[vcount]]
-                                
-                                vertex_i = b.model.vertices[vertex_i]
-                                vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
-                                vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
-
-                                glTexCoord2f(u, v)
-                                glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
-
-                                vcount += 1
-                        glEnd()
-                        glBindTexture(GL_TEXTURE_2D, 0)
-                        glDisable(GL_TEXTURE_2D)
-                    else:
-                        glPolygonMode(GL_FRONT, GL_FILL)
-                        glBegin(GL_TRIANGLES)
-                        for face in mesh.faces:
-                            for vertex_i in face:
-                                vertex_i = b.model.vertices[vertex_i]
-                                vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
-                                vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
-
-                                glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
-                        glEnd()
-                            
-                if draw_mode == 0 or draw_mode == 2:
-                    glPolygonMode(GL_FRONT, GL_LINE)
-                    if draw_mode == 2:
-                        # darken color a bit so that lines are actually visible
-                        glColor(b.get_color()[0]/1.25, b.get_color()[1]/1.25, b.get_color()[2]/1.25)
+            if draw_mode == 1 or draw_mode == 2:
+                if b.surface_map_path:
+                    glEnable(GL_TEXTURE_2D)
+                    glBindTexture(GL_TEXTURE_2D, texture_id)
+                    glPolygonMode(GL_FRONT, GL_FILL)
                     glBegin(GL_TRIANGLES)
-                    for face in mesh.faces:
-                        for vertex_i in face:
-                            vertex_i = b.model.vertices[vertex_i]
-                            vertex_i = numpy.matmul(numpy.array(vertex_i), b.orient.tolist())
-                            vertex_i = [vertex_i[0], vertex_i[1], vertex_i[2]]
+
+                    for face in b.model.faces:
+                        for i in range(3):
+                            try:
+                                u = b.model.texture_coords[face[1][i]-1][0]
+                                v = b.model.texture_coords[face[1][i]-1][1]
+                            except Exception as e:
+                                print(e)
+                                print(face)
+                                print(i)
+                                print(face[1][i])
+
+                            vertex_x = b.model.vertices[face[0][i]-1][0]
+                            vertex_y = b.model.vertices[face[0][i]-1][1]
+                            vertex_z = b.model.vertices[face[0][i]-1][2]
+
+                            vertex_i = numpy.matmul(numpy.array([vertex_x, vertex_y, vertex_z]), b.orient.tolist())
+
+                            glTexCoord2f(u, v)
+                            glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+
+                    glEnd()
+                    glBindTexture(GL_TEXTURE_2D, 0)
+                    glDisable(GL_TEXTURE_2D)
+                else:
+                    glPolygonMode(GL_FRONT, GL_FILL)
+                    glBegin(GL_TRIANGLES)
+                    for face in b.model.faces:
+                        for i in range(3):
+                            vertex_x = b.model.vertices[face[0][i]-1][0]
+                            vertex_y = b.model.vertices[face[0][i]-1][1]
+                            vertex_z = b.model.vertices[face[0][i]-1][2]
+
+                            vertex_i = numpy.matmul(numpy.array([vertex_x, vertex_y, vertex_z]), b.orient.tolist())
+
                             glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
                     glEnd()
+
+            if draw_mode == 0 or draw_mode == 2:
+                glPolygonMode(GL_FRONT, GL_LINE)
+                
+                if draw_mode == 2:
+                    # darken color a bit so that lines are actually visible
+                    glColor(b.get_color()[0]/1.25, b.get_color()[1]/1.25, b.get_color()[2]/1.25)
+                    
+                glBegin(GL_TRIANGLES)
+                for face in b.model.faces:
+                    for i in range(3):
+                        vertex_x = b.model.vertices[face[0][i]-1][0]
+                        vertex_y = b.model.vertices[face[0][i]-1][1]
+                        vertex_z = b.model.vertices[face[0][i]-1][2]
+
+                        vertex_i = numpy.matmul(numpy.array([vertex_x, vertex_y, vertex_z]), b.orient.tolist())
+
+                        glVertex3f(vertex_i[0], vertex_i[1], vertex_i[2])
+                glEnd()
 
         glPopMatrix()
 
@@ -322,24 +333,31 @@ def drawVessels(vessels, active_cam, draw_mode):
 
         else:
             # actually render model now
-            for mesh in v.model.mesh_list:
-                if draw_mode == 1 or draw_mode == 2:
-                    glPolygonMode(GL_FRONT, GL_FILL)
-                    glBegin(GL_POLYGON)
-                    for face in mesh.faces:
-                        for vertex_i in face:
-                            glVertex3f(*v.model.vertices[vertex_i])
-                    glEnd()
-                if draw_mode == 0 or draw_mode == 2:
-                    glPolygonMode(GL_FRONT, GL_LINE)
-                    if draw_mode == 2:
-                        # darken color a bit so that lines are actually visible
-                        glColor(v.get_color()[0]/1.25, v.get_color()[1]/1.25, v.get_color()[2]/1.25)
-                    glBegin(GL_TRIANGLES)
-                    for face in mesh.faces:
-                        for vertex_i in face:
-                            glVertex3f(*v.model.vertices[vertex_i])
-                    glEnd()
+            if draw_mode == 1 or draw_mode == 2:
+                glPolygonMode(GL_FRONT, GL_FILL)
+                glBegin(GL_POLYGON)
+                for face in v.model.faces:
+                    for i in range(3):
+                        vertex_x = v.model.vertices[face[0][i]-1][0]
+                        vertex_y = v.model.vertices[face[0][i]-1][1]
+                        vertex_z = v.model.vertices[face[0][i]-1][2]
+                        
+                        glVertex3f(vertex_x, vertex_y, vertex_z)
+                glEnd()
+            if draw_mode == 0 or draw_mode == 2:
+                glPolygonMode(GL_FRONT, GL_LINE)
+                if draw_mode == 2:
+                    # darken color a bit so that lines are actually visible
+                    glColor(v.get_color()[0]/1.25, v.get_color()[1]/1.25, v.get_color()[2]/1.25)
+                glBegin(GL_TRIANGLES)
+                for face in v.model.faces:
+                    for i in range(3):
+                        vertex_x = v.model.vertices[face[0][i]-1][0]
+                        vertex_y = v.model.vertices[face[0][i]-1][1]
+                        vertex_z = v.model.vertices[face[0][i]-1][2]
+                        
+                        glVertex3f(vertex_x, vertex_y, vertex_z)
+                glEnd()
 
         # now get out
         glPopMatrix()

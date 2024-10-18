@@ -1,7 +1,6 @@
 # import OpenGL
 # from OpenGL.GL import *
 # from OpenGL.GLU import *
-import pywavefront
 import os
 import keyboard
 import glfw
@@ -35,6 +34,7 @@ from general_relativity import *
 from test_propagator import *
 from observation import *
 from surface_coverage import *
+from wavefront import Wavefront3D
 
 def clear_cmd_terminal():
     if os.name == "nt":
@@ -214,7 +214,7 @@ def import_scenario(scn_filename):
             else:
                 smp = line[3]
             
-            new_body = body(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
+            new_body = body(line[1], Wavefront3D(line[2]), line[2],
                             smp, # surface map path
                             float(line[4]), float(line[5]),
                             
@@ -245,7 +245,7 @@ def import_scenario(scn_filename):
             line[3] = eval(line[3])
             line[4] = eval(line[4])
             line[5] = eval(line[5])
-            new_vessel = vessel(line[1], pywavefront.Wavefront(line[2], collect_faces=True), line[2],
+            new_vessel = vessel(line[1], Wavefront3D(line[2]), line[2],
                                 line[3], vec3(lst=line[4]), vec3(lst=line[5]))
             vessels.append(new_vessel)
             objs.append(new_vessel)
@@ -688,7 +688,7 @@ def create_vessel(name, model_name, color, pos, vel):
 
     try:
         model_path = "data/models/" + model_name + ".obj"
-        model = pywavefront.Wavefront(model_path, collect_faces=True)
+        model = Wavefront3D(model_path)
     except:
         print("Could not load model:", model_path)
         time.sleep(3)

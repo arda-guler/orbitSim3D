@@ -9,7 +9,6 @@
 - Python 3 with following 3rd party packages;
   - pyOpenGL
   - glfw
-  - pywavefront
   - keyboard
   - matplotlib
   - numpy
@@ -133,3 +132,5 @@ There are only two configuration files;
 - vector3.py: 3D vector class to handle vector math/operations.
 
 - matrix3x3.py: 3x3 matrix class to handle matrix operations.
+
+- wavefront.py: Handles loading of 3D models in Wavefront OBJ format.

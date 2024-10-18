@@ -31,35 +31,6 @@ class body():
         self.traj_history = []
         self.draw_pos = self.pos * visual_scaling_factor
 
-        if self.surface_map_path != None:
-            # do additional processing of Wavefront obj for surface texture rendering
-            # first, get the list of vertex texture coordinates
-            self.us = []
-            self.vs = []
-
-            self.vtx_tex_mapping = []
-            with open(self.model_path, "r") as f:
-                lines = f.readlines()
-
-                for line in lines:
-                    if line.startswith("vt"):
-                        line = line.strip().split()
-                        u = float(line[1])
-                        v = float(line[2])
-
-                        self.us.append(u)
-                        self.vs.append(v)
-
-                # now get the vertex-coordinate mapping
-                for line in lines:
-                    if line.startswith("f"):
-                        line = line.strip().split()
-                        for i in range(1, 4): # 1, 2, 3
-                            vertex_bunch = line[i]
-                            vertex_bunch = vertex_bunch.split("/")
-                            self.vtx_tex_mapping.append(int(vertex_bunch[1]) - 1)
-                            # self.vtx_tex_mapping[int(vertex_bunch[0]) - 1] = int(vertex_bunch[1]) - 1
-
     def get_name(self):
         return self.name
 
