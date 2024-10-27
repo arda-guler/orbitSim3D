@@ -85,11 +85,11 @@ def test_propagator():
     if not solvertype:
         solvertype = "Yoshida8"
 
-    dt = input("delta_t (seconds, default is 172800): ")
+    dt = input("delta_t (integer days, default is 10): ")
     if not dt:
-        dt = 2 * day
+        dt = 10 * day
     else:
-        dt = float(dt)
+        dt = int(dt) * day
 
     t_0_input = input("Start date (yyyy-mm-dd, default is 2017-01-01): ")
     if not t_0_input:
@@ -125,41 +125,41 @@ def test_propagator():
                      "Neptune",
                      "Sol"]
 
-    sun = body("Sol", None, None, 1.3271244004193938e11 * 1e9 / grav_const, None, None,
+    sun = body("Sol", None, None, None, 1.3271244004193938e11 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[9][0], sv_SolarSystem[9][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    mercury = body("Mercury", None, None, 2.2031780000000021E+04 * 1e9 / grav_const, None, None,
+    mercury = body("Mercury", None, None, None, 2.2031780000000021E+04 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[0][0], sv_SolarSystem[0][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    venus = body("Venus", None, None, 3.2485859200000006E+05 * 1e9 / grav_const, None, None,
+    venus = body("Venus", None, None, None, 3.2485859200000006E+05 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[1][0], sv_SolarSystem[1][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    earth = body("Earth", None, None, 4.0350323550225981E+05 * 1e9 / grav_const, None, None,
+    earth = body("Earth", None, None, None, 4.0350323550225981E+05 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[2][0], sv_SolarSystem[2][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    mars = body("Mars", None, None, 4.2828375214000022E+04 * 1e9 / grav_const, None, None,
+    mars = body("Mars", None, None, None, 4.2828375214000022E+04 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[3][0], sv_SolarSystem[3][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    jupiter = body("Jupiter", None, None, 1.2671276480000021E+08 * 1e9 / grav_const, None, None,
+    jupiter = body("Jupiter", None, None, None, 1.2671276480000021E+08 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[4][0], sv_SolarSystem[4][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    saturn = body("Saturn", None, None, 3.7940585200000003E+07 * 1e9 / grav_const, None, None,
+    saturn = body("Saturn", None, None, None, 3.7940585200000003E+07 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[5][0], sv_SolarSystem[5][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    uranus = body("Uranus", None, None, 5.7945486000000080E+06 * 1e9 / grav_const, None, None,
+    uranus = body("Uranus", None, None, None, 5.7945486000000080E+06 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[6][0], sv_SolarSystem[6][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
-    neptune = body("Neptune", None, None, 6.8365271005800236E+06 * 1e9 / grav_const, None, None,
+    neptune = body("Neptune", None, None, None, 6.8365271005800236E+06 * 1e9 / grav_const, None, None,
                    sv_SolarSystem[7][0], sv_SolarSystem[7][1], # pos, vel
-                   None, None, None, None, None, None, None)
+                   None, None, None, None, None, None, None, None)
 
     bodies = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune, sun]
     print("Solar System constructed successfully.")
