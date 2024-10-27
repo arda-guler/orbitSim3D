@@ -1,9 +1,7 @@
 move_cam_by 0 20000000 80000000
 rotate_cam_by x -20
+delta_t 86400
+output_rate 864000
 lock_origin Sol
 lock_scene_rot Earth
-note ROT Rotating frame of reference, please wait...
-t=550 clear traj_visuals
-t=550 hide ROT
-t=550 delta_t 500
-t=550 output_rate 2000
+t=864000 clear traj_visuals

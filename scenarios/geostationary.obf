@@ -1,10 +1,8 @@
 draw_mode 1
 move_cam_by 0 3000 20000
 rotate_cam_by x -10
-note FRAME_OF_REFERENCE Rotating the frame of reference, please wait...
 lock_scene_rot Karagoz
-t=400 clear traj_visuals
-t=400 hide FRAME_OF_REFERENCE
+t=2 clear traj_visuals
 show Hacivat horizon_angle Eq1 HACIVAT_ANGLE_ABOVE_HORIZON
 show Karagoz horizon_angle Eq2 KARAGOZ_ANGLE_ABOVE_HORIZON
 create_plot HacivatGroundTrack groundtrack Hacivat Earth 50 12000
