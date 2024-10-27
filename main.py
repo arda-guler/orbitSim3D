@@ -1258,7 +1258,7 @@ def delete_observation(obs_name):
     observations.remove(obs_tbd)
     del obs_tbd
 
-def vessel_body_crash(v, b):
+def vessel_body_crash(v, b, sim_time):
     # a vessel has crashed into a celestial body. We will convert the vessel object
     # into a surface point on the body (a crash site) and remove all references to
     # the vessel object
@@ -1290,7 +1290,7 @@ def vessel_body_crash(v, b):
     create_surface_point(crash_site_name, b, crash_site_color, crash_site_gpos)
 
     note_name = v.name.upper() + "_IMPACT"
-    batch_commands.append(["note", note_name, v.name + " has impacted " + b.name + "."])
+    batch_commands.append(["note", note_name, v.name + " has impacted " + b.name +  " at t=" + str(sim_time) + "."])
 
     delete_vessel(v.name)
 
@@ -1351,6 +1351,7 @@ def rotate_scene(pivot, target, dt):
 
         theta = math.atan2(dx, dz)
 
+    theta = 180/math.pi * theta
     base_mtx = matrix3x3()
     rot_mtx = base_mtx.rotated(theta, vec3(0, 1, 0))
 
@@ -2753,7 +2754,7 @@ def main(scn_filename=None, start_time=0):
         for v in vessels:
             for b in bodies:
                 if vessel_body_collision and v.get_alt_above(b) <= 0:
-                    vessel_body_crash(v, b)
+                    vessel_body_crash(v, b, sim_time)
 
         proximity_zone_violations = []
         colliding_vessels = []
@@ -2773,11 +2774,11 @@ def main(scn_filename=None, start_time=0):
 
                 if rel_vel_mag > 0.282842712474619: # more energy than 40 J/g
                     fragment(vc.name, 5, rel_vel_mag**0.5)
-                    output_buffer.append([vc.name + "_ALERT", "note", vc.name + " has broken-up after a collision with " + prox_vessel.name + "!"])
+                    output_buffer.append([vc.name + "_ALERT", "note", vc.name + " has broken-up after a collision with " + prox_vessel.name + " at t=" + str(sim_time) + "!"])
                     delete_vessel(vc.name)
                 else:
-                    if not [vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + "!"] in output_buffer:
-                        output_buffer.append([vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + "!"])
+                    if not [vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + " at t=" + str(sim_time) + "!"] in output_buffer:
+                        output_buffer.append([vc.name + "_WARNING", "note", vc.name + " has bumped into " + prox_vessel.name + " at t=" + str(sim_time) +  "!"])
 
                 if rel_vel_mag > rel_vel_max:
                     rel_vel_max = rel_vel_mag
@@ -2789,8 +2790,8 @@ def main(scn_filename=None, start_time=0):
         for violation_set in proximity_zone_violations:
             prox_vessel = violation_set[0]
             for vl in violation_set[1]:
-                if not [vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"] in output_buffer:
-                    output_buffer.append([vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + "!"])
+                if not [vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + " at t=" + str(sim_time) + "!"] in output_buffer:
+                    output_buffer.append([vl.name + "_WARNING", "note", vl.name + " has violated the proximity zone around " + prox_vessel.name + " at t=" + str(sim_time) + "!"])
 
         # update resources
         for res in resources:

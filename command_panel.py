@@ -122,7 +122,7 @@ def use_command_panel(vessels, bodies, surface_points, barycenters, maneuvers, r
             vars_text += "Scene Lock: None\n"
 
         if scene_rot_target:
-            vars_text += "Scene Rot. Target: " + str(scene_rot_target) + "\n"
+            vars_text += "Scene Rot. Target: " + str(scene_rot_target.get_name()) + "\n"
         else:
             vars_text += "Scene Rot. Target: None\n"
 
