@@ -196,6 +196,11 @@ Each of the example scenarios are explained below. These example missions can be
 
 **Desc:** Mutually assured destruction, the destroyer of worlds. USA and USSR launch ICBMs at each other.
 
+### [formation_flight.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/formation_flight.osf)
+**Type:** Demonstration
+
+**Desc:** Three satellites are in formation flight in a low orbit around Earth - one trailing the other, and one trying to fly along the trailer.
+
 ### [fourth_twilight.osf](https://github.com/arda-guler/orbitSim3D/blob/master/scenarios/fourth_twilight.osf)
 **Type:** Demonstration
 

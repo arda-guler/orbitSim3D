@@ -1,0 +1,20 @@
+;  FORMATION_FLIGHT.OSF
+;  Author: arda-guler
+;
+; Two satellites are flying in close formation.
+; Since flying side by side on ever so slightly different
+; latitudes gives the satellites some relative orbital
+; inclination, the drift must be continuously
+; corrected. However, going in a prograde-retrograde
+; train requires, in theory, no correction.
+;
+
+;Celestial bodies
+
+B|Earth|data/models/miniearth.obj|data/images/surface_maps/earth.png|5972000000000000000000000|6371000|[0.0,0.25,1.0]|[0,0,0]|[0,0,0]|[[1,0,0],[0,1,0],[0,0,1]]|86400|[0,1,0]|0|0|0|0|[]
+
+;Vessels
+
+V|Inek|data/models/minisat.obj|[1.0,0.0,1.0]|[0,61085.748488617544,6999733.461449199]|[7546,0,0]
+V|Guduk|data/models/minisat.obj|[0.0,1.0,1.0]|[0,0,7000000]|[7546,0,0]
+V|Damat|data/models/minisat.obj|[1.0,1.0,0.0]|[61085.748488617544,0,6999733.461449199]|[7545.712671442237,0,-65.85043687072971]

@@ -1,0 +1,11 @@
+lock_scene_rot Guduk
+output_rate 5
+move_cam_by 100 0 -2800
+rotate_cam_by y 40
+draw_mode 1
+create_projection GudukOrbit Guduk Earth
+create_projection InekOrbit Inek Earth
+show Inek dist Guduk INEK_GUDUK_DIST
+show Inek vel_mag Guduk INEK_GUDUK_VEL
+show Guduk dist Damat GUDUK_DAMAT_DIST
+show Guduk vel_mag Damat GUDUK_DAMAT_REL_VEL
